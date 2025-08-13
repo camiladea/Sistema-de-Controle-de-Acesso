@@ -1,0 +1,44 @@
+### CONFIGURE UDEV RULES FOR INDIVIDUAL PRODUCTS GUIDE ###
+
+## This guide will help with setting up your SDK, Udev rules and running any sample apps or your own application. ##
+
+
+### 1. Install the desired SDK version into your machine using the link provided in SDK-installation-setup text file. ###
+
+# After installing the .zip file, you must run a update in order to make sure everything is ready and setup for this whole process
+# Then, install any dependencies needed, we recommend running the following commands.
+
+~
+sudo apt update
+sudo apt install build-essential libusb-1.0-0-dev
+~
+
+### 2. Extract and Install SDK ###
+
+# Open your terminal and run the following commands to extract the SDK, or do it yourself in any directory of your liking.
+
+~
+tar -xvzf eNBioBSP-SDK-Linux-v5.3.0.1.tar.gz
+cd eNBioBSP-SDK-Linux-v5.3.0.1
+cd eNBSP.5.3.0.1_x64/eNBSP/bin
+~
+
+# Install the install.sh file.
+
+~
+sudo ./install.sh
+~
+
+
+### 3. Fetch Device ID and Configure USB Permissions ###
+
+# Run the following command to fetch all USB devices connected, for this you **MUST HAVE THE SCANNER PLUGGED IN**.
+
+~
+lsusb
+~
+
+# You are looking for anything with "Nitgen", "Scanner", "Hamster", etc. After located you must locate the device and vendor ID
+# Here's and example of what the output of the last command should look like
+
+# Bus 001 Device 005: ID 1c1a:0001 Nitgen Corp.
