@@ -30,7 +30,7 @@ sudo ./install.sh
 ~
 
 
-### 3. Fetch Device ID and Configure USB Permissions ###
+### 3. Fetch Device ID ###
 
 # Run the following command to fetch all USB devices connected, for this you **MUST HAVE THE SCANNER PLUGGED IN**.
 
@@ -42,3 +42,10 @@ lsusb
 # Here's and example of what the output of the last command should look like
 
 # Bus 001 Device 005: ID 1c1a:0001 Nitgen Corp.
+
+# Look out for these values: "1c1a" = Vendor ID, "0001" Product/Device ID. These are required to start making the Udev rules.
+
+### 4. Writing the Udev rules file ###
+
+# To start writting the file, execute a nano alongside the file path, name and specific extensions (you MUST use .rules) to open the editor UI
+# 
