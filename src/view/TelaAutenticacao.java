@@ -1,10 +1,10 @@
 package view;
 
 import controller.TerminalController;
-import model.Usuario;
-import javax.swing.*;
 import java.awt.*;
 import java.util.Optional;
+import javax.swing.*;
+import model.Usuario;
 
 /**
  * Tela principal de autenticação, recriada sem dependências de imagens externas.
@@ -47,6 +47,7 @@ public class TelaAutenticacao extends JFrame {
 
         // --- Ações ---
         painelCentral.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 executarAutenticacao();
             }

@@ -12,6 +12,7 @@ public class ConexaoBancoDados {
 
     private ConexaoBancoDados() {}
 
+    @SuppressWarnings("DoubleCheckedLocking")
     public static Connection getConexao() {
         if (conexao == null) {
             synchronized (ConexaoBancoDados.class) {
