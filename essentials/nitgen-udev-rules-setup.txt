@@ -48,4 +48,30 @@ lsusb
 ### 4. Writing the Udev rules file ###
 
 # To start writting the file, execute a nano alongside the file path, name and specific extensions (you MUST use .rules) to open the editor UI
-# 
+
+# To execute a nano use the following command with this path.
+
+~
+sudo nano /etc/udev/rules.d/99-nitgen-fingerprint.rules
+~
+
+# After that, copy and paste the code from below only changing the vendor and product ID
+
+~
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1c1a", ATTRS{idProduct}=="0001", MODE="0660", GROUP="plugdev"
+~
+
+### 5. Loading and activating new rules ###
+
+# And to end configuring the rules just run the following commands in order to set everything up correctly.
+
+~
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+sudo usermod -aG plugdev $USER
+newgrp plugdev
+~
+
+### Conclusion ###
+
+# With everything setup you might now want to build your app to run with the scanner or run a sample test from your sdk files.
