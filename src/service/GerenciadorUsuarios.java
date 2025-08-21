@@ -20,6 +20,7 @@ public class GerenciadorUsuarios {
 
     /**
      * Orquestra o processo de cadastro de um novo funcionário.
+     * 
      * @return true se o cadastro foi bem-sucedido, false caso contrário.
      */
     public boolean cadastrarNovoFuncionario(String nome, String cpf, String email, String cargo, String matricula) {
@@ -31,11 +32,11 @@ public class GerenciadorUsuarios {
 
         // 2. Interação com o Hardware
         leitorBiometrico.conectar();
-        
+
         // --- LINHA CORRIGIDA ---
         // Agora passamos o propósito da leitura para o método, como ele espera.
         Optional<String> digitalHashOpt = leitorBiometrico.lerDigital("Cadastro de Novo Usuário");
-        
+
         leitorBiometrico.desconectar();
 
         if (digitalHashOpt.isEmpty()) {
@@ -46,7 +47,18 @@ public class GerenciadorUsuarios {
         // 3. Criação do Objeto do Modelo e Persistência
         Usuario novoFuncionario = new Funcionario(nome, cpf, email, digitalHashOpt.get(), cargo, matricula);
         usuarioDAO.salvar(novoFuncionario);
-        
+
         return true;
+
     }
+
+    // No GerenciadorUsuarios
+    public boolean editarUsuario(Usuario usuario) {
+        if (usuario == null) {
+            return false;
+        }
+        UsuarioDAO dao = new UsuarioDAO();
+        return dao.atualizar(usuario);
+    }
+
 }

@@ -13,6 +13,10 @@ public class ConexaoBancoDados {
     private ConexaoBancoDados() {
     }
 
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(URL, USUARIO, SENHA);
+    }
+
     // Este método agora sempre cria e retorna uma NOVA conexão
     public static Connection getConexao() throws SQLException {
         try {

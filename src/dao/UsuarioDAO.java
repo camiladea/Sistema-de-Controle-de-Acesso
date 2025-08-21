@@ -13,7 +13,8 @@ public class UsuarioDAO {
 
     public void salvar(Usuario usuario) {
         String sql = "INSERT INTO Usuario (nome, cpf, email, digitalHash, ativo, tipoUsuario, cargo, matricula, login, senhaHash) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conexao = ConexaoBancoDados.getConexao(); PreparedStatement pstm = conexao.prepareStatement(sql)) {
+        try (Connection conexao = ConexaoBancoDados.getConexao();
+                PreparedStatement pstm = conexao.prepareStatement(sql)) {
             pstm.setString(1, usuario.getNome());
             pstm.setString(2, usuario.getCpf());
             pstm.setString(3, usuario.getEmail());
@@ -41,7 +42,9 @@ public class UsuarioDAO {
     public List<String> listarTodosOsHashes() {
         List<String> hashes = new ArrayList<>();
         String sql = "SELECT digitalHash FROM Usuario WHERE ativo = TRUE AND digitalHash IS NOT NULL";
-        try (Connection conn = ConexaoBancoDados.getConexao(); PreparedStatement pstm = conn.prepareStatement(sql); ResultSet rset = pstm.executeQuery()) {
+        try (Connection conn = ConexaoBancoDados.getConexao();
+                PreparedStatement pstm = conn.prepareStatement(sql);
+                ResultSet rset = pstm.executeQuery()) {
             while (rset.next()) {
                 hashes.add(rset.getString("digitalHash"));
             }
@@ -69,7 +72,9 @@ public class UsuarioDAO {
     public List<Usuario> listarTodos() {
         List<Usuario> usuarios = new ArrayList<>();
         String sql = "SELECT * FROM Usuario ORDER BY nome ASC";
-        try (Connection conn = ConexaoBancoDados.getConexao(); PreparedStatement pstm = conn.prepareStatement(sql); ResultSet rset = pstm.executeQuery()) {
+        try (Connection conn = ConexaoBancoDados.getConexao();
+                PreparedStatement pstm = conn.prepareStatement(sql);
+                ResultSet rset = pstm.executeQuery()) {
             while (rset.next()) {
                 usuarios.add(extrairUsuarioDoResultSet(rset));
             }
@@ -97,12 +102,62 @@ public class UsuarioDAO {
         String tipoUsuario = rset.getString("tipoUsuario");
         Usuario usuario;
         if ("Funcionario".equals(tipoUsuario)) {
-            usuario = new Funcionario(rset.getString("nome"), rset.getString("cpf"), rset.getString("email"), rset.getString("digitalHash"), rset.getString("cargo"), rset.getString("matricula"));
+            usuario = new Funcionario(rset.getString("nome"), rset.getString("cpf"), rset.getString("email"),
+                    rset.getString("digitalHash"), rset.getString("cargo"), rset.getString("matricula"));
         } else {
-            usuario = new Administrador(rset.getString("nome"), rset.getString("cpf"), rset.getString("email"), rset.getString("digitalHash"), rset.getString("login"), rset.getString("senhaHash"));
+            usuario = new Administrador(rset.getString("nome"), rset.getString("cpf"), rset.getString("email"),
+                    rset.getString("digitalHash"), rset.getString("login"), rset.getString("senhaHash"));
         }
         usuario.setId(rset.getInt("id"));
         usuario.setAtivo(rset.getBoolean("ativo"));
         return usuario;
     }
+
+    public boolean remover(int id) {
+        String sql = "DELETE FROM Usuario WHERE id = ?";
+        try (Connection conn = ConexaoBancoDados.getConexao();
+                PreparedStatement pstm = conn.prepareStatement(sql)) {
+            pstm.setInt(1, id);
+            int linhas = pstm.executeUpdate();
+            return linhas > 0;
+        } catch (SQLException e) {
+            System.err.println("Erro ao remover usuário: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public Usuario buscarPorId(int id) {
+        String sql = "SELECT * FROM Usuario WHERE id = ?";
+        try (Connection conn = ConexaoBancoDados.getConexao();
+                PreparedStatement pstm = conn.prepareStatement(sql)) {
+            pstm.setInt(1, id);
+            try (ResultSet rset = pstm.executeQuery()) {
+                if (rset.next()) {
+                    return extrairUsuarioDoResultSet(rset);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Erro ao buscar usuário por ID: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public boolean atualizar(Usuario usuario) {
+        String sql = "UPDATE usuarios SET nome = ?, email = ?, digitalHash = ? WHERE cpf = ?";
+        try (Connection conn = ConexaoBancoDados.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, usuario.getNome());
+            stmt.setString(2, usuario.getEmail());
+            stmt.setString(3, usuario.getDigitalHash());
+            stmt.setString(4, usuario.getCpf());
+
+            int linhasAfetadas = stmt.executeUpdate();
+            return linhasAfetadas > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }
