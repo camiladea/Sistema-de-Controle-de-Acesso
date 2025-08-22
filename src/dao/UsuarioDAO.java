@@ -166,19 +166,48 @@ public class UsuarioDAO {
     }
 
     public boolean atualizar(Usuario usuario) {
-        String sql = "UPDATE usuarios SET nome = ?, email = ?, digitalHash = ? WHERE cpf = ?";
-        try (Connection conn = ConexaoBancoDados.getConnection();
+        String sql = "UPDATE Usuario SET " +
+                "nome = ?, cpf = ?, email = ?, digitalHash = ?, ativo = ?, tipo = ?, cargo = ?, matricula = ?, login = ?, senhaHash = ? "
+                +
+                "WHERE cpf = ?";
+
+        final String tipo = (usuario instanceof Funcionario) ? "Funcionario"
+                : (usuario instanceof Administrador) ? "Administrador" : "User";
+
+        try (Connection conn = ConexaoBancoDados.getConexao();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, usuario.getNome());
-            stmt.setString(2, usuario.getEmail());
-            stmt.setString(3, usuario.getDigitalHash());
-            stmt.setString(4, usuario.getCpf());
+            stmt.setString(2, usuario.getCpf());
+            stmt.setString(3, usuario.getEmail());
+            stmt.setString(4, usuario.getDigitalHash());
+            stmt.setBoolean(5, usuario.isAtivo());
+            stmt.setString(6, tipo);
+
+            if (usuario instanceof Funcionario f) {
+                stmt.setString(7, f.getCargo());
+                stmt.setString(8, f.getMatricula());
+                stmt.setNull(9, Types.VARCHAR);
+                stmt.setNull(10, Types.VARCHAR);
+            } else if (usuario instanceof Administrador a) {
+                stmt.setNull(7, Types.VARCHAR);
+                stmt.setNull(8, Types.VARCHAR);
+                stmt.setString(9, a.getLogin());
+                stmt.setString(10, a.getSenhaHash());
+            } else {
+                stmt.setNull(7, Types.VARCHAR);
+                stmt.setNull(8, Types.VARCHAR);
+                stmt.setNull(9, Types.VARCHAR);
+                stmt.setNull(10, Types.VARCHAR);
+            }
+
+            stmt.setString(11, usuario.getCpf()); // WHERE cpf = ?
 
             int linhasAfetadas = stmt.executeUpdate();
             return linhasAfetadas > 0;
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Erro ao atualizar usuário: " + e.getMessage());
             return false;
         }
     }
