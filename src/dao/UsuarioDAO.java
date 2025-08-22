@@ -12,30 +12,53 @@ import java.util.List;
 public class UsuarioDAO {
 
     public void salvar(Usuario usuario) {
-        String sql = "INSERT INTO Usuario (nome, cpf, email, digitalHash, ativo, tipoUsuario, cargo, matricula, login, senhaHash) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        // Use o mesmo nome de tabela que você alterou no SQL:
+        final String sql = "INSERT INTO Usuario " +
+                "(nome, cpf, email, digitalHash, ativo, tipoUsuario, cargo, matricula, login, senhaHash) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        // Resolve o 'tipo' de forma centralizada, com fallback "User"
+        final String tipo = (usuario instanceof Funcionario) ? "Funcionario"
+                : (usuario instanceof Administrador) ? "Administrador" : "User";
+
         try (Connection conexao = ConexaoBancoDados.getConexao();
                 PreparedStatement pstm = conexao.prepareStatement(sql)) {
+
             pstm.setString(1, usuario.getNome());
             pstm.setString(2, usuario.getCpf());
             pstm.setString(3, usuario.getEmail());
             pstm.setString(4, usuario.getDigitalHash());
             pstm.setBoolean(5, usuario.isAtivo());
-            if (usuario instanceof Funcionario) {
-                pstm.setString(6, "Funcionario");
-                pstm.setString(7, ((Funcionario) usuario).getCargo());
-                pstm.setString(8, ((Funcionario) usuario).getMatricula());
-                pstm.setNull(9, Types.VARCHAR);
-                pstm.setNull(10, Types.VARCHAR);
-            } else if (usuario instanceof Administrador) {
-                pstm.setString(6, "Administrador");
+            pstm.setString(6, tipo); // <- SEMPRE envia 'tipo'
+
+            if (usuario instanceof Funcionario f) {
+                pstm.setString(7, f.getCargo());
+                pstm.setString(8, f.getMatricula());
+                pstm.setNull(9, Types.VARCHAR); // login
+                pstm.setNull(10, Types.VARCHAR); // senhaHash
+
+            } else if (usuario instanceof Administrador a) {
+                pstm.setNull(7, Types.VARCHAR); // cargo
+                pstm.setNull(8, Types.VARCHAR); // matricula
+                pstm.setString(9, a.getLogin());
+                pstm.setString(10, a.getSenhaHash());
+
+            } else {
+                // Usuário "comum"
                 pstm.setNull(7, Types.VARCHAR);
                 pstm.setNull(8, Types.VARCHAR);
-                pstm.setString(9, ((Administrador) usuario).getLogin());
-                pstm.setString(10, ((Administrador) usuario).getSenhaHash());
+                pstm.setNull(9, Types.VARCHAR);
+                pstm.setNull(10, Types.VARCHAR);
             }
-            pstm.execute();
+
+            pstm.executeUpdate();
+            System.out.println("Usuário salvo com sucesso!");
+
         } catch (SQLException e) {
-            System.err.println("Erro ao salvar usuário: " + e.getMessage());
+            System.err.println(
+                    "Erro ao salvar usuário: " + e.getMessage() +
+                            " | SQLState=" + e.getSQLState() +
+                            " | Code=" + e.getErrorCode());
         }
     }
 
