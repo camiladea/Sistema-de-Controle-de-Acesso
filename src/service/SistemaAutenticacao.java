@@ -2,12 +2,12 @@ package service;
 
 import dao.RegistroAcessoDAO;
 import dao.UsuarioDAO;
-import model.Administrador;
-import model.RegistroAcesso;
-import model.Usuario;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import model.Administrador;
+import model.RegistroAcesso;
+import model.Usuario;
 
 /**
  * SistemaAutenticacao (LÓGICA DE SIMULAÇÃO CORRIGIDA)
@@ -55,8 +55,7 @@ public class SistemaAutenticacao {
 
     public Optional<Administrador> autenticarAdminPorCredenciais(String login, String senha) {
         Usuario usuario = usuarioDAO.buscarPorLogin(login);
-        if (usuario instanceof Administrador) {
-            Administrador admin = (Administrador) usuario;
+        if (usuario instanceof Administrador admin) {
             if (senha.equals(admin.getSenhaHash())) { // Simulação, usar BCrypt em produção
                 return Optional.of(admin);
             }
