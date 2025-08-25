@@ -3,7 +3,9 @@ package util;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
+/* Se o erro for Erro ao buscar usuário: Driver JDBC do MySQL não encontrado: ir na class path 
+ * <classpathentry kind="lib" path="C:\Users\aluno\Downloads\Sistema-de-Controle-de-Acesso\lib\mysql-connector-j-9.3.0.jar"/>
+*/
 public class ConexaoBancoDados {
     private static final String URL = "jdbc:mysql://localhost:3306/projeto_pi_db";
     private static final String USUARIO = "root";
