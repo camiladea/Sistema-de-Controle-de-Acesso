@@ -7,8 +7,8 @@
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="resources"/>
-	<classpathentry kind="lib" path="C:/Users/Pichau/Desktop/Sistema-de-Controle-de-Acesso/lib/mysql-connector-j-9.3.0.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Pichau/Desktop/Sistema-de-Controle-de-Acesso/lib/NBioBSPJNI.jar"/>
+	<classpathentry kind="lib" path="C:\Users\aluno\Downloads\Sistema-de-Controle-de-Acesso\lib\mysql-connector-j-9.3.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/aluno/Desktop/Sistema-de-Controle-de-Acesso/lib/NBioBSPJNI.jar"/>
 	
 	<classpathentry kind="output" path="bin"/>
 </classpath>
