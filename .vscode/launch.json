@@ -10,6 +10,7 @@
 >>>>>>> c9bf205a16ab89c4d817ace67ccbbd41f7730694
     "version": "0.2.0",
     "configurations": [
+        
         {
             "type": "java",
             "name": "Current File",
