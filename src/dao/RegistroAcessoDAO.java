@@ -1,12 +1,11 @@
 package dao;
 
-import model.RegistroAcesso;
-import util.ConexaoBancoDados;
-
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import model.RegistroAcesso;
+import util.ConexaoBancoDados;
 
 public class RegistroAcessoDAO {
     public void salvar(RegistroAcesso registro) {
