@@ -1,11 +1,10 @@
 package view;
 
 import controller.TerminalController;
-import model.Usuario;
-
+import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.Border;
-import java.awt.*;
+import model.Usuario;
 
 public class TelaEdicaoUsuario extends JDialog {
 
@@ -20,7 +19,6 @@ public class TelaEdicaoUsuario extends JDialog {
     private JTextField txtEmail;
     private JCheckBox chkAtivo;
 
-    // --- CORES E FONTES PARA UM DESIGN MAIS MODERNO ---
     private static final Color COR_FUNDO = new Color(245, 245, 245);
     private static final Color COR_PAINEL = new Color(255, 255, 255);
     private static final Color COR_BOTAO_SALVAR = new Color(50, 150, 255);

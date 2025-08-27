@@ -1,27 +1,25 @@
 package view;
 
 import controller.TerminalController;
-import model.*;
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.table.*;
 import java.awt.*;
 import java.time.*;
 import java.time.format.*;
 import java.util.List;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.*;
+import model.*;
 
 public class TelaGestao extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
-    // As variáveis originais permanecem as mesmas
     private final transient TerminalController controller;
     private DefaultTableModel modelUsuarios;
     private DefaultTableModel modelRelatorio;
     private JTextField txtDataInicio, txtDataFim;
     private JTable tabelaUsuarios;
 
-    // --- PALETA DE CORES E FONTES PARA UM DESIGN MODERNO ---
     private static final Color COR_FUNDO = new Color(240, 242, 245);
     private static final Color COR_PAINEL_CONTEUDO = Color.WHITE;
     private static final Color COR_CABECALHO_TABELA = new Color(220, 223, 228);
@@ -60,9 +58,6 @@ public class TelaGestao extends JDialog {
         JPanel painelUsuarios = criarAbaUsuarios();
         JPanel painelRelatorios = criarAbaRelatorios();
 
-        // Adicionar ícones às abas (opcional, mas melhora a UI)
-        // abas.addTab("Gerenciamento de Usuários", new ImageIcon("path/to/icon_user.png"), painelUsuarios);
-        // abas.addTab("Relatório de Acessos", new ImageIcon("path/to/icon_report.png"), painelRelatorios);
         abas.addTab("Gerenciamento de Usuários", painelUsuarios);
         abas.addTab("Relatório de Acessos", painelRelatorios);
 
@@ -190,8 +185,6 @@ public class TelaGestao extends JDialog {
         botao.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 
-    // ----- MÉTODOS DE LÓGICA (permanecem inalterados) -----
-
     private void editarSelecionado() {
         int viewIndex = tabelaUsuarios.getSelectedRow();
         if (viewIndex == -1) {
@@ -281,10 +274,6 @@ public class TelaGestao extends JDialog {
     
     // ----- CLASSES INTERNAS DE RENDERIZAÇÃO -----
     
-    /**
-     * Renderizador que pinta linhas alternadas (efeito zebra) e herda de StatusCellRenderer
-     * para também colorir a coluna de status.
-     */
     static class StatusCellRenderer extends ZebraTableCellRenderer {
         private static final long serialVersionUID = 1L;
         @Override

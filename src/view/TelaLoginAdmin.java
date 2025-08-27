@@ -22,7 +22,7 @@ public class TelaLoginAdmin extends JDialog {
     private static final Color COR_FUNDO_ESCURO = new Color(45, 45, 45);
     private static final Color COR_INPUT = new Color(70, 70, 70);
     private static final Color COR_TEXTO = Color.WHITE;
-    private static final Color COR_TEXTO_PLACEHOLDER = Color.WHITE;
+    private static final Color COR_TEXTO_PLACEHOLDER = new Color(150, 150, 150);
     private static final Color COR_BOTAO_ACAO = new Color(24, 119, 242);
     private static final Font FONTE_PADRAO = new Font("Segoe UI", Font.PLAIN, 16);
     private static final Font FONTE_TITULO = new Font("Segoe UI", Font.BOLD, 20);
@@ -33,11 +33,6 @@ public class TelaLoginAdmin extends JDialog {
 
         configurarJanela();
         inicializarComponentes();
-
-        // --- REMOVA AS LINHAS ABAIXO DAQUI ---
-        // pack(); 
-        // setLocationRelativeTo(parent); 
-    
     }
 
     private void configurarJanela() {

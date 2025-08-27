@@ -1,14 +1,13 @@
 package view;
 
 import controller.TerminalController;
-import model.Usuario;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Optional;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import model.Usuario;
 
 /**
  * Tela principal de autenticação com um design visual aprimorado e interativo.
@@ -83,7 +82,7 @@ public class TelaAutenticacao extends JFrame {
     }
 
     private JButton criarBotaoAdmin() {
-        JButton botao = new JButton("Painel do Administrador");
+        JButton botao = new JButton("Painel do Administrador"); // tela de autenticacao alterada e de cadastro de usuario com cpf com mascara e email com obrigacao do @
         botao.setFont(FONTE_BOTAO);
         botao.setForeground(COR_DESTAQUE_IDLE);
         botao.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -176,9 +175,6 @@ public class TelaAutenticacao extends JFrame {
             Graphics2D g2d = (Graphics2D) g.create();
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            // --- ALTERAÇÃO AQUI ---
-            // O valor subtraído define a "margem" em volta do desenho.
-            // Um número maior resulta em um desenho menor.
             int diametro = Math.min(getWidth(), getHeight()) - 160;
 
             int x = (getWidth() - diametro) / 2;
@@ -195,6 +191,7 @@ public class TelaAutenticacao extends JFrame {
                 g2d.drawArc(arcX, arcY, d, d, -45 - (i * 10), 270 + (i * 5));
             }
             g2d.dispose();
+ 
         }
     }
 }
