@@ -2,74 +2,169 @@ package view;
 
 import controller.TerminalController;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 public class TelaCadastroUsuario extends JDialog {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	private final transient TerminalController controller;
-    private final JTextField txtNome, txtCpf, txtEmail, txtCargo, txtMatricula;
-    private final JButton btnSalvar;
+
+    private static final long serialVersionUID = 1L;
+
+    // As variáveis de controle e componentes permanecem as mesmas
+    private final transient TerminalController controller;
+    private JTextField txtNome, txtCpf, txtEmail, txtCargo, txtMatricula;
+    private JButton btnSalvar;
+
+    // --- paleta de cores E FONTES PARA UM DESIGN MODERNO ---
+    private static final Color COR_FUNDO = new Color(240, 242, 245);
+    private static final Color COR_PAINEL_FORMULARIO = Color.WHITE;
+    private static final Color COR_BOTAO_PRINCIPAL = new Color(24, 119, 242);
+    private static final Color COR_TEXTO_BOTAO = Color.WHITE;
+    private static final Font FONTE_TITULO = new Font("Segoe UI", Font.BOLD, 24);
+    private static final Font FONTE_LABEL = new Font("Segoe UI", Font.BOLD, 14);
+    private static final Font FONTE_CAMPO = new Font("Segoe UI", Font.PLAIN, 14);
 
     public TelaCadastroUsuario(Window owner, TerminalController controller) {
         super(owner, "Cadastro de Novo Usuário", ModalityType.APPLICATION_MODAL);
         this.controller = controller;
-        setSize(1188, 744);
-        setLocationRelativeTo(owner);
-        getContentPane().setLayout(null);
-
-        JLabel lblTitulo = new JLabel("Dados do Novo Funcionário", SwingConstants.CENTER);
-        lblTitulo.setBounds(0, 27, 1172, 27);
-        lblTitulo.setFont(new Font("Rubik", Font.BOLD, 26));
-        getContentPane().add(lblTitulo);
-
-        JPanel painelForm = new JPanel();
-        painelForm.setBounds(0, 42, 1172, 610);
-        painelForm.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        painelForm.setLayout(null);
         
-        JLabel label = new JLabel("Nome Completo:");
-        label.setBounds(250, 69, 561, 110);
-        label.setFont(new Font("Noto Sans Georgian Bold", Font.PLAIN, 20));
-        painelForm.add(label); txtNome = new JTextField(); 
- txtNome.setBounds(458, 110, 514, 35);painelForm.add(txtNome);
-        JLabel label_1 = new JLabel("CPF:");
-        label_1.setBounds(250, 157, 561, 110);
-        label_1.setFont(new Font("Noto Sans Georgian Bold", Font.PLAIN, 20));
-        painelForm.add(label_1); txtCpf = new JTextField(); 
- txtCpf.setBounds(458, 198, 514, 35);painelForm.add(txtCpf);
-        JLabel label_2 = new JLabel("Email:");
-        label_2.setBounds(250, 334, 561, 110);
-        label_2.setFont(new Font("Noto Sans Georgian Bold", Font.PLAIN, 20));
-        painelForm.add(label_2); txtEmail = new JTextField(); 
- txtEmail.setBounds(458, 287, 514, 35);painelForm.add(txtEmail);
-        JLabel label_3 = new JLabel("Cargo:");
-        label_3.setBounds(250, 243, 561, 110);
-        label_3.setFont(new Font("Noto Sans Georgian Bold", Font.PLAIN, 20));
-        painelForm.add(label_3); txtCargo = new JTextField(); 
- txtCargo.setBounds(458, 375, 514, 35);painelForm.add(txtCargo);
-        JLabel label_4 = new JLabel("Matrícula:");
-        label_4.setBounds(250, 425, 561, 110);
-        label_4.setFont(new Font("Noto Sans Georgian Bold", Font.PLAIN, 20));
-        painelForm.add(label_4); txtMatricula = new JTextField(); 
- txtMatricula.setBounds(458, 466, 514, 35);painelForm.add(txtMatricula);
-        getContentPane().add(painelForm);
+        configurarJanela();
+        inicializarComponentes();
 
-        btnSalvar = new JButton("CAPTURAR DIGITAL E SALVAR");
-        btnSalvar.setBackground(new Color(255, 255, 255));
-        btnSalvar.setBounds(20, 0, 1132, 23);
-        btnSalvar.addActionListener(e -> executarCadastro());
-        JPanel painelBotao = new JPanel();
-        painelBotao.setBounds(0, 667, 1172, 38);
-        painelBotao.setBorder(BorderFactory.createEmptyBorder(0, 20, 15, 20));
-        painelBotao.setLayout(null);
-        painelBotao.add(btnSalvar);
-        getContentPane().add(painelBotao);
+        // --- ALTERAÇÃO 1: DEFINIR TAMANHO GRANDE E CENTRALIZAR NO FINAL ---
+        // Removemos o pack() e definimos um tamanho baseado na tela do computador.
+
+        // Pega as dimensões do monitor
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        
+        // Define o tamanho da janela como 85% da largura e 80% da altura do monitor
+        int largura = (int) (screenSize.width * 0.85);
+        int altura = (int) (screenSize.height * 0.80);
+        setSize(largura, altura);
+
+        // AGORA SIM: Centraliza a janela APÓS ela ter seu tamanho definido.
+        setLocationRelativeTo(owner);
+    }
+    
+    /**
+     * Define as propriedades principais da janela.
+     */
+    private void configurarJanela() {
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        // A linha setLocationRelativeTo foi MOVIDA para o final do construtor
+        setLayout(new BorderLayout(0, 15));
+        getContentPane().setBackground(COR_FUNDO);
+        ((JPanel) getContentPane()).setBorder(new EmptyBorder(20, 20, 20, 20));
     }
 
+    /**
+     * Cria e organiza todos os componentes visuais na tela. (Sem alterações aqui)
+     */
+    private void inicializarComponentes() {
+        // 1. Painel do Título
+        JPanel painelTitulo = criarPainelTitulo();
+        add(painelTitulo, BorderLayout.NORTH);
+
+        // 2. Painel do Formulário
+        JPanel painelFormulario = criarPainelFormulario();
+        add(painelFormulario, BorderLayout.CENTER);
+
+        // 3. Painel de Botões
+        JPanel painelBotoes = criarPainelBotoes();
+        add(painelBotoes, BorderLayout.SOUTH);
+    }
+
+    /**
+     * Cria o painel superior com o título da tela. (Sem alterações aqui)
+     */
+    private JPanel criarPainelTitulo() {
+        JPanel painel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        painel.setBackground(COR_FUNDO);
+        
+        JLabel lblTitulo = new JLabel("Dados do Novo Funcionário");
+        lblTitulo.setFont(FONTE_TITULO);
+        lblTitulo.setForeground(new Color(60, 60, 60));
+        painel.add(lblTitulo);
+        
+        return painel;
+    }
+
+    /**
+     * Cria o painel central com os campos de entrada de dados. (Sem alterações aqui)
+     */
+    private JPanel criarPainelFormulario() {
+        JPanel painel = new JPanel(new GridBagLayout());
+        painel.setBackground(COR_PAINEL_FORMULARIO);
+        painel.setBorder(new EmptyBorder(25, 25, 25, 25));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 8, 10, 8); // Aumentei o espaçamento vertical
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        txtNome = new JTextField(30); // Aumentei o tamanho sugerido do campo
+        txtCpf = new JTextField();
+        txtEmail = new JTextField();
+        txtCargo = new JTextField();
+        txtMatricula = new JTextField();
+        
+        adicionarCampo(painel, gbc, "Nome Completo:", txtNome, 0);
+        adicionarCampo(painel, gbc, "CPF:", txtCpf, 1);
+        adicionarCampo(painel, gbc, "Email:", txtEmail, 2);
+        adicionarCampo(painel, gbc, "Cargo:", txtCargo, 3);
+        adicionarCampo(painel, gbc, "Matrícula:", txtMatricula, 4);
+
+        return painel;
+    }
+
+    private void adicionarCampo(JPanel painel, GridBagConstraints gbc, String rotulo, JComponent campo, int yPos) {
+        JLabel label = new JLabel(rotulo);
+        label.setFont(FONTE_LABEL);
+        gbc.gridx = 0;
+        gbc.gridy = yPos;
+        gbc.anchor = GridBagConstraints.LINE_END;
+        gbc.weightx = 0.2; // Aumentei um pouco o peso do rótulo
+        painel.add(label, gbc);
+
+        campo.setFont(FONTE_CAMPO);
+        // --- ALTERAÇÃO 2: MELHORAR O PREENCHIMENTO DO CAMPO ---
+        // Adiciona um espaçamento interno nos campos de texto para o texto não ficar colado na borda.
+        if (campo instanceof JTextField) {
+            ((JTextField) campo).setMargin(new Insets(5, 5, 5, 5));
+        }
+
+        gbc.gridx = 1;
+        gbc.gridy = yPos;
+        gbc.anchor = GridBagConstraints.LINE_START;
+        gbc.weightx = 0.8;
+        painel.add(campo, gbc);
+    }
+    
+    /**
+     * Cria o painel inferior com o botão de salvar. (Sem alterações aqui)
+     */
+    private JPanel criarPainelBotoes() {
+        JPanel painel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        painel.setBorder(new EmptyBorder(15, 0, 0, 0)); // Adiciona espaço acima do botão
+        painel.setBackground(COR_FUNDO);
+        
+        btnSalvar = new JButton("CAPTURAR DIGITAL E SALVAR");
+        btnSalvar.setFont(new Font("Segoe UI", Font.BOLD, 16)); // Aumentei a fonte do botão
+        btnSalvar.setBackground(COR_BOTAO_PRINCIPAL);
+        btnSalvar.setForeground(COR_TEXTO_BOTAO);
+        btnSalvar.setFocusPainted(false);
+        btnSalvar.setBorder(new EmptyBorder(15, 40, 15, 40)); // Aumentei o padding do botão
+        btnSalvar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        btnSalvar.addActionListener(e -> executarCadastro());
+        painel.add(btnSalvar);
+
+        return painel;
+    }
+
+    /**
+     * Ação de cadastro. A lógica original com SwingWorker foi mantida intacta.
+     */
     private void executarCadastro() {
+        //... (nenhuma alteração nesta parte)
         if (txtNome.getText().trim().isEmpty() || txtCpf.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Nome e CPF são obrigatórios.", "Erro de Validação", JOptionPane.WARNING_MESSAGE);
             return;
