@@ -3,18 +3,23 @@ package view;
 import controller.TerminalController;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.MaskFormatter;
 import java.awt.*;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener; // Importe o FocusListener
+import java.text.ParseException;
 
 public class TelaCadastroUsuario extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
-    // As variáveis de controle e componentes permanecem as mesmas
     private final transient TerminalController controller;
-    private JTextField txtNome, txtCpf, txtEmail, txtCargo, txtMatricula;
+    private JTextField txtNome, txtEmail, txtCargo, txtMatricula;
+    private JFormattedTextField txtCpf; 
     private JButton btnSalvar;
 
-    // --- paleta de cores E FONTES PARA UM DESIGN MODERNO ---
     private static final Color COR_FUNDO = new Color(240, 242, 245);
     private static final Color COR_PAINEL_FORMULARIO = Color.WHITE;
     private static final Color COR_BOTAO_PRINCIPAL = new Color(24, 119, 242);
@@ -30,16 +35,10 @@ public class TelaCadastroUsuario extends JDialog {
         configurarJanela();
         inicializarComponentes();
 
-        // --- ALTERAÇÃO PARA DEIXAR DO MESMO TAMANHO DA TELA GESTÃO ---
         setSize(1200, 800);
-
-        // Centraliza a janela APÓS ela ter seu tamanho definido.
         setLocationRelativeTo(owner);
     }
     
-    /**
-     * Define as propriedades principais da janela.
-     */
     private void configurarJanela() {
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout(0, 15));
@@ -47,15 +46,10 @@ public class TelaCadastroUsuario extends JDialog {
         ((JPanel) getContentPane()).setBorder(new EmptyBorder(20, 20, 20, 20));
     }
 
-    // O restante do código permanece exatamente o mesmo...
-
     private void inicializarComponentes() {
-        JPanel painelTitulo = criarPainelTitulo();
-        add(painelTitulo, BorderLayout.NORTH);
-        JPanel painelFormulario = criarPainelFormulario();
-        add(painelFormulario, BorderLayout.CENTER);
-        JPanel painelBotoes = criarPainelBotoes();
-        add(painelBotoes, BorderLayout.SOUTH);
+        add(criarPainelTitulo(), BorderLayout.NORTH);
+        add(criarPainelFormulario(), BorderLayout.CENTER);
+        add(criarPainelBotoes(), BorderLayout.SOUTH);
     }
 
     private JPanel criarPainelTitulo() {
@@ -75,11 +69,24 @@ public class TelaCadastroUsuario extends JDialog {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 8, 10, 8);
         gbc.fill = GridBagConstraints.HORIZONTAL;
+
         txtNome = new JTextField(30);
-        txtCpf = new JTextField();
+        TextPrompt placeholderNome = new TextPrompt("Nome Sobrenome", txtNome);
+        placeholderNome.setForeground(new Color(150, 150, 150));
+        
+        try {
+            MaskFormatter cpfFormatter = new MaskFormatter("###.###.###-##");
+            cpfFormatter.setPlaceholderCharacter('_');
+            txtCpf = new JFormattedTextField(cpfFormatter);
+        } catch (ParseException e) {
+            txtCpf = new JFormattedTextField();
+            JOptionPane.showMessageDialog(this, "Erro ao criar máscara de CPF.", "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+
         txtEmail = new JTextField();
         txtCargo = new JTextField();
         txtMatricula = new JTextField();
+
         adicionarCampo(painel, gbc, "Nome Completo:", txtNome, 0);
         adicionarCampo(painel, gbc, "CPF:", txtCpf, 1);
         adicionarCampo(painel, gbc, "Email:", txtEmail, 2);
@@ -91,17 +98,18 @@ public class TelaCadastroUsuario extends JDialog {
     private void adicionarCampo(JPanel painel, GridBagConstraints gbc, String rotulo, JComponent campo, int yPos) {
         JLabel label = new JLabel(rotulo);
         label.setFont(FONTE_LABEL);
-        gbc.gridx = 0;
-        gbc.gridy = yPos;
+        gbc.gridx = 0; gbc.gridy = yPos;
         gbc.anchor = GridBagConstraints.LINE_END;
         gbc.weightx = 0.2;
         painel.add(label, gbc);
+
         campo.setFont(FONTE_CAMPO);
-        if (campo instanceof JTextField) {
-            ((JTextField) campo).setMargin(new Insets(5, 5, 5, 5));
+        if (campo instanceof JTextField || campo instanceof JFormattedTextField) {
+             // Esta é uma forma mais moderna e recomendada de adicionar margens
+            campo.putClientProperty("JTextField.margin", new Insets(5, 5, 5, 5));
         }
-        gbc.gridx = 1;
-        gbc.gridy = yPos;
+
+        gbc.gridx = 1; gbc.gridy = yPos;
         gbc.anchor = GridBagConstraints.LINE_START;
         gbc.weightx = 0.8;
         painel.add(campo, gbc);
@@ -124,17 +132,27 @@ public class TelaCadastroUsuario extends JDialog {
     }
 
     private void executarCadastro() {
-        if (txtNome.getText().trim().isEmpty() || txtCpf.getText().trim().isEmpty()) {
+        String cpfSemMascara = txtCpf.getText().replaceAll("[^0-9]", "");
+        if (txtNome.getText().trim().isEmpty() || cpfSemMascara.trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Nome e CPF são obrigatórios.", "Erro de Validação", JOptionPane.WARNING_MESSAGE);
             return;
         }
+
+        String email = txtEmail.getText().trim();
+        if (!email.isEmpty() && !email.contains("@")) {
+            JOptionPane.showMessageDialog(this, "O email informado é inválido. Certifique-se de que ele contém o caractere '@'.", "Erro de Validação", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         JOptionPane.showMessageDialog(this, "A seguir, será solicitada a captura da digital.", "Próximo Passo", JOptionPane.INFORMATION_MESSAGE);
+        
         btnSalvar.setEnabled(false);
         btnSalvar.setText("PROCESSANDO...");
+
         new SwingWorker<Boolean, Void>() {
             @Override
             protected Boolean doInBackground() {
-                return controller.solicitarCadastroNovoFuncionario(txtNome.getText(), txtCpf.getText(), txtEmail.getText(), txtCargo.getText(), txtMatricula.getText());
+                return controller.solicitarCadastroNovoFuncionario(txtNome.getText(), cpfSemMascara, email, txtCargo.getText(), txtMatricula.getText());
             }
             @Override
             protected void done() {
@@ -153,5 +171,58 @@ public class TelaCadastroUsuario extends JDialog {
                 }
             }
         }.execute();
+    }
+}
+
+/**
+ * Classe utilitária para criar um texto de placeholder (prompt) em campos de texto.
+ */
+// --- CORREÇÃO APLICADA AQUI ---
+class TextPrompt extends JLabel implements DocumentListener, FocusListener {
+    private static final long serialVersionUID = 1L;
+    private final JTextField textField;
+
+    public TextPrompt(String text, JTextField textField) {
+        this.textField = textField;
+        setText(text);
+        setFont(textField.getFont().deriveFont(Font.ITALIC));
+        setForeground(Color.GRAY);
+        setBorder(new EmptyBorder(textField.getInsets()));
+        
+        textField.add(this, 0);
+        textField.getDocument().addDocumentListener(this);
+        // Agora this é um FocusListener válido
+        textField.addFocusListener(this);
+        
+        checkForPrompt();
+    }
+
+    private void checkForPrompt() {
+        setVisible(textField.getText().isEmpty());
+    }
+
+    @Override
+    public void focusGained(FocusEvent e) {
+        setVisible(false);
+    }
+
+    @Override
+    public void focusLost(FocusEvent e) {
+        checkForPrompt();
+    }
+
+    @Override
+    public void insertUpdate(DocumentEvent e) {
+        setVisible(false);
+    }
+
+    @Override
+    public void removeUpdate(DocumentEvent e) {
+        checkForPrompt();
+    }
+
+    @Override
+    public void changedUpdate(DocumentEvent e) {
+        // Não usado para texto plano
     }
 }
