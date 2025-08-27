@@ -25,9 +25,9 @@ public class TelaGestao extends JDialog {
         super(owner, "Painel de Gestão", ModalityType.APPLICATION_MODAL);
         this.controller = controller;
 
-        setSize(900, 650);
+        setSize(1116, 762);
         setLocationRelativeTo(owner);
-        setLayout(new BorderLayout());
+        getContentPane().setLayout(new BorderLayout());
 
         JTabbedPane abas = new JTabbedPane();
         abas.setFont(new Font("Segoe UI", Font.BOLD, 14));
@@ -115,7 +115,7 @@ public class TelaGestao extends JDialog {
 
         abas.addTab("Gerenciamento de Usuários", painelUsuarios);
         abas.addTab("Relatório de Acessos", painelRelatorios);
-        add(abas, BorderLayout.CENTER);
+        getContentPane().add(abas, BorderLayout.CENTER);
 
         carregarDadosUsuarios();
     }
