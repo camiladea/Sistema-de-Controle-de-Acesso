@@ -123,7 +123,7 @@ CREATE TABLE RegistroAcesso (
 
 - [X] Definição da Arquitetura e Blueprint do Sistema.
 - [X] Implementação do Pacote `model`.
-- [ ] Implementação dos Pacotes `util` e `dao`.
+- [X] Implementação dos Pacotes `util` e `dao`.
 - [ ] Implementação do Pacote `service` para integração com o leitor.
 - [ ] Desenvolvimento das telas do sistema.
 
