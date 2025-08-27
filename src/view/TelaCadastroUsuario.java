@@ -16,30 +16,57 @@ public class TelaCadastroUsuario extends JDialog {
     public TelaCadastroUsuario(Window owner, TerminalController controller) {
         super(owner, "Cadastro de Novo Usuário", ModalityType.APPLICATION_MODAL);
         this.controller = controller;
-        setSize(450, 300);
+        setSize(1188, 744);
         setLocationRelativeTo(owner);
-        setLayout(new BorderLayout(15, 15));
+        getContentPane().setLayout(null);
 
         JLabel lblTitulo = new JLabel("Dados do Novo Funcionário", SwingConstants.CENTER);
-        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 20));
-        add(lblTitulo, BorderLayout.NORTH);
+        lblTitulo.setBounds(0, 27, 1172, 27);
+        lblTitulo.setFont(new Font("Rubik", Font.BOLD, 26));
+        getContentPane().add(lblTitulo);
 
-        JPanel painelForm = new JPanel(new GridLayout(5, 2, 10, 10));
+        JPanel painelForm = new JPanel();
+        painelForm.setBounds(0, 42, 1172, 610);
         painelForm.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        painelForm.setLayout(null);
         
-        painelForm.add(new JLabel("Nome Completo:")); txtNome = new JTextField(); painelForm.add(txtNome);
-        painelForm.add(new JLabel("CPF:")); txtCpf = new JTextField(); painelForm.add(txtCpf);
-        painelForm.add(new JLabel("Email:")); txtEmail = new JTextField(); painelForm.add(txtEmail);
-        painelForm.add(new JLabel("Cargo:")); txtCargo = new JTextField(); painelForm.add(txtCargo);
-        painelForm.add(new JLabel("Matrícula:")); txtMatricula = new JTextField(); painelForm.add(txtMatricula);
-        add(painelForm, BorderLayout.CENTER);
+        JLabel label = new JLabel("Nome Completo:");
+        label.setBounds(250, 69, 561, 110);
+        label.setFont(new Font("Noto Sans Georgian Bold", Font.PLAIN, 20));
+        painelForm.add(label); txtNome = new JTextField(); 
+ txtNome.setBounds(458, 110, 514, 35);painelForm.add(txtNome);
+        JLabel label_1 = new JLabel("CPF:");
+        label_1.setBounds(250, 157, 561, 110);
+        label_1.setFont(new Font("Noto Sans Georgian Bold", Font.PLAIN, 20));
+        painelForm.add(label_1); txtCpf = new JTextField(); 
+ txtCpf.setBounds(458, 198, 514, 35);painelForm.add(txtCpf);
+        JLabel label_2 = new JLabel("Email:");
+        label_2.setBounds(250, 334, 561, 110);
+        label_2.setFont(new Font("Noto Sans Georgian Bold", Font.PLAIN, 20));
+        painelForm.add(label_2); txtEmail = new JTextField(); 
+ txtEmail.setBounds(458, 287, 514, 35);painelForm.add(txtEmail);
+        JLabel label_3 = new JLabel("Cargo:");
+        label_3.setBounds(250, 243, 561, 110);
+        label_3.setFont(new Font("Noto Sans Georgian Bold", Font.PLAIN, 20));
+        painelForm.add(label_3); txtCargo = new JTextField(); 
+ txtCargo.setBounds(458, 375, 514, 35);painelForm.add(txtCargo);
+        JLabel label_4 = new JLabel("Matrícula:");
+        label_4.setBounds(250, 425, 561, 110);
+        label_4.setFont(new Font("Noto Sans Georgian Bold", Font.PLAIN, 20));
+        painelForm.add(label_4); txtMatricula = new JTextField(); 
+ txtMatricula.setBounds(458, 466, 514, 35);painelForm.add(txtMatricula);
+        getContentPane().add(painelForm);
 
         btnSalvar = new JButton("CAPTURAR DIGITAL E SALVAR");
+        btnSalvar.setBackground(new Color(255, 255, 255));
+        btnSalvar.setBounds(20, 0, 1132, 23);
         btnSalvar.addActionListener(e -> executarCadastro());
-        JPanel painelBotao = new JPanel(new BorderLayout());
+        JPanel painelBotao = new JPanel();
+        painelBotao.setBounds(0, 667, 1172, 38);
         painelBotao.setBorder(BorderFactory.createEmptyBorder(0, 20, 15, 20));
-        painelBotao.add(btnSalvar, BorderLayout.CENTER);
-        add(painelBotao, BorderLayout.SOUTH);
+        painelBotao.setLayout(null);
+        painelBotao.add(btnSalvar);
+        getContentPane().add(painelBotao);
     }
 
     private void executarCadastro() {
