@@ -4,8 +4,8 @@ public class Administrador extends Usuario {
     private String login;
     private String senhaHash;
 
-    public Administrador(String nome, String cpf, String email, String digitalHash, String login, String senhaHash) {
-        super(nome, cpf, email, digitalHash);
+    public Administrador(String nome, String cpf, String email, String digitalFIR, String login, String senhaHash) {
+        super(nome, cpf, email, digitalFIR);
         this.login = login;
         this.senhaHash = senhaHash;
     }
