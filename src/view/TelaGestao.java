@@ -21,7 +21,7 @@ public class TelaGestao extends JDialog {
     private JTable tabelaUsuarios;
 
     private static final Color COR_FUNDO = new Color(240, 242, 245);
-    private static final Color COR_PAINEL_CONTEUDO = Color.WHITE;
+    private static final Color COR_PAINEL_CONTEUdo = Color.WHITE;
     private static final Color COR_CABECALHO_TABELA = new Color(220, 223, 228);
     private static final Color COR_BOTAO_PRIMARIO = new Color(24, 119, 242);
     private static final Color COR_BOTAO_SECUNDARIO = new Color(230, 232, 235);
@@ -63,31 +63,14 @@ public class TelaGestao extends JDialog {
 
         add(abas, BorderLayout.CENTER);
         
-        // --- NOVO CÓDIGO ---
-        // Adiciona o painel com o botão de voltar no rodapé da janela
-        add(criarPainelVoltar(), BorderLayout.SOUTH);
-        // --- FIM DO NOVO CÓDIGO ---
+        // --- CÓDIGO REMOVIDO ---
+        // A linha que adicionava o painel de voltar no rodapé foi removida daqui.
     }
     
-    // --- NOVO CÓDIGO ---
-    /**
-     * Cria o painel do rodapé com o botão para fechar a janela.
-     * @return JPanel com o botão de voltar/sair.
-     */
-    private JPanel criarPainelVoltar() {
-        JPanel painel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 10)); // Alinhado à direita
-        painel.setBackground(COR_FUNDO);
-        painel.setBorder(new EmptyBorder(5, 0, 5, 0)); // Pequena margem vertical
+    // --- MÉTODO REMOVIDO ---
+    // O método criarPainelVoltar() foi completamente removido.
 
-        JButton btnVoltar = new JButton("VOLTAR / SAIR");
-        configurarBotao(btnVoltar, COR_BOTAO_SECUNDARIO, COR_TEXTO_BOTAO_SECUNDARIO);
-        btnVoltar.addActionListener(e -> dispose()); // Ação para fechar a janela
-
-        painel.add(btnVoltar);
-        return painel;
-    }
-    // --- FIM DO NOVO CÓDIGO ---
-
+    // --- MÉTODO MODIFICADO ---
     private JPanel criarAbaUsuarios() {
         JPanel painel = new JPanel(new BorderLayout(10, 10));
         painel.setBorder(new EmptyBorder(15, 15, 15, 15));
@@ -106,12 +89,22 @@ public class TelaGestao extends JDialog {
         scrollPane.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
         painel.add(scrollPane, BorderLayout.CENTER);
 
-        // --- Painel de Ações do Usuário ---
-        JPanel painelAcoes = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5));
+        // --- Painel de Ações do Usuário (Layout Modificado) ---
+        // Usamos BorderLayout para dividir os botões em esquerda e direita
+        JPanel painelAcoes = new JPanel(new BorderLayout());
         painelAcoes.setBackground(COR_FUNDO);
 
+        // --- Botão de Voltar (Lado Esquerdo) ---
+        JButton btnVoltar = new JButton("VOLTAR / SAIR");
+        configurarBotao(btnVoltar, COR_BOTAO_SECUNDARIO, COR_TEXTO_BOTAO_SECUNDARIO);
+        btnVoltar.addActionListener(e -> dispose());
+        painelAcoes.add(btnVoltar, BorderLayout.WEST); // Adiciona na esquerda
+
+        // --- Painel para os botões da Direita ---
+        JPanel painelBotoesDireita = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        painelBotoesDireita.setBackground(COR_FUNDO);
+
         JButton btnAdicionar = new JButton("ADICIONAR NOVO");
-        // new ImageIcon(getClass().getResource("/icons/add.png")) -> Exemplo de como adicionar ícone
         configurarBotao(btnAdicionar, COR_BOTAO_PRIMARIO, COR_TEXTO_BOTAO_PRIMARIO);
         btnAdicionar.addActionListener(e -> {
             new TelaCadastroUsuario(this, controller).setVisible(true);
@@ -130,10 +123,13 @@ public class TelaGestao extends JDialog {
         configurarBotao(btnAtualizar, COR_BOTAO_SECUNDARIO, COR_TEXTO_BOTAO_SECUNDARIO);
         btnAtualizar.addActionListener(e -> carregarDadosUsuarios());
 
-        painelAcoes.add(btnAtualizar);
-        painelAcoes.add(btnEditar);
-        painelAcoes.add(btnRemover);
-        painelAcoes.add(btnAdicionar);
+        painelBotoesDireita.add(btnAtualizar);
+        painelBotoesDireita.add(btnEditar);
+        painelBotoesDireita.add(btnRemover);
+        painelBotoesDireita.add(btnAdicionar);
+
+        // Adiciona o painel da direita no painel principal de ações
+        painelAcoes.add(painelBotoesDireita, BorderLayout.CENTER);
 
         painel.add(painelAcoes, BorderLayout.SOUTH);
         return painel;
@@ -146,7 +142,7 @@ public class TelaGestao extends JDialog {
 
         // --- Painel de Filtro ---
         JPanel painelFiltro = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        painelFiltro.setBackground(COR_PAINEL_CONTEUDO);
+        painelFiltro.setBackground(COR_PAINEL_CONTEUdo);
         painelFiltro.setBorder(new EmptyBorder(10,10,10,10));
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
