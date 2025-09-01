@@ -1,13 +1,12 @@
 package dao;
 
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import model.Administrador;
 import model.Funcionario;
 import model.Usuario;
 import util.ConexaoBancoDados;
-
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class UsuarioDAO {
 
@@ -167,7 +166,7 @@ public class UsuarioDAO {
 
     public boolean atualizar(Usuario usuario) {
         String sql = "UPDATE Usuario SET " +
-                "nome = ?, cpf = ?, email = ?, digitalHash = ?, ativo = ?, tipo = ?, cargo = ?, matricula = ?, login = ?, senhaHash = ? "
+                "nome = ?, cpf = ?, email = ?, digitalHash = ?, ativo = ?, tipoUsuario = ?, cargo = ?, matricula = ?, login = ?, senhaHash = ? "
                 +
                 "WHERE cpf = ?";
 
