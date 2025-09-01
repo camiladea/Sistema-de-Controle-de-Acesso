@@ -62,7 +62,31 @@ public class TelaGestao extends JDialog {
         abas.addTab("Relatório de Acessos", painelRelatorios);
 
         add(abas, BorderLayout.CENTER);
+        
+        // --- NOVO CÓDIGO ---
+        // Adiciona o painel com o botão de voltar no rodapé da janela
+        add(criarPainelVoltar(), BorderLayout.SOUTH);
+        // --- FIM DO NOVO CÓDIGO ---
     }
+    
+    // --- NOVO CÓDIGO ---
+    /**
+     * Cria o painel do rodapé com o botão para fechar a janela.
+     * @return JPanel com o botão de voltar/sair.
+     */
+    private JPanel criarPainelVoltar() {
+        JPanel painel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 10)); // Alinhado à direita
+        painel.setBackground(COR_FUNDO);
+        painel.setBorder(new EmptyBorder(5, 0, 5, 0)); // Pequena margem vertical
+
+        JButton btnVoltar = new JButton("VOLTAR / SAIR");
+        configurarBotao(btnVoltar, COR_BOTAO_SECUNDARIO, COR_TEXTO_BOTAO_SECUNDARIO);
+        btnVoltar.addActionListener(e -> dispose()); // Ação para fechar a janela
+
+        painel.add(btnVoltar);
+        return painel;
+    }
+    // --- FIM DO NOVO CÓDIGO ---
 
     private JPanel criarAbaUsuarios() {
         JPanel painel = new JPanel(new BorderLayout(10, 10));

@@ -1,15 +1,15 @@
 package view;
 
 import controller.TerminalController;
+import java.awt.*;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.text.ParseException;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
+import javax.swing.event.DocumentListener; // Importe o FocusListener
 import javax.swing.text.MaskFormatter;
-import java.awt.*;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener; // Importe o FocusListener
-import java.text.ParseException;
 
 public class TelaCadastroUsuario extends JDialog {
 
@@ -23,6 +23,10 @@ public class TelaCadastroUsuario extends JDialog {
     private static final Color COR_FUNDO = new Color(240, 242, 245);
     private static final Color COR_PAINEL_FORMULARIO = Color.WHITE;
     private static final Color COR_BOTAO_PRINCIPAL = new Color(24, 119, 242);
+    // --- NOVO CÓDIGO ---
+    private static final Color COR_BOTAO_SECUNDARIO = new Color(230, 232, 235);
+    private static final Color COR_TEXTO_BOTAO_SECUNDARIO = new Color(40, 40, 40);
+    // --- FIM DO NOVO CÓDIGO ---
     private static final Color COR_TEXTO_BOTAO = Color.WHITE;
     private static final Font FONTE_TITULO = new Font("Segoe UI", Font.BOLD, 24);
     private static final Font FONTE_LABEL = new Font("Segoe UI", Font.BOLD, 14);
@@ -115,22 +119,37 @@ public class TelaCadastroUsuario extends JDialog {
         painel.add(campo, gbc);
     }
     
+    // --- MÉTODO MODIFICADO ---
     private JPanel criarPainelBotoes() {
-        JPanel painel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JPanel painel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0)); // MODIFICADO para alinhar à direita
         painel.setBorder(new EmptyBorder(15, 0, 0, 0));
         painel.setBackground(COR_FUNDO);
+
+        // --- Botão de Cancelar (NOVO) ---
+        JButton btnCancelar = new JButton("CANCELAR");
+        configurarBotao(btnCancelar, COR_BOTAO_SECUNDARIO, COR_TEXTO_BOTAO_SECUNDARIO, new Font("Segoe UI", Font.BOLD, 14), new EmptyBorder(12, 30, 12, 30));
+        btnCancelar.addActionListener(e -> dispose()); // Ação para fechar a janela
+        
+        // --- Botão Salvar (Existente) ---
         btnSalvar = new JButton("CAPTURAR DIGITAL E SALVAR");
-        btnSalvar.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        btnSalvar.setBackground(COR_BOTAO_PRINCIPAL);
-        btnSalvar.setForeground(COR_TEXTO_BOTAO);
-        btnSalvar.setFocusPainted(false);
-        btnSalvar.setBorder(new EmptyBorder(15, 40, 15, 40));
-        btnSalvar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        configurarBotao(btnSalvar, COR_BOTAO_PRINCIPAL, COR_TEXTO_BOTAO, new Font("Segoe UI", Font.BOLD, 14), new EmptyBorder(12, 30, 12, 30));
         btnSalvar.addActionListener(e -> executarCadastro());
+
+        painel.add(btnCancelar); // Adiciona o botão de cancelar primeiro
         painel.add(btnSalvar);
         return painel;
     }
 
+    // --- NOVO MÉTODO AUXILIAR ---
+    private void configurarBotao(JButton botao, Color corFundo, Color corTexto, Font fonte, EmptyBorder borda) {
+        botao.setFont(fonte);
+        botao.setBackground(corFundo);
+        botao.setForeground(corTexto);
+        botao.setFocusPainted(false);
+        botao.setBorder(borda);
+        botao.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    }
+    
     private void executarCadastro() {
         String cpfSemMascara = txtCpf.getText().replaceAll("[^0-9]", "");
         if (txtNome.getText().trim().isEmpty() || cpfSemMascara.trim().isEmpty()) {
