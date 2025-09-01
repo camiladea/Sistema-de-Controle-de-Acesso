@@ -37,8 +37,8 @@ Desenvolver uma solução de controle de acesso segura, eficiente e acessível, 
 - **(RF02)** Autenticação de usuários via leitor biométrico (identificação 1 para N).
 - **(RF03)** Registro e log de todas as tentativas de acesso (permitidas e negadas) para fins de auditoria.
 - **(RF04)** Autenticação de administrador por login e senha para autorizar operações críticas (como novos cadastros).
-- **(RF06)** Painel administrativo para gestão de usuários (ativar, desativar, editar).
-- **(RF07)** Geração e visualização de relatórios de acesso por período ou por usuário.
+- **(RF05)** Painel administrativo para gestão de usuários (ativar, desativar, editar).
+- **(RF06)** Geração e visualização de relatórios de acesso por período ou por usuário.
 
 ## Tecnologias Utilizadas
 
