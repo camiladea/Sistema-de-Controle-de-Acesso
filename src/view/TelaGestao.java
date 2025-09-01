@@ -21,7 +21,7 @@ public class TelaGestao extends JDialog {
     private JTable tabelaUsuarios;
 
     private static final Color COR_FUNDO = new Color(240, 242, 245);
-    private static final Color COR_PAINEL_CONTEUdo = Color.WHITE;
+    private static final Color COR_PAINEL_CONTEUDO = Color.WHITE;
     private static final Color COR_CABECALHO_TABELA = new Color(220, 223, 228);
     private static final Color COR_BOTAO_PRIMARIO = new Color(24, 119, 242);
     private static final Color COR_BOTAO_SECUNDARIO = new Color(230, 232, 235);
@@ -62,13 +62,10 @@ public class TelaGestao extends JDialog {
         abas.addTab("Relatório de Acessos", painelRelatorios);
 
         add(abas, BorderLayout.CENTER);
-        
-        // --- CÓDIGO REMOVIDO ---
-        // A linha que adicionava o painel de voltar no rodapé foi removida daqui.
+        // O botão de voltar global foi removido daqui
     }
     
-    // --- MÉTODO REMOVIDO ---
-    // O método criarPainelVoltar() foi completamente removido.
+    // O método criarPainelVoltar() foi removido completamente
 
     // --- MÉTODO MODIFICADO ---
     private JPanel criarAbaUsuarios() {
@@ -89,8 +86,7 @@ public class TelaGestao extends JDialog {
         scrollPane.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
         painel.add(scrollPane, BorderLayout.CENTER);
 
-        // --- Painel de Ações do Usuário (Layout Modificado) ---
-        // Usamos BorderLayout para dividir os botões em esquerda e direita
+        // --- Painel de Ações do Usuário (Layout com Botão à Esquerda) ---
         JPanel painelAcoes = new JPanel(new BorderLayout());
         painelAcoes.setBackground(COR_FUNDO);
 
@@ -98,7 +94,7 @@ public class TelaGestao extends JDialog {
         JButton btnVoltar = new JButton("VOLTAR / SAIR");
         configurarBotao(btnVoltar, COR_BOTAO_SECUNDARIO, COR_TEXTO_BOTAO_SECUNDARIO);
         btnVoltar.addActionListener(e -> dispose());
-        painelAcoes.add(btnVoltar, BorderLayout.WEST); // Adiciona na esquerda
+        painelAcoes.add(btnVoltar, BorderLayout.WEST);
 
         // --- Painel para os botões da Direita ---
         JPanel painelBotoesDireita = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
@@ -127,14 +123,14 @@ public class TelaGestao extends JDialog {
         painelBotoesDireita.add(btnEditar);
         painelBotoesDireita.add(btnRemover);
         painelBotoesDireita.add(btnAdicionar);
-
-        // Adiciona o painel da direita no painel principal de ações
+        
         painelAcoes.add(painelBotoesDireita, BorderLayout.CENTER);
 
         painel.add(painelAcoes, BorderLayout.SOUTH);
         return painel;
     }
 
+    // --- MÉTODO MODIFICADO ---
     private JPanel criarAbaRelatorios() {
         JPanel painel = new JPanel(new BorderLayout(10, 10));
         painel.setBorder(new EmptyBorder(15, 15, 15, 15));
@@ -142,7 +138,7 @@ public class TelaGestao extends JDialog {
 
         // --- Painel de Filtro ---
         JPanel painelFiltro = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        painelFiltro.setBackground(COR_PAINEL_CONTEUdo);
+        painelFiltro.setBackground(COR_PAINEL_CONTEUDO);
         painelFiltro.setBorder(new EmptyBorder(10,10,10,10));
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -161,6 +157,12 @@ public class TelaGestao extends JDialog {
         btnGerar.addActionListener(e -> carregarRelatorio());
         painelFiltro.add(btnGerar);
         
+        // --- BOTÃO ADICIONADO AQUI ---
+        JButton btnVoltar = new JButton("VOLTAR / SAIR");
+        configurarBotao(btnVoltar, COR_BOTAO_SECUNDARIO, COR_TEXTO_BOTAO_SECUNDARIO);
+        btnVoltar.addActionListener(e -> dispose());
+        painelFiltro.add(btnVoltar); // Adicionado ao lado do botão de gerar relatório
+        
         painel.add(painelFiltro, BorderLayout.NORTH);
 
         // --- Tabela de Relatório ---
@@ -169,7 +171,7 @@ public class TelaGestao extends JDialog {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
         JTable tabelaRelatorio = new JTable(modelRelatorio);
-        configurarTabela(tabelaRelatorio, new ZebraTableCellRenderer()); // Usa o renderer padrão de zebra
+        configurarTabela(tabelaRelatorio, new ZebraTableCellRenderer());
         
         JScrollPane scrollPane = new JScrollPane(tabelaRelatorio);
         scrollPane.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
@@ -205,6 +207,7 @@ public class TelaGestao extends JDialog {
         botao.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 
+    // ... (restante do código permanece igual)
     private void editarSelecionado() {
         int viewIndex = tabelaUsuarios.getSelectedRow();
         if (viewIndex == -1) {
@@ -292,15 +295,12 @@ public class TelaGestao extends JDialog {
         }
     }
     
-    // ----- CLASSES INTERNAS DE RENDERIZAÇÃO -----
-    
     static class StatusCellRenderer extends ZebraTableCellRenderer {
         private static final long serialVersionUID = 1L;
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             if (!isSelected) {
-                // table.convertColumnIndexToModel(column) é crucial se as colunas forem reordenáveis
                 if (table.getColumnName(column).equals("Status")) {
                     String status = (String) value;
                     if ("Ativo".equals(status)) {
@@ -316,9 +316,6 @@ public class TelaGestao extends JDialog {
         }
     }
     
-    /**
-     * Renderizador base que apenas pinta as linhas com cores alternadas.
-     */
     static class ZebraTableCellRenderer extends DefaultTableCellRenderer {
         private static final long serialVersionUID = 1L;
         private static final Color COR_LINHA_PAR = new Color(248, 249, 250);
