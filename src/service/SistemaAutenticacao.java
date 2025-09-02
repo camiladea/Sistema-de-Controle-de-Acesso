@@ -26,29 +26,32 @@ public class SistemaAutenticacao {
 
     public Optional<Usuario> autenticarPorBiometria() {
         leitorBiometrico.conectar();
-        Optional<String> hashOpt = leitorBiometrico.lerDigital("Autenticação");
+        Optional<String> firOpt = leitorBiometrico.lerDigital("Autenticação");
         leitorBiometrico.desconectar();
 
-        if (hashOpt.isEmpty()) {
+        if (firOpt.isEmpty()) {
             registrarAcesso(null, "Falha na Captura");
             return Optional.empty();
         }
 
-        // --- LÓGICA DE SIMULAÇÃO CORRIGIDA ---
-        // Para simular um login bem-sucedido, vamos pegar o primeiro usuário com digital
-        // que encontrarmos no banco e assumir que a digital dele "correspondeu".
-        List<Usuario> todosOsUsuarios = usuarioDAO.listarTodos();
-        
-        Optional<Usuario> usuarioCorrespondente = todosOsUsuarios.stream()
-            .filter(u -> u.getDigitalFIR() != null && !u.getDigitalFIR().isEmpty())
-            .findFirst();
+        String firCapturada = firOpt.get();
 
-        if (usuarioCorrespondente.isPresent() && usuarioCorrespondente.get().isAtivo()) {
-            registrarAcesso(usuarioCorrespondente.get(), "Acesso Permitido (Simulado)");
-            return usuarioCorrespondente;
+        // Pega todos os usuários ativos com FIR
+        List<Usuario> usuarios = usuarioDAO.listarTodos().stream()
+                .filter(u -> u.getDigitalFIR() != null && !u.getDigitalFIR().isEmpty() && u.isAtivo())
+                .toList();
+
+        // Tenta validar cada um
+        for (Usuario u : usuarios) {
+            boolean match = leitorBiometrico.verificarDigital(firCapturada, u.getDigitalFIR());
+            if (match) {
+                registrarAcesso(u, "Acesso Permitido");
+                System.out.println("Usuário autenticado: " + u.getNome());
+                return Optional.of(u);
+            }
         }
-        // Se não houver usuários com digital ou o encontrado estiver inativo...
-        
+
+        // Se nenhum bateu
         registrarAcesso(null, "Acesso Negado");
         return Optional.empty();
     }
