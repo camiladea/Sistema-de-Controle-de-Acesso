@@ -139,8 +139,8 @@ ON DUPLICATE KEY UPDATE
 - [X] Definição da Arquitetura e Blueprint do Sistema.
 - [X] Implementação do Pacote `model`.
 - [X] Implementação dos Pacotes `util` e `dao`.
-- [ ] Implementação do Pacote `service` para integração com o leitor.
-- [ ] Desenvolvimento das telas do sistema.
+- [X] Implementação do Pacote `service` para integração com o leitor.
+- [X] Desenvolvimento das telas do sistema.
 
 ## Autores
 
