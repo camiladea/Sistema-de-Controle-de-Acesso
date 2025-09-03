@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * SistemaAutenticacao (LÓGICA DE SIMULAÇÃO CORRIGIDA)
+ * SistemaAutenticacao 
  */
 public class SistemaAutenticacao {
     private final LeitorBiometrico leitorBiometrico;
@@ -34,7 +34,6 @@ public class SistemaAutenticacao {
             return Optional.empty();
         }
 
-        // --- LÓGICA DE SIMULAÇÃO CORRIGIDA ---
         // Para simular um login bem-sucedido, vamos pegar o primeiro usuário com digital
         // que encontrarmos no banco e assumir que a digital dele "correspondeu".
         List<Usuario> todosOsUsuarios = usuarioDAO.listarTodos();

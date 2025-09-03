@@ -74,7 +74,7 @@ public class UsuarioDAO {
         String sql = "SELECT * FROM Usuario WHERE cpf = ?";
         return buscarUsuarioPorString(sql, cpf);
     }
-
+    
     public Usuario buscarPorFIR(String digitalFIR) {
         String sql = "SELECT * FROM Usuario WHERE digitalFIR = ?";
         return buscarUsuarioPorString(sql, digitalFIR);

@@ -44,7 +44,7 @@ public class TelaEdicaoUsuario extends JDialog {
     }
 
     /**
-     * Cria e organiza os componentes visuais na tela.
+     * 
      */
 
     private void inicializarComponentes() {

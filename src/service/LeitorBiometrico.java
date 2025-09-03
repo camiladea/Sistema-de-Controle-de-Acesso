@@ -18,8 +18,7 @@ public class LeitorBiometrico {
     }
 
     /**
-     * SIMULAÇÃO CORRIGIDA: Usa uma caixa de diálogo para pausar e simular a
-     * leitura.
+     * SIMULAÇÃO 
      * 
      * @return um Optional contendo um hash de digital simulado.
      */

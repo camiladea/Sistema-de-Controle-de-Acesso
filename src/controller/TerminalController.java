@@ -26,11 +26,11 @@ public class TerminalController {
         this.registroAcessoDAO = new RegistroAcessoDAO();
     }
 
-    // --- AUTENTICAÇÃO ---
+    // AUTENTICAÇÃO 
     public Optional<Usuario> solicitarAutenticacaoBiometrica() {
         return sistemaAutenticacao.autenticarPorBiometria();
     }
-
+    // AUTENTICAR ADM
     public Optional<Administrador> solicitarAutenticacaoAdmin(String login, String senha) {
         if (login == null || login.trim().isEmpty() || senha == null || senha.isEmpty()) {
             return Optional.empty();
@@ -38,7 +38,7 @@ public class TerminalController {
         return sistemaAutenticacao.autenticarAdminPorCredenciais(login, senha);
     }
 
-    // --- USUÁRIOS ---
+    // USUÁRIOS 
     public boolean solicitarCadastroNovoFuncionario(String nome, String cpf, String email, String cargo,
             String matricula) {
         return gerenciadorUsuarios.cadastrarNovoFuncionario(nome, cpf, email, cargo, matricula);
@@ -48,17 +48,17 @@ public class TerminalController {
         return usuarioDAO.listarTodos();
     }
 
-    // 🚀 Novo: remover usuário
+    // remover usuário
     public boolean removerUsuario(int id) {
         return usuarioDAO.remover(id);
     }
 
-    // 🚀 Novo: buscar usuário por ID
+    // buscar usuário por ID
     public Usuario buscarUsuarioPorId(int id) {
         return usuarioDAO.buscarPorId(id);
     }
 
-    // 🚀 Opcional: editar usuário
+    // editar usuário
 
     // --- RELATÓRIOS ---
     public List<RegistroAcesso> solicitarRelatorioAcesso(LocalDateTime inicio, LocalDateTime fim) {

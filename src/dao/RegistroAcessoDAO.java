@@ -9,7 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RegistroAcessoDAO {
-    public void salvar(RegistroAcesso registro) {
+    // Salva o acesso
+    public void salvar(RegistroAcesso registro) { 
         String sql = "INSERT INTO RegistroAcesso (dataHora, usuarioId, status, origem) VALUES (?, ?, ?, ?)";
         try (Connection conexao = ConexaoBancoDados.getConexao(); PreparedStatement pstm = conexao.prepareStatement(sql)) {
             pstm.setTimestamp(1, Timestamp.valueOf(registro.getDataHora()));
@@ -26,7 +27,8 @@ public class RegistroAcessoDAO {
         }
     }
 
-    public List<RegistroAcesso> listarPorPeriodo(LocalDateTime inicio, LocalDateTime fim) {
+    // Filtra por periodo
+    public List<RegistroAcesso> listarPorPeriodo(LocalDateTime inicio, LocalDateTime fim) { 
         List<RegistroAcesso> registros = new ArrayList<>();
         String sql = "SELECT * FROM RegistroAcesso WHERE dataHora BETWEEN ? AND ?";
         try (Connection conexao = ConexaoBancoDados.getConexao(); PreparedStatement pstm = conexao.prepareStatement(sql)) {

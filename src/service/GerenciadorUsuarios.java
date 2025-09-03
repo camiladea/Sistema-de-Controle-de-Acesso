@@ -6,8 +6,8 @@ import model.Usuario;
 import java.util.Optional;
 
 /**
- * GerenciadorUsuarios (VERSÃO FINAL CORRIGIDA E SINCRONIZADA)
- * Centraliza a lógica de negócio para o gerenciamento de usuários.
+ * GerenciadorUsuarios
+ * 
  */
 public class GerenciadorUsuarios {
     private final UsuarioDAO usuarioDAO;
@@ -19,12 +19,12 @@ public class GerenciadorUsuarios {
     }
 
     /**
-     * Orquestra o processo de cadastro de um novo funcionário.
+     * 
      * 
      * @return true se o cadastro foi bem-sucedido, false caso contrário.
      */
     public boolean cadastrarNovoFuncionario(String nome, String cpf, String email, String cargo, String matricula) {
-        // 1. Validação da Regra de Negócio: CPF não pode ser duplicado.
+        // 1. Validação: CPF não pode ser duplicado.
         if (usuarioDAO.buscarPorCpf(cpf) != null) {
             System.err.println("FALHA DE NEGÓCIO: Tentativa de cadastrar um CPF que já existe: " + cpf);
             return false;
@@ -33,7 +33,6 @@ public class GerenciadorUsuarios {
         // 2. Interação com o Hardware
         leitorBiometrico.conectar();
 
-        // --- LINHA CORRIGIDA ---
         // Agora passamos o propósito da leitura para o método, como ele espera.
         Optional<String> digitalHashOpt = leitorBiometrico.lerDigital("Cadastro de Novo Usuário");
 
