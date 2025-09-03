@@ -37,7 +37,6 @@ public class TelaGestao extends JDialog {
         configurarJanela();
         inicializarComponentes();
 
-        // Carrega os dados iniciais após a interface estar pronta
         carregarDadosUsuarios();
     }
 
@@ -62,18 +61,14 @@ public class TelaGestao extends JDialog {
         abas.addTab("Relatório de Acessos", painelRelatorios);
 
         add(abas, BorderLayout.CENTER);
-        // O botão de voltar global foi removido daqui
     }
     
-    // O método criarPainelVoltar() foi removido completamente
-
-    // --- MÉTODO MODIFICADO ---
     private JPanel criarAbaUsuarios() {
         JPanel painel = new JPanel(new BorderLayout(10, 10));
         painel.setBorder(new EmptyBorder(15, 15, 15, 15));
         painel.setBackground(COR_FUNDO);
 
-        // --- Tabela de Usuários ---
+        // Tabela de Usuários
         modelUsuarios = new DefaultTableModel(new String[]{"ID", "Nome", "CPF", "Tipo", "Status"}, 0) {
             private static final long serialVersionUID = 1L;
             @Override public boolean isCellEditable(int r, int c) { return false; }
@@ -86,17 +81,17 @@ public class TelaGestao extends JDialog {
         scrollPane.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
         painel.add(scrollPane, BorderLayout.CENTER);
 
-        // --- Painel de Ações do Usuário (Layout com Botão à Esquerda) ---
+        // Painel de Ações do Usuário
         JPanel painelAcoes = new JPanel(new BorderLayout());
         painelAcoes.setBackground(COR_FUNDO);
 
-        // --- Botão de Voltar (Lado Esquerdo) ---
+        // Botão de Voltar
         JButton btnVoltar = new JButton("VOLTAR / SAIR");
         configurarBotao(btnVoltar, COR_BOTAO_SECUNDARIO, COR_TEXTO_BOTAO_SECUNDARIO);
         btnVoltar.addActionListener(e -> dispose());
         painelAcoes.add(btnVoltar, BorderLayout.WEST);
 
-        // --- Painel para os botões da Direita ---
+        //Painel para os botões da Direita
         JPanel painelBotoesDireita = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         painelBotoesDireita.setBackground(COR_FUNDO);
 
@@ -130,13 +125,11 @@ public class TelaGestao extends JDialog {
         return painel;
     }
 
-    // --- MÉTODO MODIFICADO ---
     private JPanel criarAbaRelatorios() {
         JPanel painel = new JPanel(new BorderLayout(10, 10));
         painel.setBorder(new EmptyBorder(15, 15, 15, 15));
         painel.setBackground(COR_FUNDO);
 
-        // --- Painel de Filtro ---
         JPanel painelFiltro = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         painelFiltro.setBackground(COR_PAINEL_CONTEUDO);
         painelFiltro.setBorder(new EmptyBorder(10,10,10,10));
@@ -157,7 +150,7 @@ public class TelaGestao extends JDialog {
         btnGerar.addActionListener(e -> carregarRelatorio());
         painelFiltro.add(btnGerar);
         
-        // --- BOTÃO ADICIONADO AQUI ---
+        // botao voltar
         JButton btnVoltar = new JButton("VOLTAR / SAIR");
         configurarBotao(btnVoltar, COR_BOTAO_SECUNDARIO, COR_TEXTO_BOTAO_SECUNDARIO);
         btnVoltar.addActionListener(e -> dispose());
@@ -165,7 +158,7 @@ public class TelaGestao extends JDialog {
         
         painel.add(painelFiltro, BorderLayout.NORTH);
 
-        // --- Tabela de Relatório ---
+        // Tabela de Relatório
         modelRelatorio = new DefaultTableModel(new String[]{"ID", "Data e Hora", "ID Usuário", "Status", "Origem"}, 0) {
             private static final long serialVersionUID = 1L;
             @Override public boolean isCellEditable(int r, int c) { return false; }
@@ -180,7 +173,7 @@ public class TelaGestao extends JDialog {
         return painel;
     }
 
-    // ----- MÉTODOS AUXILIARES DE ESTILO -----
+    // metodos pro estilo
 
     private void configurarTabela(JTable tabela, DefaultTableCellRenderer renderer) {
         tabela.setRowSorter(new TableRowSorter<>(tabela.getModel()));
@@ -207,7 +200,6 @@ public class TelaGestao extends JDialog {
         botao.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 
-    // ... (restante do código permanece igual)
     private void editarSelecionado() {
         int viewIndex = tabelaUsuarios.getSelectedRow();
         if (viewIndex == -1) {
