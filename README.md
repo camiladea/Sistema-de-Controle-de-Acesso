@@ -154,3 +154,4 @@ ON DUPLICATE KEY UPDATE
 - Prof. Andrei Inácio de Souza
 - Prof. Leonardo Ronald Perin Rauta
 - Prof. Maykon Chagas
+- Prof. Fernando Weber Albiero
