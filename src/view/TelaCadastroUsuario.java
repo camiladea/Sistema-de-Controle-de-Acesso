@@ -8,7 +8,7 @@ import java.text.ParseException;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener; // Importe o FocusListener
+import javax.swing.event.DocumentListener;
 import javax.swing.text.MaskFormatter;
 
 public class TelaCadastroUsuario extends JDialog {
@@ -23,10 +23,8 @@ public class TelaCadastroUsuario extends JDialog {
     private static final Color COR_FUNDO = new Color(240, 242, 245);
     private static final Color COR_PAINEL_FORMULARIO = Color.WHITE;
     private static final Color COR_BOTAO_PRINCIPAL = new Color(24, 119, 242);
-    // --- NOVO CÓDIGO ---
     private static final Color COR_BOTAO_SECUNDARIO = new Color(230, 232, 235);
     private static final Color COR_TEXTO_BOTAO_SECUNDARIO = new Color(40, 40, 40);
-    // --- FIM DO NOVO CÓDIGO ---
     private static final Color COR_TEXTO_BOTAO = Color.WHITE;
     private static final Font FONTE_TITULO = new Font("Segoe UI", Font.BOLD, 24);
     private static final Font FONTE_LABEL = new Font("Segoe UI", Font.BOLD, 14);
@@ -109,7 +107,6 @@ public class TelaCadastroUsuario extends JDialog {
 
         campo.setFont(FONTE_CAMPO);
         if (campo instanceof JTextField || campo instanceof JFormattedTextField) {
-             // Esta é uma forma mais moderna e recomendada de adicionar margens
             campo.putClientProperty("JTextField.margin", new Insets(5, 5, 5, 5));
         }
 
@@ -119,28 +116,26 @@ public class TelaCadastroUsuario extends JDialog {
         painel.add(campo, gbc);
     }
     
-    // --- MÉTODO MODIFICADO ---
     private JPanel criarPainelBotoes() {
         JPanel painel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0)); // MODIFICADO para alinhar à direita
         painel.setBorder(new EmptyBorder(15, 0, 0, 0));
         painel.setBackground(COR_FUNDO);
 
-        // --- Botão de Cancelar (NOVO) ---
+        // Botão de Cancelar
         JButton btnCancelar = new JButton("CANCELAR");
         configurarBotao(btnCancelar, COR_BOTAO_SECUNDARIO, COR_TEXTO_BOTAO_SECUNDARIO, new Font("Segoe UI", Font.BOLD, 14), new EmptyBorder(12, 30, 12, 30));
         btnCancelar.addActionListener(e -> dispose()); // Ação para fechar a janela
         
-        // --- Botão Salvar (Existente) ---
+        // Botão Salvar
         btnSalvar = new JButton("CAPTURAR DIGITAL E SALVAR");
         configurarBotao(btnSalvar, COR_BOTAO_PRINCIPAL, COR_TEXTO_BOTAO, new Font("Segoe UI", Font.BOLD, 14), new EmptyBorder(12, 30, 12, 30));
         btnSalvar.addActionListener(e -> executarCadastro());
 
-        painel.add(btnCancelar); // Adiciona o botão de cancelar primeiro
+        painel.add(btnCancelar);
         painel.add(btnSalvar);
         return painel;
     }
 
-    // --- NOVO MÉTODO AUXILIAR ---
     private void configurarBotao(JButton botao, Color corFundo, Color corTexto, Font fonte, EmptyBorder borda) {
         botao.setFont(fonte);
         botao.setBackground(corFundo);
@@ -196,7 +191,6 @@ public class TelaCadastroUsuario extends JDialog {
 /**
  * Classe utilitária para criar um texto de placeholder (prompt) em campos de texto.
  */
-// --- CORREÇÃO APLICADA AQUI ---
 class TextPrompt extends JLabel implements DocumentListener, FocusListener {
     private static final long serialVersionUID = 1L;
     private final JTextField textField;
@@ -210,7 +204,6 @@ class TextPrompt extends JLabel implements DocumentListener, FocusListener {
         
         textField.add(this, 0);
         textField.getDocument().addDocumentListener(this);
-        // Agora this é um FocusListener válido
         textField.addFocusListener(this);
         
         checkForPrompt();
@@ -242,6 +235,5 @@ class TextPrompt extends JLabel implements DocumentListener, FocusListener {
 
     @Override
     public void changedUpdate(DocumentEvent e) {
-        // Não usado para texto plano
     }
 }

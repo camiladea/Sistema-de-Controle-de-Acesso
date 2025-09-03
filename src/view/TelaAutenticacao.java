@@ -20,7 +20,7 @@ public class TelaAutenticacao extends JFrame {
     private final JLabel labelStatus;
     private final FingerprintPanel fingerprintPanel; // Painel customizado para o ícone de biometria
 
-    // --- Constantes de Design ---
+    // Constantes de Design
     private static final Color COR_FUNDO = new Color(30, 30, 30);
     private static final Color COR_LETRA_PRINCIPAL = new Color(200, 200, 200);
     private static final Color COR_DESTAQUE_IDLE = new Color(100, 100, 100);
@@ -38,7 +38,7 @@ public class TelaAutenticacao extends JFrame {
 
         configurarJanela();
 
-        // --- Componentes ---
+        // Componentes
         fingerprintPanel = new FingerprintPanel();
         labelStatus = new JLabel("Aproxime o dedo para autenticar", SwingConstants.CENTER);
         labelStatus.setFont(FONTE_STATUS);
@@ -47,11 +47,11 @@ public class TelaAutenticacao extends JFrame {
         JButton btnPainelAdmin = criarBotaoAdmin();
         JPanel painelCentral = criarPainelCentral();
 
-        // --- Layout ---
+        // Layout
         getContentPane().add(painelCentral, BorderLayout.CENTER);
         getContentPane().add(btnPainelAdmin, BorderLayout.SOUTH);
 
-        // --- Ações ---
+        // Ações
         painelCentral.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent evt) {
@@ -155,7 +155,7 @@ public class TelaAutenticacao extends JFrame {
     }
 
     /**
-     * Painel customizado que desenha uma impressão digital estilizada.
+     * impressao digital desenhada
      */
     private static class FingerprintPanel extends JPanel {
         private static final long serialVersionUID = 1L;
@@ -184,12 +184,12 @@ public class TelaAutenticacao extends JFrame {
             g2d.setColor(statusCor);
             g2d.setStroke(new BasicStroke(diametro / 20f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             
-            // Desenha arcos concêntricos para simular uma impressão digital
+            // Desenha arcos
             for (int i = 0; i < 6; i++) {
                 int d = diametro - (i * (diametro / 6));
                 int arcX = x + (i * (diametro / 12));
                 int arcY = y + (i * (diametro / 12));
-                g2d.drawArc(arcX, arcY, d, d, -45 - (i * 10), 270 + (i * 5)); // Desenha arcos concêntricos
+                g2d.drawArc(arcX, arcY, d, d, -45 - (i * 10), 270 + (i * 5)); // Desenha arcos
             }
             g2d.dispose();
         }
