@@ -55,7 +55,7 @@ public class TelaAutenticacao extends JFrame {
         painelCentral.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent evt) {
-                executarAutenticacao(); // Inicia o processo de autenticação
+                executarAutenticacao();                             // Inicia o processo de autenticação
             }
         });
     }
@@ -83,7 +83,7 @@ public class TelaAutenticacao extends JFrame {
     }
 
     private JButton criarBotaoAdmin() {
-        JButton botao = new JButton("Painel do Administrador"); // Tela para acesso administrativo
+        JButton botao = new JButton("Painel do Administrador");         // Tela para acesso administrativo
         botao.setFont(FONTE_BOTAO);
         botao.setForeground(COR_DESTAQUE_IDLE);
         botao.setCursor(new Cursor(Cursor.HAND_CURSOR));
