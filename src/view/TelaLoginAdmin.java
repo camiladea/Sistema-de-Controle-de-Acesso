@@ -12,13 +12,12 @@ public class TelaLoginAdmin extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
-    // As variáveis originais permanecem as mesmas
     private final transient TerminalController controller;
     private JTextField txtLogin; 
     private JPasswordField txtSenha;
     private boolean loginSucedido = false;
 
-    // --- PALETA DE CORES E FONTES (sem alteração) ---
+    // paleta de cores e fonte
     private static final Color COR_FUNDO_ESCURO = new Color(45, 45, 45);
     private static final Color COR_INPUT = new Color(70, 70, 70);
     private static final Color COR_TEXTO = Color.WHITE;
@@ -42,7 +41,7 @@ public class TelaLoginAdmin extends JDialog {
         setLayout(new BorderLayout(10, 10));
         ((JPanel) getContentPane()).setBorder(new EmptyBorder(20, 20, 20, 20));
         setSize(400, 430); 
-        setLocationRelativeTo(getParent()); // Centraliza usando getParent()
+        setLocationRelativeTo(getParent()); // Centraliza
     }
 
     private void inicializarComponentes() {
