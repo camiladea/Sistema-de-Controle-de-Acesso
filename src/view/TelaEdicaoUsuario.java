@@ -10,7 +10,6 @@ public class TelaEdicaoUsuario extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
-    // As variáveis originais permanecem as mesmas
     private final TerminalController controller;
     private final Usuario usuario;
 
@@ -37,7 +36,6 @@ public class TelaEdicaoUsuario extends JDialog {
 
     private void configurarJanela() {
         setSize(450, 350);
-        // CORREÇÃO: Usar getOwner() para buscar a janela "mãe" que foi definida no construtor.
         setLocationRelativeTo(getOwner());
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         // Define a cor de fundo principal
@@ -48,20 +46,19 @@ public class TelaEdicaoUsuario extends JDialog {
     /**
      * Cria e organiza os componentes visuais na tela.
      */
+
     private void inicializarComponentes() {
-        // --- PAINEL PRINCIPAL COM CAMPOS DE EDIÇÃO ---
+        // PAINEL PRINCIPAL
         JPanel painelCampos = new JPanel(new GridBagLayout());
         painelCampos.setBackground(COR_PAINEL);
-        // Adiciona uma borda com espaçamento e uma linha sutil
+        // borda
         Border bordaExterna = BorderFactory.createEmptyBorder(20, 20, 20, 20);
         Border bordaInterna = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
         painelCampos.setBorder(BorderFactory.createCompoundBorder(bordaInterna, bordaExterna));
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 8, 8, 8); // Espaçamento entre os componentes
-        gbc.anchor = GridBagConstraints.WEST; // Alinha componentes à esquerda
-
-        // Campo Nome
+        gbc.insets = new Insets(8, 8, 8, 8);
+        gbc.anchor = GridBagConstraints.WEST;
         gbc.gridx = 0;
         gbc.gridy = 0;
         JLabel lblNome = new JLabel("Nome:");
@@ -70,12 +67,12 @@ public class TelaEdicaoUsuario extends JDialog {
 
         gbc.gridx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 1.0; // Faz o campo de texto ocupar o espaço horizontal disponível
+        gbc.weightx = 1.0;
         txtNome = new JTextField(usuario.getNome());
         txtNome.setFont(FONTE_CAMPO);
         painelCampos.add(txtNome, gbc);
 
-        // Campo CPF (não editável)
+        // campo CPF (não editável)
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.fill = GridBagConstraints.NONE;
@@ -122,13 +119,13 @@ public class TelaEdicaoUsuario extends JDialog {
         gbc.anchor = GridBagConstraints.WEST;
         chkAtivo = new JCheckBox();
         chkAtivo.setSelected(usuario.isAtivo());
-        chkAtivo.setBackground(COR_PAINEL); // Garante que o fundo do checkbox seja o mesmo do painel
+        chkAtivo.setBackground(COR_PAINEL);
         painelCampos.add(chkAtivo, gbc);
 
         // Adiciona o painel de campos ao centro da janela
         add(painelCampos, BorderLayout.CENTER);
 
-        // --- PAINEL DE BOTÕES ---
+        // BOTÕES
         JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
         painelBotoes.setBackground(COR_FUNDO); // Mesma cor de fundo da janela
 
@@ -143,15 +140,13 @@ public class TelaEdicaoUsuario extends JDialog {
         painelBotoes.add(btnSalvar);
         painelBotoes.add(btnCancelar);
 
-        // Adiciona o painel de botões na parte inferior da janela
         add(painelBotoes, BorderLayout.SOUTH);
 
-        // Define o botão "Salvar" como padrão (acionado com Enter)
         getRootPane().setDefaultButton(btnSalvar);
     }
 
     /**
-     * Aplica um estilo padrão aos botões.
+     * estilo padrão aos botões.
      */
     private void configurarBotao(JButton botao, Color corFundo) {
         botao.setFont(new Font("Segoe UI", Font.BOLD, 12));
@@ -164,7 +159,7 @@ public class TelaEdicaoUsuario extends JDialog {
 
 
     /**
-     * Ação de salvar os dados. A lógica interna permanece a mesma.
+     * Ação de salvar
      */
     private void salvar() {
         usuario.setNome(txtNome.getText());
