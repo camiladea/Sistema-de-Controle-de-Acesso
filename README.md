@@ -18,6 +18,7 @@ Projeto Integrador do Curso Técnico Integrado em Informática do **Instituto Fe
 - [Arquitetura do Software](#arquitetura-do-software)
 - [Configuração do Ambiente](#configuração-do-ambiente)
 - [Status do Projeto](#status-do-projeto)
+- [Telas](#telas)
 - [Autores](#autores)
 - [Orientadores](#orientadores)
 
@@ -147,6 +148,8 @@ ON DUPLICATE KEY UPDATE
 - [ ] Simulação de execução no TVBox
 - [ ] Teste de conexão remota.
 - [ ] Release Final.
+
+## Telas
 
 ## Autores
 
