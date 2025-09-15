@@ -152,7 +152,7 @@ ON DUPLICATE KEY UPDATE
 
 - **Alvaro Gabriel Goulart**
 - **Camila de Assunção**
-- **Gustavo Ribeiro**
+- **Gustavo Ribeiro Gonçalves Barbosa**
 - **José Olavio da Silva**
 
 ## Orientadores
