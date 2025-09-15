@@ -141,6 +141,12 @@ ON DUPLICATE KEY UPDATE
 - [X] Implementação dos Pacotes `util` e `dao`.
 - [X] Implementação do Pacote `service` para integração com o leitor.
 - [X] Desenvolvimento das telas do sistema.
+- [ ] Verificação de rentabilidade com o sistema ARM64.
+- [ ] Implementação do Java no TVBox.
+- [ ] Implementação das funcionalidades do banco de dados no TVBox.
+- [ ] Simulação de execução no TVBox
+- [ ] Teste de conexão remota.
+- [ ] Release Final.
 
 ## Autores
 
