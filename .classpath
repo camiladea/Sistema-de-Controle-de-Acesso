@@ -10,4 +10,5 @@
 	<classpathentry kind="lib" path="lib/mysql-connector-j-9.3.0.jar"/>
 	<classpathentry kind="lib" path="lib/NBioBSPJNI.jar"/>
 	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="lib" path="C:\Users\aluno\Downloads\Sistema-de-Controle-de-Acesso\lib\mysql-connector-j-9.3.0.jar"/>
 </classpath>
