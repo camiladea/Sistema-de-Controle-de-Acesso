@@ -12,11 +12,11 @@ public class UsuarioDAO {
 
     public void salvar(Usuario usuario) {
         final String sql = "INSERT INTO Usuario " +
-                "(nome, cpf, email, digitalFIR, ativo, tipoUsuario, cargo, matricula, login, senhaHash) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
+                "(nome, cpf, email, digitalFIR, ativo, tipoUsuario, cargo, login, senhaHash) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         final String tipo = (usuario instanceof Funcionario) ? "Funcionario"
-                : (usuario instanceof Administrador) ? "Administrador" : "User";
+                : (usuario instanceof Administrador) ? "Administrador"
+                : "User";
 
         try (Connection conexao = ConexaoBancoDados.getConexao();
              PreparedStatement pstm = conexao.prepareStatement(sql)) {
@@ -30,26 +30,20 @@ public class UsuarioDAO {
 
             if (usuario instanceof Funcionario f) {
                 pstm.setString(7, f.getCargo());
-                pstm.setString(8, f.getMatricula());
+                pstm.setNull(8, Types.VARCHAR);
                 pstm.setNull(9, Types.VARCHAR);
-                pstm.setNull(10, Types.VARCHAR);
-
             } else if (usuario instanceof Administrador a) {
                 pstm.setNull(7, Types.VARCHAR);
-                pstm.setNull(8, Types.VARCHAR);
-                pstm.setString(9, a.getLogin());
-                pstm.setString(10, a.getSenhaHash());
-
+                pstm.setString(8, a.getLogin());
+                pstm.setString(9, a.getSenhaHash());
             } else {
                 pstm.setNull(7, Types.VARCHAR);
                 pstm.setNull(8, Types.VARCHAR);
                 pstm.setNull(9, Types.VARCHAR);
-                pstm.setNull(10, Types.VARCHAR);
             }
 
             pstm.executeUpdate();
             System.out.println("Usuário salvo com sucesso!");
-
         } catch (SQLException e) {
             System.err.println("Erro ao salvar usuário: " + e.getMessage());
         }
@@ -74,7 +68,7 @@ public class UsuarioDAO {
         String sql = "SELECT * FROM Usuario WHERE cpf = ?";
         return buscarUsuarioPorString(sql, cpf);
     }
-    
+
     public Usuario buscarPorFIR(String digitalFIR) {
         String sql = "SELECT * FROM Usuario WHERE digitalFIR = ?";
         return buscarUsuarioPorString(sql, digitalFIR);
@@ -118,14 +112,14 @@ public class UsuarioDAO {
     private Usuario extrairUsuarioDoResultSet(ResultSet rset) throws SQLException {
         String tipoUsuario = rset.getString("tipoUsuario");
         Usuario usuario;
+
         if ("Funcionario".equals(tipoUsuario)) {
             usuario = new Funcionario(
                     rset.getString("nome"),
                     rset.getString("cpf"),
                     rset.getString("email"),
                     rset.getString("digitalFIR"),
-                    rset.getString("cargo"),
-                    rset.getString("matricula"));
+                    rset.getString("cargo"));
         } else {
             usuario = new Administrador(
                     rset.getString("nome"),
@@ -170,16 +164,15 @@ public class UsuarioDAO {
     }
 
     public boolean atualizar(Usuario usuario) {
-        String sql = "UPDATE Usuario SET " +
-                "nome = ?, cpf = ?, email = ?, digitalFIR = ?, ativo = ?, tipoUsuario = ?, cargo = ?, matricula = ?, login = ?, senhaHash = ? " +
+        String sql = "UPDATE Usuario SET nome = ?, cpf = ?, email = ?, digitalFIR = ?, " +
+                "ativo = ?, tipoUsuario = ?, cargo = ?, login = ?, senhaHash = ? " +
                 "WHERE cpf = ?";
-
         final String tipo = (usuario instanceof Funcionario) ? "Funcionario"
-                : (usuario instanceof Administrador) ? "Administrador" : "User";
+                : (usuario instanceof Administrador) ? "Administrador"
+                : "User";
 
         try (Connection conn = ConexaoBancoDados.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
             stmt.setString(1, usuario.getNome());
             stmt.setString(2, usuario.getCpf());
             stmt.setString(3, usuario.getEmail());
@@ -189,26 +182,20 @@ public class UsuarioDAO {
 
             if (usuario instanceof Funcionario f) {
                 stmt.setString(7, f.getCargo());
-                stmt.setString(8, f.getMatricula());
+                stmt.setNull(8, Types.VARCHAR);
                 stmt.setNull(9, Types.VARCHAR);
-                stmt.setNull(10, Types.VARCHAR);
             } else if (usuario instanceof Administrador a) {
                 stmt.setNull(7, Types.VARCHAR);
-                stmt.setNull(8, Types.VARCHAR);
-                stmt.setString(9, a.getLogin());
-                stmt.setString(10, a.getSenhaHash());
+                stmt.setString(8, a.getLogin());
+                stmt.setString(9, a.getSenhaHash());
             } else {
                 stmt.setNull(7, Types.VARCHAR);
                 stmt.setNull(8, Types.VARCHAR);
                 stmt.setNull(9, Types.VARCHAR);
-                stmt.setNull(10, Types.VARCHAR);
             }
-
-            stmt.setString(11, usuario.getCpf());
-
+            stmt.setString(10, usuario.getCpf());
             int linhasAfetadas = stmt.executeUpdate();
             return linhasAfetadas > 0;
-
         } catch (SQLException e) {
             System.err.println("Erro ao atualizar usuário: " + e.getMessage());
             return false;

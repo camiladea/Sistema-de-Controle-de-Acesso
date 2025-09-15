@@ -5,11 +5,8 @@ import model.Funcionario;
 import model.Usuario;
 import java.util.Optional;
 
-/**
- * GerenciadorUsuarios
- * 
- */
 public class GerenciadorUsuarios {
+
     private final UsuarioDAO usuarioDAO;
     private final LeitorBiometrico leitorBiometrico;
 
@@ -18,24 +15,14 @@ public class GerenciadorUsuarios {
         this.leitorBiometrico = new LeitorBiometrico();
     }
 
-    /**
-     * 
-     * 
-     * @return true se o cadastro foi bem-sucedido, false caso contrário.
-     */
-    public boolean cadastrarNovoFuncionario(String nome, String cpf, String email, String cargo, String matricula) {
-        // 1. Validação: CPF não pode ser duplicado.
+    public boolean cadastrarNovoFuncionario(String nome, String cpf, String email, String cargo) {
         if (usuarioDAO.buscarPorCpf(cpf) != null) {
-            System.err.println("FALHA DE NEGÓCIO: Tentativa de cadastrar um CPF que já existe: " + cpf);
+            System.err.println("FALHA DE NEGOCIO: Tentativa de cadastrar um CPF que já existe: " + cpf);
             return false;
         }
 
-        // 2. Interação com o Hardware
         leitorBiometrico.conectar();
-
-        // Agora passamos o propósito da leitura para o método, como ele espera.
         Optional<String> digitalHashOpt = leitorBiometrico.lerDigital("Cadastro de Novo Usuário");
-
         leitorBiometrico.desconectar();
 
         if (digitalHashOpt.isEmpty()) {
@@ -43,15 +30,11 @@ public class GerenciadorUsuarios {
             return false;
         }
 
-        // 3. Criação do Objeto do Modelo e Persistência
-        Usuario novoFuncionario = new Funcionario(nome, cpf, email, digitalHashOpt.get(), cargo, matricula);
+        Usuario novoFuncionario = new Funcionario(nome, cpf, email, digitalHashOpt.get(), cargo);
         usuarioDAO.salvar(novoFuncionario);
-
         return true;
-
     }
 
-    // No GerenciadorUsuarios
     public boolean editarUsuario(Usuario usuario) {
         if (usuario == null) {
             return false;
@@ -59,5 +42,4 @@ public class GerenciadorUsuarios {
         UsuarioDAO dao = new UsuarioDAO();
         return dao.atualizar(usuario);
     }
-
 }

@@ -7,13 +7,13 @@ import service.GerenciadorUsuarios;
 import service.SistemaAutenticacao;
 import dao.UsuarioDAO;
 import dao.RegistroAcessoDAO;
-
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 public class TerminalController {
+
     private final SistemaAutenticacao sistemaAutenticacao;
     private final GerenciadorUsuarios gerenciadorUsuarios;
     private final UsuarioDAO usuarioDAO;
@@ -26,11 +26,10 @@ public class TerminalController {
         this.registroAcessoDAO = new RegistroAcessoDAO();
     }
 
-    // AUTENTICAÇÃO 
     public Optional<Usuario> solicitarAutenticacaoBiometrica() {
         return sistemaAutenticacao.autenticarPorBiometria();
     }
-    // AUTENTICAR ADM
+
     public Optional<Administrador> solicitarAutenticacaoAdmin(String login, String senha) {
         if (login == null || login.trim().isEmpty() || senha == null || senha.isEmpty()) {
             return Optional.empty();
@@ -38,29 +37,22 @@ public class TerminalController {
         return sistemaAutenticacao.autenticarAdminPorCredenciais(login, senha);
     }
 
-    // USUÁRIOS 
-    public boolean solicitarCadastroNovoFuncionario(String nome, String cpf, String email, String cargo,
-            String matricula) {
-        return gerenciadorUsuarios.cadastrarNovoFuncionario(nome, cpf, email, cargo, matricula);
+    public boolean solicitarCadastroNovoFuncionario(String nome, String cpf, String email, String cargo) {
+        return gerenciadorUsuarios.cadastrarNovoFuncionario(nome, cpf, email, cargo);
     }
 
     public List<Usuario> solicitarListaDeUsuarios() {
         return usuarioDAO.listarTodos();
     }
 
-    // remover usuário
     public boolean removerUsuario(int id) {
         return usuarioDAO.remover(id);
     }
 
-    // buscar usuário por ID
     public Usuario buscarUsuarioPorId(int id) {
         return usuarioDAO.buscarPorId(id);
     }
 
-    // editar usuário
-
-    // --- RELATÓRIOS ---
     public List<RegistroAcesso> solicitarRelatorioAcesso(LocalDateTime inicio, LocalDateTime fim) {
         if (inicio == null || fim == null || inicio.isAfter(fim)) {
             return Collections.emptyList();
@@ -72,5 +64,4 @@ public class TerminalController {
         GerenciadorUsuarios gerenciador = new GerenciadorUsuarios();
         gerenciador.editarUsuario(usuario);
     }
-
 }
