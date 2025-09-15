@@ -1,3 +1,4 @@
-#To download and use the correct SDK version for the Nitgen Hamster DX use the following link.
-#https://fingertech.com.br/download/eNBioBSP-SDK-linux-v5.3.0.1.zip
-#To setup the Udev rules for your specific product model access the "nitgen-udev-rules-setup.txt"
+## To download and use the correct SDK version for the Nitgen Hamster DX use the following link.
+## https://fingertech.com.br/download/eNBioBSP-SDK-linux-v5.3.0.1.zip
+## To setup the Udev rules for your specific product model access the "nitgen-udev-rules-setup.txt"
+
