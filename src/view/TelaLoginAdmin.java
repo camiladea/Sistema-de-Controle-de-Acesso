@@ -2,6 +2,10 @@ package view;
 
 import controller.TerminalController;
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Optional;
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -11,133 +15,150 @@ import model.Administrador;
 public class TelaLoginAdmin extends JDialog {
 
     private static final long serialVersionUID = 1L;
-
     private final transient TerminalController controller;
-    private JTextField txtLogin; 
+    private JTextField txtLogin;
     private JPasswordField txtSenha;
     private boolean loginSucedido = false;
 
-    // paleta de cores e fonte
-    private static final Color COR_FUNDO_ESCURO = new Color(45, 45, 45);
-    private static final Color COR_INPUT = new Color(70, 70, 70);
+    private static final Color COR_FUNDO_ESCURO = new Color(30, 30, 30);
+    private static final Color COR_INPUT = new Color(55, 55, 55);
+    private static final Color COR_BORDA_INPUT = new Color(80, 80, 80);
     private static final Color COR_TEXTO = Color.WHITE;
-    private static final Color COR_TEXTO_PLACEHOLDER = new Color(150, 150, 150);
+    private static final Color COR_TEXTO_PLACEHOLDER = new Color(170, 170, 170);
     private static final Color COR_BOTAO_ACAO = new Color(24, 119, 242);
+    private static final Color COR_BOTAO_ACAO_HOVER = new Color(60, 140, 250);
+
     private static final Font FONTE_PADRAO = new Font("Segoe UI", Font.PLAIN, 16);
-    private static final Font FONTE_TITULO = new Font("Segoe UI", Font.BOLD, 20);
+    private static final Font FONTE_TITULO = new Font("Segoe UI", Font.BOLD, 22);
+
+    private static final Border BORDA_PADRAO_CAMPO = BorderFactory.createCompoundBorder(
+        BorderFactory.createLineBorder(COR_BORDA_INPUT),
+        new EmptyBorder(12, 12, 12, 12)
+    );
+    private static final Border BORDA_FOCO_CAMPO = BorderFactory.createCompoundBorder(
+        BorderFactory.createLineBorder(COR_BOTAO_ACAO, 2),
+        new EmptyBorder(11, 11, 11, 11)
+    );
 
     public TelaLoginAdmin(JFrame parent, TerminalController controller) {
         super(parent, "Autenticação de Administrador", true);
         this.controller = controller;
-
-        configurarJanela();
-        inicializarComponentes();
+        configurarEInicializar();
     }
 
-    private void configurarJanela() {
+    private void configurarEInicializar() {
         setResizable(false);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        getContentPane().setBackground(COR_FUNDO_ESCURO);
-        setLayout(new BorderLayout(10, 10));
-        ((JPanel) getContentPane()).setBorder(new EmptyBorder(20, 20, 20, 20));
-        setSize(400, 430); 
-        setLocationRelativeTo(getParent()); // Centraliza
-    }
 
-    private void inicializarComponentes() {
-        add(criarPainelTitulo(), BorderLayout.NORTH);
-        add(criarPainelFormulario(), BorderLayout.CENTER);
-        add(criarPainelBotoes(), BorderLayout.SOUTH);
-    }
+        JPanel painelPrincipal = new JPanel(new GridBagLayout());
+        painelPrincipal.setBackground(COR_FUNDO_ESCURO);
+        painelPrincipal.setBorder(new EmptyBorder(30, 40, 30, 40));
 
-    private JPanel criarPainelTitulo() {
-        JPanel painel = new JPanel();
-        painel.setLayout(new BoxLayout(painel, BoxLayout.Y_AXIS));
-        painel.setBackground(COR_FUNDO_ESCURO);
-        painel.setBorder(new EmptyBorder(10, 0, 15, 0));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        int linhaAtual = 0;
 
         JLabel lblIcone = new JLabel("🔒");
-        lblIcone.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 36));
-        lblIcone.setAlignmentX(Component.CENTER_ALIGNMENT);
+        lblIcone.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 50));
+        lblIcone.setHorizontalAlignment(SwingConstants.CENTER);
+        lblIcone.setForeground(COR_BOTAO_ACAO);
+        lblIcone.setPreferredSize(new Dimension(1, 70));
+        gbc.gridy = linhaAtual++;
+        gbc.insets = new Insets(0, 0, 15, 0);
+        painelPrincipal.add(lblIcone, gbc);
 
         JLabel lblTitulo = new JLabel("Autorização Necessária");
         lblTitulo.setFont(FONTE_TITULO);
         lblTitulo.setForeground(COR_TEXTO);
-        lblTitulo.setAlignmentX(Component.CENTER_ALIGNMENT);
-        lblTitulo.setBorder(new EmptyBorder(10, 0, 0, 0));
-
-        painel.add(lblIcone);
-        painel.add(lblTitulo);
-        return painel;
-    }
-
-    private JPanel criarPainelFormulario() {
-        JPanel painel = new JPanel(new GridBagLayout());
-        painel.setBackground(COR_FUNDO_ESCURO);
-        painel.setBorder(new EmptyBorder(5, 20, 5, 20));
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(8, 5, 8, 5);
-        gbc.weightx = 1.0;
+        lblTitulo.setHorizontalAlignment(SwingConstants.CENTER);
+        gbc.gridy = linhaAtual++;
+        gbc.insets = new Insets(0, 0, 30, 0);
+        painelPrincipal.add(lblTitulo, gbc);
 
         JLabel lblLogin = new JLabel("Login:");
         estilizarLabel(lblLogin);
-        gbc.gridy = 0; gbc.gridx = 0; gbc.weightx = 0.2;
-        painel.add(lblLogin, gbc);
+        gbc.gridy = linhaAtual++;
+        gbc.insets = new Insets(0, 0, 5, 0);
+        painelPrincipal.add(lblLogin, gbc);
 
-        txtLogin = new JTextField("admin");
+        txtLogin = new JTextField(20);
         estilizarCampoDeTexto(txtLogin);
-        gbc.gridx = 1; gbc.weightx = 0.8;
-        painel.add(txtLogin, gbc);
+        gbc.gridy = linhaAtual++;
+        gbc.insets = new Insets(0, 0, 15, 0);
+        painelPrincipal.add(txtLogin, gbc);
 
         JLabel lblSenha = new JLabel("Senha:");
         estilizarLabel(lblSenha);
-        gbc.gridy = 1; gbc.gridx = 0; gbc.weightx = 0.2;
-        painel.add(lblSenha, gbc);
+        gbc.gridy = linhaAtual++;
+        gbc.insets = new Insets(0, 0, 5, 0);
+        painelPrincipal.add(lblSenha, gbc);
 
         txtSenha = new JPasswordField();
         estilizarCampoDeTexto(txtSenha);
-        gbc.gridx = 1; gbc.weightx = 0.8;
-        painel.add(txtSenha, gbc);
-        
-        return painel;
-    }
-
-    private JPanel criarPainelBotoes() {
-        JPanel painel = new JPanel(new BorderLayout());
-        painel.setBackground(COR_FUNDO_ESCURO);
-        painel.setBorder(new EmptyBorder(15, 20, 10, 20));
+        gbc.gridy = linhaAtual++;
+        gbc.insets = new Insets(0, 0, 30, 0);
+        painelPrincipal.add(txtSenha, gbc);
 
         JButton btnLogin = new JButton("AUTORIZAR");
-        btnLogin.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        btnLogin.setBackground(COR_BOTAO_ACAO);
-        btnLogin.setForeground(COR_TEXTO);
-        btnLogin.setFocusPainted(false);
-        btnLogin.setBorder(new EmptyBorder(12, 0, 12, 0));
-        btnLogin.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
+        estilizarBotao(btnLogin);
         btnLogin.addActionListener(e -> autenticar());
-        painel.add(btnLogin, BorderLayout.CENTER);
-        
+        gbc.gridy = linhaAtual++;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        painelPrincipal.add(btnLogin, gbc);
+
         getRootPane().setDefaultButton(btnLogin);
-        
-        return painel;
+
+        add(painelPrincipal);
+        pack();
+        setLocationRelativeTo(getParent());
     }
-    
+
+    private void estilizarBotao(JButton botao) {
+        botao.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        botao.setBackground(COR_BOTAO_ACAO);
+        botao.setForeground(COR_TEXTO);
+        botao.setFocusPainted(false);
+        botao.setBorder(new EmptyBorder(14, 0, 14, 0));
+        botao.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        botao.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                botao.setBackground(COR_BOTAO_ACAO_HOVER);
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                botao.setBackground(COR_BOTAO_ACAO);
+            }
+        });
+    }
+
     private void estilizarLabel(JLabel label) {
-        label.setFont(FONTE_PADRAO);
+        label.setFont(new Font("Segoe UI", Font.BOLD, 14));
         label.setForeground(COR_TEXTO_PLACEHOLDER);
+        label.setBorder(new EmptyBorder(0, 2, 0, 0));
     }
-    
+
     private void estilizarCampoDeTexto(JTextField campo) {
         campo.setFont(FONTE_PADRAO);
         campo.setBackground(COR_INPUT);
         campo.setForeground(COR_TEXTO);
         campo.setCaretColor(Color.WHITE);
-        Border bordaExterna = BorderFactory.createLineBorder(new Color(90, 90, 90));
-        Border bordaInterna = new EmptyBorder(8, 10, 8, 10);
-        campo.setBorder(BorderFactory.createCompoundBorder(bordaExterna, bordaInterna));
+        campo.setBorder(BORDA_PADRAO_CAMPO);
+
+        campo.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                campo.setBorder(BORDA_FOCO_CAMPO);
+            }
+            @Override
+            public void focusLost(FocusEvent e) {
+                campo.setBorder(BORDA_PADRAO_CAMPO);
+            }
+        });
     }
 
     private void autenticar() {
@@ -148,8 +169,21 @@ public class TelaLoginAdmin extends JDialog {
             loginSucedido = true;
             dispose();
         } else {
+            UIManager.put("OptionPane.background", COR_FUNDO_ESCURO);
+            UIManager.put("Panel.background", COR_FUNDO_ESCURO);
+            UIManager.put("OptionPane.messageForeground", COR_TEXTO);
+            UIManager.put("Button.background", COR_BOTAO_ACAO);
+            UIManager.put("Button.foreground", COR_TEXTO);
+
             JOptionPane.showMessageDialog(this, "Login ou Senha inválidos.",
                 "Falha na Autenticação", JOptionPane.ERROR_MESSAGE);
+
+            UIManager.put("OptionPane.background", null);
+            UIManager.put("Panel.background", null);
+            UIManager.put("OptionPane.messageForeground", null);
+            UIManager.put("Button.background", null);
+            UIManager.put("Button.foreground", null);
+
             txtSenha.setText("");
             txtSenha.requestFocus();
         }
