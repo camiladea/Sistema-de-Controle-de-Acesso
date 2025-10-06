@@ -11,11 +11,9 @@ public class Main {
 
           
             TerminalController controller = new TerminalController();
-
          
             TelaAutenticacao telaPrincipal = new TelaAutenticacao(controller);
-
-            
+ 
             telaPrincipal.setVisible(true);
         
     }
