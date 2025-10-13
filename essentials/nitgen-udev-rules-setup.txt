@@ -1,9 +1,9 @@
-### CONFIGURE UDEV RULES FOR INDIVIDUAL PRODUCTS GUIDE ###
+### CONFIGURE UDEV RULES FOR INDIVIDUAL PRODUCTS GUIDE
 
-## This guide will help with setting up your SDK, Udev rules and running any sample apps or your own application. ##
+## This guide will help with setting up your SDK, Udev rules and running any sample apps or your own application.
 
 
-### 1. Install the desired SDK version into your machine using the link provided in SDK-installation-setup text file. ###
+### 1. Install the desired SDK version into your machine using the link provided in SDK-installation-setup text file.
 
 # After installing the .zip file, you must run a update in order to make sure everything is ready and setup for this whole process
 # Then, install any dependencies needed, we recommend running the following commands.
@@ -13,7 +13,7 @@ sudo apt update
 sudo apt install build-essential libusb-1.0-0-dev
 ~
 
-### 2. Extract and Install SDK ###
+### 2. Extract and Install SDK
 
 # Open your terminal and run the following commands to extract the SDK, or do it yourself in any directory of your liking.
 
@@ -30,7 +30,7 @@ sudo ./install.sh
 ~
 
 
-### 3. Fetch Device ID ###
+### 3. Fetch Device ID
 
 # Run the following command to fetch all USB devices connected, for this you **MUST HAVE THE SCANNER PLUGGED IN**.
 
@@ -61,7 +61,7 @@ sudo nano /etc/udev/rules.d/99-nitgen-fingerprint.rules
 SUBSYSTEM=="usb", ATTRS{idVendor}=="1c1a", ATTRS{idProduct}=="0001", MODE="0660", GROUP="plugdev"
 ~
 
-### 5. Loading and activating new rules ###
+### 5. Loading and activating new rules
 
 # And to end configuring the rules just run the following commands in order to set everything up correctly.
 
@@ -72,6 +72,6 @@ sudo usermod -aG plugdev $USER
 newgrp plugdev
 ~
 
-### Conclusion ###
+### Conclusion
 
 # With everything setup you might now want to build your app to run with the scanner or run a sample test from your sdk files.
