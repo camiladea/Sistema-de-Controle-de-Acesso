@@ -9,18 +9,13 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import model.Usuario;
 
-/**
- * Tela principal de autenticação
- */
-
 public class TelaAutenticacao extends JFrame {
 
     private static final long serialVersionUID = 1L;
     private final transient TerminalController controller;
     private final JLabel labelStatus;
-    private final FingerprintPanel fingerprintPanel; // Painel customizado para o ícone de biometria
+    private final FingerprintPanel fingerprintPanel;
 
-    // Constantes de Design
     private static final Color COR_FUNDO = new Color(30, 30, 30);
     private static final Color COR_LETRA_PRINCIPAL = new Color(200, 200, 200);
     private static final Color COR_DESTAQUE_IDLE = new Color(100, 100, 100);
@@ -38,7 +33,6 @@ public class TelaAutenticacao extends JFrame {
 
         configurarJanela();
 
-        // Componentes
         fingerprintPanel = new FingerprintPanel();
         labelStatus = new JLabel("Aproxime o dedo para autenticar", SwingConstants.CENTER);
         labelStatus.setFont(FONTE_STATUS);
@@ -47,15 +41,13 @@ public class TelaAutenticacao extends JFrame {
         JButton btnPainelAdmin = criarBotaoAdmin();
         JPanel painelCentral = criarPainelCentral();
 
-        // Layout
         getContentPane().add(painelCentral, BorderLayout.CENTER);
         getContentPane().add(btnPainelAdmin, BorderLayout.SOUTH);
 
-        // Ações
         painelCentral.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent evt) {
-                executarAutenticacao();                             // Inicia o processo de autenticação
+                executarAutenticacao();
             }
         });
     }
@@ -68,7 +60,7 @@ public class TelaAutenticacao extends JFrame {
         setLocationRelativeTo(null);
         getContentPane().setBackground(COR_FUNDO);
         getContentPane().setLayout(new BorderLayout(20, 20));
-        getRootPane().setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        ((JPanel) getContentPane()).setBorder(new EmptyBorder(30, 30, 30, 30));
     }
 
     private JPanel criarPainelCentral() {
@@ -83,7 +75,7 @@ public class TelaAutenticacao extends JFrame {
     }
 
     private JButton criarBotaoAdmin() {
-        JButton botao = new JButton("Painel do Administrador");         // Tela para acesso administrativo
+        JButton botao = new JButton("Painel do Administrador");
         botao.setFont(FONTE_BOTAO);
         botao.setForeground(COR_DESTAQUE_IDLE);
         botao.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -92,19 +84,18 @@ public class TelaAutenticacao extends JFrame {
         botao.setFocusPainted(false);
         botao.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        // Efeito Hover
         botao.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                botao.setForeground(COR_DESTAQUE_PROCESSANDO); // Altera cor ao passar o mouse
+                botao.setForeground(COR_DESTAQUE_PROCESSANDO);
             }
             @Override
             public void mouseExited(MouseEvent e) {
-                botao.setForeground(COR_DESTAQUE_IDLE); // Restaura a cor
+                botao.setForeground(COR_DESTAQUE_IDLE);
             }
         });
 
-        botao.addActionListener(e -> abrirPainelAdmin()); // Abre o painel administrativo
+        botao.addActionListener(e -> abrirPainelAdmin());
         return botao;
     }
 
@@ -116,7 +107,7 @@ public class TelaAutenticacao extends JFrame {
         new SwingWorker<Optional<Usuario>, Void>() {
             @Override
             protected Optional<Usuario> doInBackground() {
-                return controller.solicitarAutenticacaoBiometrica(); // Realiza a autenticação biométrica
+                return controller.solicitarAutenticacaoBiometrica();
             }
             @Override
             protected void done() {
@@ -124,19 +115,19 @@ public class TelaAutenticacao extends JFrame {
                     Optional<Usuario> usuarioOpt = get();
                     if (usuarioOpt.isPresent()) {
                         labelStatus.setText("Acesso Permitido: " + usuarioOpt.get().getNome());
-                        fingerprintPanel.setStatusCor(COR_SUCESSO); // Sucesso na autenticação
+                        fingerprintPanel.setStatusCor(COR_SUCESSO);
                     } else {
                         labelStatus.setText("Acesso Negado. Tente novamente.");
-                        fingerprintPanel.setStatusCor(COR_ERRO); // Falha na autenticação
+                        fingerprintPanel.setStatusCor(COR_ERRO);
                     }
                 } catch (Exception ex) {
                     labelStatus.setText("Erro de Comunicação com o Leitor");
-                    fingerprintPanel.setStatusCor(COR_ERRO); // Erro ao comunicar com o leitor
+                    fingerprintPanel.setStatusCor(COR_ERRO);
                 } finally {
-                    setCursor(Cursor.getDefaultCursor()); // Restaura o cursor
+                    setCursor(Cursor.getDefaultCursor());
                     Timer timer = new Timer(3000, evt -> {
                         labelStatus.setText("Aproxime o dedo para autenticar");
-                        fingerprintPanel.setStatusCor(COR_DESTAQUE_IDLE); // Restaura o estado inicial
+                        fingerprintPanel.setStatusCor(COR_DESTAQUE_IDLE);
                     });
                     timer.setRepeats(false);
                     timer.start();
@@ -154,20 +145,17 @@ public class TelaAutenticacao extends JFrame {
         }
     }
 
-    /**
-     * impressao digital desenhada
-     */
     private static class FingerprintPanel extends JPanel {
         private static final long serialVersionUID = 1L;
         private Color statusCor = COR_DESTAQUE_IDLE;
 
         public FingerprintPanel() {
-            setOpaque(false); // Torna o painel transparente
+            setOpaque(false);
         }
 
         public void setStatusCor(Color cor) {
             this.statusCor = cor;
-            repaint(); // Atualiza a cor no painel
+            repaint();
         }
 
         @Override
@@ -177,19 +165,17 @@ public class TelaAutenticacao extends JFrame {
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
             int diametro = Math.min(getWidth(), getHeight()) - 160;
-
             int x = (getWidth() - diametro) / 2;
             int y = (getHeight() - diametro) / 2;
 
             g2d.setColor(statusCor);
             g2d.setStroke(new BasicStroke(diametro / 20f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             
-            // Desenha arcos
             for (int i = 0; i < 6; i++) {
                 int d = diametro - (i * (diametro / 6));
                 int arcX = x + (i * (diametro / 12));
                 int arcY = y + (i * (diametro / 12));
-                g2d.drawArc(arcX, arcY, d, d, -45 - (i * 10), 270 + (i * 5)); // Desenha arcos
+                g2d.drawArc(arcX, arcY, d, d, -45 - (i * 10), 270 + (i * 5));
             }
             g2d.dispose();
         }
