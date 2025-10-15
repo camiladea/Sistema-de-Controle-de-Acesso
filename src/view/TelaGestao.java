@@ -53,7 +53,6 @@ public class TelaGestao extends JDialog {
         abas.setFont(new Font("Segoe UI", Font.BOLD, 14));
         abas.setBackground(COR_FUNDO);
 
-        // Cria e adiciona as abas
         JPanel painelUsuarios = criarAbaUsuarios();
         JPanel painelRelatorios = criarAbaRelatorios();
 
@@ -68,7 +67,6 @@ public class TelaGestao extends JDialog {
         painel.setBorder(new EmptyBorder(15, 15, 15, 15));
         painel.setBackground(COR_FUNDO);
 
-        // Tabela de Usuários
         modelUsuarios = new DefaultTableModel(new String[]{"ID", "Nome", "CPF", "Tipo", "Status"}, 0) {
             private static final long serialVersionUID = 1L;
             @Override public boolean isCellEditable(int r, int c) { return false; }
@@ -81,17 +79,14 @@ public class TelaGestao extends JDialog {
         scrollPane.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
         painel.add(scrollPane, BorderLayout.CENTER);
 
-        // Painel de Ações do Usuário
         JPanel painelAcoes = new JPanel(new BorderLayout());
         painelAcoes.setBackground(COR_FUNDO);
 
-        // Botão de Voltar
         JButton btnVoltar = new JButton("VOLTAR / SAIR");
         configurarBotao(btnVoltar, COR_BOTAO_SECUNDARIO, COR_TEXTO_BOTAO_SECUNDARIO);
         btnVoltar.addActionListener(e -> dispose());
         painelAcoes.add(btnVoltar, BorderLayout.WEST);
 
-        //Painel para os botões da Direita
         JPanel painelBotoesDireita = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         painelBotoesDireita.setBackground(COR_FUNDO);
 
@@ -150,16 +145,14 @@ public class TelaGestao extends JDialog {
         btnGerar.addActionListener(e -> carregarRelatorio());
         painelFiltro.add(btnGerar);
         
-        // botao voltar
         JButton btnVoltar = new JButton("VOLTAR / SAIR");
         configurarBotao(btnVoltar, COR_BOTAO_SECUNDARIO, COR_TEXTO_BOTAO_SECUNDARIO);
         btnVoltar.addActionListener(e -> dispose());
-        painelFiltro.add(btnVoltar); // Adicionado ao lado do botão de gerar relatório
+        painelFiltro.add(btnVoltar);
         
         painel.add(painelFiltro, BorderLayout.NORTH);
 
-        // Tabela de Relatório
-        modelRelatorio = new DefaultTableModel(new String[]{"ID", "Data e Hora", "ID Usuário", "Status", "Origem"}, 0) {
+        modelRelatorio = new DefaultTableModel(new String[]{"ID", "Data e Hora", "ID Usuário", "Nome Usuário", "Status", "Origem"}, 0) {
             private static final long serialVersionUID = 1L;
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -172,8 +165,6 @@ public class TelaGestao extends JDialog {
         
         return painel;
     }
-
-    // metodos pro estilo
 
     private void configurarTabela(JTable tabela, DefaultTableCellRenderer renderer) {
         tabela.setRowSorter(new TableRowSorter<>(tabela.getModel()));
@@ -273,9 +264,12 @@ public class TelaGestao extends JDialog {
                         modelRelatorio.setRowCount(0);
                         DateTimeFormatter displayFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
                         get().forEach(r -> modelRelatorio.addRow(new Object[]{
-                                r.getId(), r.getDataHora().format(displayFormatter),
+                                r.getId(),
+                                r.getDataHora().format(displayFormatter),
                                 r.getUsuarioId() == 0 ? "N/A" : r.getUsuarioId(),
-                                r.getStatus(), r.getOrigem()
+                                r.getNomeUsuario() == null ? "Usuário Removido" : r.getNomeUsuario(),
+                                r.getStatus(),
+                                r.getOrigem()
                         }));
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(TelaGestao.this, "Erro ao carregar relatório: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
@@ -296,7 +290,7 @@ public class TelaGestao extends JDialog {
                 if (table.getColumnName(column).equals("Status")) {
                     String status = (String) value;
                     if ("Ativo".equals(status)) {
-                        c.setForeground(new Color(0, 128, 0)); // Verde
+                        c.setForeground(new Color(0, 128, 0));
                     } else if ("Inativo".equals(status)) {
                         c.setForeground(Color.RED);
                     }

@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RegistroAcessoDAO {
-    // Salva o acesso
-    public void salvar(RegistroAcesso registro) { 
+
+    public void salvar(RegistroAcesso registro) {
         String sql = "INSERT INTO RegistroAcesso (dataHora, usuarioId, status, origem) VALUES (?, ?, ?, ?)";
         try (Connection conexao = ConexaoBancoDados.getConexao(); PreparedStatement pstm = conexao.prepareStatement(sql)) {
             pstm.setTimestamp(1, Timestamp.valueOf(registro.getDataHora()));
@@ -27,17 +27,27 @@ public class RegistroAcessoDAO {
         }
     }
 
-    // Filtra por periodo
-    public List<RegistroAcesso> listarPorPeriodo(LocalDateTime inicio, LocalDateTime fim) { 
+    public List<RegistroAcesso> listarPorPeriodo(LocalDateTime inicio, LocalDateTime fim) {
         List<RegistroAcesso> registros = new ArrayList<>();
-        String sql = "SELECT * FROM RegistroAcesso WHERE dataHora BETWEEN ? AND ?";
+        String sql = "SELECT ra.id, ra.dataHora, ra.usuarioId, u.nome AS nomeUsuario, ra.status, ra.origem " +
+                     "FROM RegistroAcesso ra " +
+                     "LEFT JOIN Usuario u ON ra.usuarioId = u.id " +
+                     "WHERE ra.dataHora BETWEEN ? AND ? " +
+                     "ORDER BY ra.dataHora DESC";
+
         try (Connection conexao = ConexaoBancoDados.getConexao(); PreparedStatement pstm = conexao.prepareStatement(sql)) {
             pstm.setTimestamp(1, Timestamp.valueOf(inicio));
             pstm.setTimestamp(2, Timestamp.valueOf(fim));
             try (ResultSet rset = pstm.executeQuery()) {
                 while (rset.next()) {
-                    RegistroAcesso registro = new RegistroAcesso(rset.getTimestamp("dataHora").toLocalDateTime(), rset.getInt("usuarioId"), rset.getString("status"), rset.getString("origem"));
+                    RegistroAcesso registro = new RegistroAcesso(
+                        rset.getTimestamp("dataHora").toLocalDateTime(),
+                        rset.getInt("usuarioId"),
+                        rset.getString("status"),
+                        rset.getString("origem")
+                    );
                     registro.setId(rset.getInt("id"));
+                    registro.setNomeUsuario(rset.getString("nomeUsuario"));
                     registros.add(registro);
                 }
             }
