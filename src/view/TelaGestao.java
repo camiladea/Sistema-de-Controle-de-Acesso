@@ -14,7 +14,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.*;
 import model.*;
 
-// ALTERAÇÃO: A classe agora herda de JFrame para suportar maximização
 public class TelaGestao extends JFrame {
 
     private static final long serialVersionUID = 1L;
@@ -28,7 +27,6 @@ public class TelaGestao extends JFrame {
     private Point initialClick;
     private JButton btnMaximizar;
 
-    // ALTERAÇÃO: Nova paleta de cores para um tema claro e profissional
     private static final Color COR_FUNDO = new Color(240, 242, 245);
     private static final Color COR_PAINEL_CONTEUDO = Color.WHITE;
     private static final Color COR_CABECALHO_TABELA = new Color(220, 223, 228);
@@ -42,11 +40,9 @@ public class TelaGestao extends JFrame {
     private static final Font FONTE_BOTAO = new Font("Segoe UI", Font.BOLD, 12);
 
     public TelaGestao(Window owner, TerminalController controller) {
-        // ALTERAÇÃO: Construtor ajustado para JFrame
         super();
         this.controller = controller;
 
-        // Reset do UIManager para o tema claro
         UIManager.put("TabbedPane.contentAreaColor", null);
         UIManager.put("TabbedPane.selected", null);
         UIManager.put("TabbedPane.background", null);
@@ -96,7 +92,6 @@ public class TelaGestao extends JFrame {
         barraDeTitulo.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(220, 223, 228)));
 
         JPanel painelTituloIcone = new JPanel(new BorderLayout(10, 0));
-        painelTituloIcone.setBackground(new Color(192, 192, 192));
         painelTituloIcone.setOpaque(false);
         painelTituloIcone.setBorder(new EmptyBorder(5, 10, 5, 5));
 
@@ -111,15 +106,20 @@ public class TelaGestao extends JFrame {
 
         barraDeTitulo.add(painelTituloIcone, BorderLayout.CENTER);
 
-        JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        JPanel painelBotoes = new JPanel();
         painelBotoes.setOpaque(false);
+        painelBotoes.setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         
         btnMaximizar = new JButton("\u25A1");
         configurarBotaoControle(btnMaximizar);
+        // ALTERAÇÃO: Definindo a fonte manualmente aqui para aumentar o "alcance"
+        btnMaximizar.setFont(new Font("Segoe UI", Font.BOLD, 17));
         btnMaximizar.addActionListener(e -> toggleMaximize());
         
         JButton btnFechar = new JButton("\u00D7");
         configurarBotaoControle(btnFechar);
+        // ALTERAÇÃO: Definindo a fonte manualmente aqui para aumentar o "alcance"
+        btnFechar.setFont(new Font("Segoe UI", Font.BOLD, 16));
         btnFechar.addActionListener(e -> dispose());
         
         applyButtonHoverEffect(btnMaximizar, COR_DESTAQUE_BOTAO, COR_TEXTO);
@@ -146,7 +146,7 @@ public class TelaGestao extends JFrame {
 
     private void configurarBotaoControle(JButton button) {
         button.setForeground(COR_TEXTO);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        // ALTERAÇÃO: A linha setFont foi removida conforme solicitado.
         button.setFocusPainted(false);
         button.setBorderPainted(false);
         button.setContentAreaFilled(false);
