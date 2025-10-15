@@ -2,6 +2,10 @@ package view;
 
 import controller.TerminalController;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowStateListener;
 import java.time.*;
 import java.time.format.*;
 import java.util.List;
@@ -10,7 +14,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.*;
 import model.*;
 
-public class TelaGestao extends JDialog {
+// ALTERAÇÃO: A classe agora herda de JFrame para suportar maximização
+public class TelaGestao extends JFrame {
 
     private static final long serialVersionUID = 1L;
 
@@ -19,20 +24,33 @@ public class TelaGestao extends JDialog {
     private DefaultTableModel modelRelatorio;
     private JTextField txtDataInicio, txtDataFim;
     private JTable tabelaUsuarios;
+    
+    private Point initialClick;
+    private JButton btnMaximizar;
 
+    // ALTERAÇÃO: Nova paleta de cores para um tema claro e profissional
     private static final Color COR_FUNDO = new Color(240, 242, 245);
     private static final Color COR_PAINEL_CONTEUDO = Color.WHITE;
     private static final Color COR_CABECALHO_TABELA = new Color(220, 223, 228);
+    private static final Color COR_TEXTO = new Color(40, 40, 40);
     private static final Color COR_BOTAO_PRIMARIO = new Color(24, 119, 242);
     private static final Color COR_BOTAO_SECUNDARIO = new Color(230, 232, 235);
     private static final Color COR_TEXTO_BOTAO_PRIMARIO = Color.WHITE;
     private static final Color COR_TEXTO_BOTAO_SECUNDARIO = new Color(40, 40, 40);
+    private static final Color COR_DESTAQUE_BOTAO = new Color(0, 174, 239);
     private static final Font FONTE_PADRAO = new Font("Segoe UI", Font.PLAIN, 14);
     private static final Font FONTE_BOTAO = new Font("Segoe UI", Font.BOLD, 12);
 
     public TelaGestao(Window owner, TerminalController controller) {
-        super(owner, "Painel de Gestão", ModalityType.APPLICATION_MODAL);
+        // ALTERAÇÃO: Construtor ajustado para JFrame
+        super();
         this.controller = controller;
+
+        // Reset do UIManager para o tema claro
+        UIManager.put("TabbedPane.contentAreaColor", null);
+        UIManager.put("TabbedPane.selected", null);
+        UIManager.put("TabbedPane.background", null);
+        UIManager.put("TabbedPane.foreground", null);
 
         configurarJanela();
         inicializarComponentes();
@@ -41,14 +59,20 @@ public class TelaGestao extends JDialog {
     }
 
     private void configurarJanela() {
+        setUndecorated(true);
+        setTitle("Painel de Gestão");
         setSize(1200, 800);
         setMinimumSize(new Dimension(900, 600));
         setLocationRelativeTo(getOwner());
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        getContentPane().setLayout(new BorderLayout());
         getContentPane().setBackground(COR_FUNDO);
     }
 
     private void inicializarComponentes() {
+        JPanel barraDeTitulo = criarBarraDeTituloCustomizada();
+        getContentPane().add(barraDeTitulo, BorderLayout.NORTH);
+
         JTabbedPane abas = new JTabbedPane();
         abas.setFont(new Font("Segoe UI", Font.BOLD, 14));
         abas.setBackground(COR_FUNDO);
@@ -59,7 +83,74 @@ public class TelaGestao extends JDialog {
         abas.addTab("Gerenciamento de Usuários", painelUsuarios);
         abas.addTab("Relatório de Acessos", painelRelatorios);
 
-        add(abas, BorderLayout.CENTER);
+        getContentPane().add(abas, BorderLayout.CENTER);
+
+        MouseAdapter draggableAdapter = createDraggableMouseAdapter();
+        abas.addMouseListener(draggableAdapter);
+        abas.addMouseMotionListener(draggableAdapter);
+    }
+    
+    private JPanel criarBarraDeTituloCustomizada() {
+        JPanel barraDeTitulo = new JPanel(new BorderLayout());
+        barraDeTitulo.setBackground(COR_PAINEL_CONTEUDO);
+        barraDeTitulo.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(220, 223, 228)));
+
+        JPanel painelTituloIcone = new JPanel(new BorderLayout(10, 0));
+        painelTituloIcone.setBackground(new Color(192, 192, 192));
+        painelTituloIcone.setOpaque(false);
+        painelTituloIcone.setBorder(new EmptyBorder(5, 10, 5, 5));
+
+        FingerprintIconPanel iconPanel = new FingerprintIconPanel();
+        iconPanel.setBorder(new EmptyBorder(2, 0, 0, 0));
+        painelTituloIcone.add(iconPanel, BorderLayout.WEST);
+        
+        JLabel tituloLabel = new JLabel("Painel de Gestão");
+        tituloLabel.setForeground(COR_TEXTO);
+        tituloLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        painelTituloIcone.add(tituloLabel, BorderLayout.CENTER);
+
+        barraDeTitulo.add(painelTituloIcone, BorderLayout.CENTER);
+
+        JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        painelBotoes.setOpaque(false);
+        
+        btnMaximizar = new JButton("\u25A1");
+        configurarBotaoControle(btnMaximizar);
+        btnMaximizar.addActionListener(e -> toggleMaximize());
+        
+        JButton btnFechar = new JButton("\u00D7");
+        configurarBotaoControle(btnFechar);
+        btnFechar.addActionListener(e -> dispose());
+        
+        applyButtonHoverEffect(btnMaximizar, COR_DESTAQUE_BOTAO, COR_TEXTO);
+        applyButtonHoverEffect(btnFechar, COR_DESTAQUE_BOTAO, COR_TEXTO);
+
+        painelBotoes.add(btnMaximizar);
+        painelBotoes.add(btnFechar);
+        barraDeTitulo.add(painelBotoes, BorderLayout.EAST);
+
+        MouseAdapter draggableAdapter = createDraggableMouseAdapter();
+        barraDeTitulo.addMouseListener(draggableAdapter);
+        barraDeTitulo.addMouseMotionListener(draggableAdapter);
+        
+        this.addWindowStateListener(e -> {
+            if ((e.getNewState() & JFrame.MAXIMIZED_BOTH) == JFrame.MAXIMIZED_BOTH) {
+                btnMaximizar.setText("\u29C9");
+            } else {
+                btnMaximizar.setText("\u25A1");
+            }
+        });
+        
+        return barraDeTitulo;
+    }
+
+    private void configurarBotaoControle(JButton button) {
+        button.setForeground(COR_TEXTO);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setContentAreaFilled(false);
+        button.setPreferredSize(new Dimension(45, 30));
     }
     
     private JPanel criarAbaUsuarios() {
@@ -281,6 +372,38 @@ public class TelaGestao extends JDialog {
         }
     }
     
+    private void toggleMaximize() {
+        if (getExtendedState() == JFrame.MAXIMIZED_BOTH) {
+            setExtendedState(JFrame.NORMAL);
+        } else {
+            setExtendedState(JFrame.MAXIMIZED_BOTH);
+        }
+    }
+    
+    private MouseAdapter createDraggableMouseAdapter() {
+        return new MouseAdapter() {
+            @Override public void mousePressed(MouseEvent e) {
+                if (getExtendedState() != JFrame.MAXIMIZED_BOTH) { initialClick = e.getPoint(); }
+            }
+            @Override public void mouseDragged(MouseEvent e) {
+                 if (getExtendedState() != JFrame.MAXIMIZED_BOTH) {
+                    int thisX = getLocation().x;
+                    int thisY = getLocation().y;
+                    int xMoved = thisX + (e.getX() - initialClick.x);
+                    int yMoved = thisY + (e.getY() - initialClick.y);
+                    setLocation(xMoved, yMoved);
+                }
+            }
+        };
+    }
+    
+    private void applyButtonHoverEffect(JButton button, Color hoverColor, Color defaultColor) {
+        button.addMouseListener(new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e) { button.setForeground(hoverColor); }
+            @Override public void mouseExited(MouseEvent e) { button.setForeground(defaultColor); }
+        });
+    }
+
     static class StatusCellRenderer extends ZebraTableCellRenderer {
         private static final long serialVersionUID = 1L;
         @Override
@@ -314,6 +437,32 @@ public class TelaGestao extends JDialog {
                 c.setBackground(row % 2 == 0 ? COR_LINHA_PAR : COR_LINHA_IMPAR);
             }
             return c;
+        }
+    }
+    
+    private static class FingerprintIconPanel extends JPanel {
+        private static final long serialVersionUID = 1L;
+        public FingerprintIconPanel() {
+            setOpaque(false);
+            setPreferredSize(new Dimension(20, 20));
+        }
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2d = (Graphics2D) g.create();
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            int diametro = Math.min(getWidth(), getHeight()) - 4;
+            int x = (getWidth() - diametro) / 2;
+            int y = (getHeight() - diametro) / 2;
+            g2d.setColor(COR_TEXTO); // Ícone com a cor do texto
+            g2d.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            for (int i = 0; i < 4; i++) {
+                int d = diametro - (i * (diametro / 4));
+                int arcX = x + (i * (diametro / 8));
+                int arcY = y + (i * (diametro / 8));
+                g2d.drawArc(arcX, arcY, d, d, -45 - (i * 10), 270 + (i * 5));
+            }
+            g2d.dispose();
         }
     }
 }
