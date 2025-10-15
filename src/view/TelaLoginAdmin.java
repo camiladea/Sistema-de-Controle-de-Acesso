@@ -20,6 +20,9 @@ public class TelaLoginAdmin extends JDialog {
     private JPasswordField txtSenha;
     private boolean loginSucedido = false;
 
+    // arrastar a janela
+    private Point initialClick;
+
     private static final Color COR_FUNDO_ESCURO = new Color(30, 30, 30);
     private static final Color COR_INPUT = new Color(55, 55, 55);
     private static final Color COR_BORDA_INPUT = new Color(80, 80, 80);
@@ -27,6 +30,8 @@ public class TelaLoginAdmin extends JDialog {
     private static final Color COR_TEXTO_PLACEHOLDER = new Color(170, 170, 170);
     private static final Color COR_BOTAO_ACAO = new Color(24, 119, 242);
     private static final Color COR_BOTAO_ACAO_HOVER = new Color(60, 140, 250);
+    private static final Color COR_DESTAQUE_PROCESSANDO = new Color(0, 174, 239);
+
 
     private static final Font FONTE_PADRAO = new Font("Segoe UI", Font.PLAIN, 16);
     private static final Font FONTE_TITULO = new Font("Segoe UI", Font.BOLD, 22);
@@ -41,14 +46,21 @@ public class TelaLoginAdmin extends JDialog {
     );
 
     public TelaLoginAdmin(JFrame parent, TerminalController controller) {
-        super(parent, "Autenticação de Administrador", true);
+        super(parent, true);
         this.controller = controller;
         configurarEInicializar();
     }
 
     private void configurarEInicializar() {
+        setUndecorated(true);
         setResizable(false);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+        getContentPane().setLayout(new BorderLayout());
+        getContentPane().setBackground(COR_FUNDO_ESCURO);
+
+        JPanel barraDeTitulo = criarBarraDeTituloCustomizada();
+        getContentPane().add(barraDeTitulo, BorderLayout.NORTH);
 
         JPanel painelPrincipal = new JPanel(new GridBagLayout());
         painelPrincipal.setBackground(COR_FUNDO_ESCURO);
@@ -110,10 +122,85 @@ public class TelaLoginAdmin extends JDialog {
         painelPrincipal.add(btnLogin, gbc);
 
         getRootPane().setDefaultButton(btnLogin);
+        
+        MouseAdapter draggableAdapter = createDraggableMouseAdapter();
+        painelPrincipal.addMouseListener(draggableAdapter);
+        painelPrincipal.addMouseMotionListener(draggableAdapter);
 
-        add(painelPrincipal);
+        getContentPane().add(painelPrincipal, BorderLayout.CENTER);
         pack();
         setLocationRelativeTo(getParent());
+    }
+    
+    private JPanel criarBarraDeTituloCustomizada() {
+        JPanel barraDeTitulo = new JPanel(new BorderLayout());
+        barraDeTitulo.setBackground(COR_FUNDO_ESCURO);
+        barraDeTitulo.setBorder(new EmptyBorder(5, 10, 5, 5));
+
+        JPanel painelTituloIcone = new JPanel(new BorderLayout(10, 0));
+        painelTituloIcone.setOpaque(false);
+
+        FingerprintIconPanel iconPanel = new FingerprintIconPanel();
+        iconPanel.setBorder(new EmptyBorder(2, 0, 0, 0));
+        painelTituloIcone.add(iconPanel, BorderLayout.WEST);
+        
+        JLabel tituloLabel = new JLabel("Autenticação de Administrador");
+        tituloLabel.setForeground(Color.WHITE);
+        tituloLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        painelTituloIcone.add(tituloLabel, BorderLayout.CENTER);
+
+        barraDeTitulo.add(painelTituloIcone, BorderLayout.CENTER);
+        
+        JButton btnFechar = new JButton("\u00D7");
+        btnFechar.setForeground(Color.WHITE);
+        btnFechar.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        btnFechar.setFocusPainted(false);
+        btnFechar.setBorderPainted(false);
+        btnFechar.setContentAreaFilled(false);
+        btnFechar.setPreferredSize(new Dimension(45, 30));
+        btnFechar.addActionListener(e -> dispose());
+        
+        applyButtonHoverEffect(btnFechar, COR_DESTAQUE_PROCESSANDO, Color.WHITE);
+        
+        barraDeTitulo.add(btnFechar, BorderLayout.EAST);
+
+        MouseAdapter draggableAdapter = createDraggableMouseAdapter();
+        barraDeTitulo.addMouseListener(draggableAdapter);
+        barraDeTitulo.addMouseMotionListener(draggableAdapter);
+        
+        return barraDeTitulo;
+    }
+
+    private MouseAdapter createDraggableMouseAdapter() {
+        return new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                initialClick = e.getPoint();
+            }
+            
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                int thisX = getLocation().x;
+                int thisY = getLocation().y;
+                int xMoved = thisX + (e.getX() - initialClick.x);
+                int yMoved = thisY + (e.getY() - initialClick.y);
+                setLocation(xMoved, yMoved);
+            }
+        };
+    }
+
+    private void applyButtonHoverEffect(JButton button, Color hoverColor, Color defaultColor) {
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                button.setForeground(hoverColor);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                button.setForeground(defaultColor);
+            }
+        });
     }
 
     private void estilizarBotao(JButton botao) {
@@ -191,5 +278,36 @@ public class TelaLoginAdmin extends JDialog {
 
     public boolean isLoginSucedido() {
         return loginSucedido;
+    }
+    
+    private static class FingerprintIconPanel extends JPanel {
+        private static final long serialVersionUID = 1L;
+        
+        public FingerprintIconPanel() {
+            setOpaque(false);
+            setPreferredSize(new Dimension(20, 20)); // tamanho
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2d = (Graphics2D) g.create();
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            int diametro = Math.min(getWidth(), getHeight()) - 4;
+            int x = (getWidth() - diametro) / 2;
+            int y = (getHeight() - diametro) / 2;
+
+            g2d.setColor(Color.WHITE); // cor
+            g2d.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            
+            for (int i = 0; i < 4; i++) { // tem menos arcos que o grande
+                int d = diametro - (i * (diametro / 4));
+                int arcX = x + (i * (diametro / 8));
+                int arcY = y + (i * (diametro / 8));
+                g2d.drawArc(arcX, arcY, d, d, -45 - (i * 10), 270 + (i * 5));
+            }
+            g2d.dispose();
+        }
     }
 }
