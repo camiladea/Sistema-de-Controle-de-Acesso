@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-21">
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="resources"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="resources"/>
-	<classpathentry kind="lib" path="C:/Users/ccarl/Downloads/Sistema-de-Controle-de-Acesso-1/lib/mysql-connector-j-9.3.0.jar"/>
-	<classpathentry kind="lib" path="C:/Users/ccarl/Downloads/Sistema-de-Controle-de-Acesso-1/lib/NBioBSPJNI.jar"/>
+	<classpathentry kind="lib" path="lib/mysql-connector-j-9.3.0.jar"/>
+	<classpathentry kind="lib" path="lib/NBioBSPJNI.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Pichau/Desktop/Sistema-de-Controle-de-Acesso-1/lib/jna-5.14.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Pichau/Desktop/Sistema-de-Controle-de-Acesso-1/lib/jna-platform-5.14.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
