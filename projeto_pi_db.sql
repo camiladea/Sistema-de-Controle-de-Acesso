@@ -1,40 +1,30 @@
-CREATE DATABASE IF NOT EXISTS projeto_pi_db 
-CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- Script de criação das tabelas para o banco de dados SQLite
 
-USE projeto_pi_db;
-
--- Tabela Usuario corrigida: sem 'matricula' e com 'digitalFIR'
+-- Tabela Usuario adaptada para SQLite
 CREATE TABLE IF NOT EXISTS Usuario (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    nome VARCHAR(255) NOT NULL,
-    cpf VARCHAR(14) UNIQUE NOT NULL,
-    email VARCHAR(255),
-    digitalFIR TEXT, -- CORRIGIDO: O nome da coluna agora é 'digitalFIR'
-    ativo BOOLEAN DEFAULT TRUE,
-    tipoUsuario VARCHAR(15) NOT NULL COMMENT 'Define se é Funcionario ou Administrador',
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    cpf TEXT UNIQUE NOT NULL,
+    email TEXT,
+    digitalTemplate BLOB, -- Tipo correto para dados binários
+    ativo INTEGER DEFAULT 1, -- Em SQLite, BOOLEAN é representado por INTEGER (0 ou 1)
+    tipoUsuario TEXT NOT NULL,
+    cargo TEXT,
+    login TEXT UNIQUE,
+    senhaHash TEXT
+);
 
-    cargo VARCHAR(100),
-    -- REMOVIDO: A coluna 'matricula' foi retirada para alinhar com o código Java
-
-    login VARCHAR(50) UNIQUE,
-    senhaHash VARCHAR(255)
-) ENGINE=InnoDB;
-
+-- Tabela RegistroAcesso adaptada para SQLite
 CREATE TABLE IF NOT EXISTS RegistroAcesso (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    dataHora DATETIME NOT NULL,
-    usuarioId INT, 
-    status VARCHAR(50) NOT NULL,
-    origem VARCHAR(100) NOT NULL,
-    
-    CONSTRAINT fk_usuario_acesso
-    FOREIGN KEY (usuarioId) REFERENCES Usuario(id) 
-    ON DELETE SET NULL
-) ENGINE=InnoDB;
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    dataHora TEXT NOT NULL, -- DATETIME é armazenado como TEXT no SQLite
+    usuarioId INTEGER, 
+    status TEXT NOT NULL,
+    origem TEXT NOT NULL,
+    FOREIGN KEY (usuarioId) REFERENCES Usuario(id) ON DELETE SET NULL
+);
 
--- Inserção do usuário administrador (senha ainda em texto plano para fins de simulação)
-INSERT INTO Usuario (nome, cpf, email, tipoUsuario, ativo, login, senhaHash) 
+-- Inserção do usuário administrador. O comando é compatível.
+INSERT OR IGNORE INTO Usuario (nome, cpf, email, tipoUsuario, ativo, login, senhaHash) 
 VALUES 
-('Administrador Principal', '000.000.000-00', 'admin@sistema.com', 'Administrador', TRUE, 'admin', 'admin123')
-ON DUPLICATE KEY UPDATE 
-    nome = VALUES(nome);
+('Administrador Principal', '000.000.000-00', 'admin@sistema.com', 'Administrador', 1, 'admin', 'admin123');
