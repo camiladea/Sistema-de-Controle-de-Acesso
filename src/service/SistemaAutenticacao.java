@@ -39,7 +39,7 @@ public class SistemaAutenticacao {
         List<Usuario> todosOsUsuarios = usuarioDAO.listarTodos();
         
         Optional<Usuario> usuarioCorrespondente = todosOsUsuarios.stream()
-            .filter(u -> u.getDigitalFIR() != null && !u.getDigitalFIR().isEmpty())
+        .filter(u -> u.getDigitalTemplate() != null && u.getDigitalTemplate().length > 0)
             .findFirst();
 
         if (usuarioCorrespondente.isPresent() && usuarioCorrespondente.get().isAtivo()) {

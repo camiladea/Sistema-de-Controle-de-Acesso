@@ -4,12 +4,11 @@ public class Administrador extends Usuario {
     private String login;
     private String senhaHash;
 
-    public Administrador(String nome, String cpf, String email, String digitalFIR, String login, String senhaHash) {
-        super(nome, cpf, email, digitalFIR);
+    public Administrador(String nome, String cpf, String email, byte[] digitalTemplate, String login, String senhaHash) {
+        super(nome, cpf, email, digitalTemplate); // CORRETO: Passando byte[]
         this.login = login;
         this.senhaHash = senhaHash;
     }
-
     public String getLogin() { return login; }
     public void setLogin(String login) { this.login = login; }
     public String getSenhaHash() { return senhaHash; }

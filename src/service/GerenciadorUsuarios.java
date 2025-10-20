@@ -30,7 +30,7 @@ public class GerenciadorUsuarios {
             return false;
         }
 
-        Usuario novoFuncionario = new Funcionario(nome, cpf, email, digitalHashOpt.get(), cargo);
+        Usuario novoFuncionario = new Funcionario(nome, cpf, email, digitalHashOpt.get().getBytes(), cargo);
         usuarioDAO.salvar(novoFuncionario);
         return true;
     }

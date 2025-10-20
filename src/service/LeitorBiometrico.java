@@ -17,11 +17,7 @@ public class LeitorBiometrico {
         System.out.println("LOG [LeitorBiometrico]: SIMULAÇÃO - Desconectado.");
     }
 
-    /**
-     * SIMULAÇÃO 
-     * 
-     * @return um Optional contendo um hash de digital simulado.
-     */
+    
     public Optional<String> lerDigital(String proposito) {
         // Mostra uma janela gráfica para o usuário
         JOptionPane.showMessageDialog(

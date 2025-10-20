@@ -31,9 +31,7 @@ public class ConexaoBancoDados {
         return conexao;
     }
 
-    /**
-     * Fecha a conexão com o banco de dados.
-     */
+    
     public static void fecharConexao() {
         try {
             if (conexao != null && !conexao.isClosed()) {
