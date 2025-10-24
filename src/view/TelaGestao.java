@@ -4,8 +4,8 @@ import controller.TerminalController;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowStateListener;
+//import java.awt.event.WindowEvent;
+//import java.awt.event.WindowStateListener;
 import java.time.*;
 import java.time.format.*;
 import java.util.List;
@@ -23,7 +23,7 @@ public class TelaGestao extends JFrame {
     private DefaultTableModel modelRelatorio;
     private JTextField txtDataInicio, txtDataFim;
     private JTable tabelaUsuarios;
-    
+
     private Point initialClick;
     private JButton btnMaximizar;
 
@@ -85,7 +85,7 @@ public class TelaGestao extends JFrame {
         abas.addMouseListener(draggableAdapter);
         abas.addMouseMotionListener(draggableAdapter);
     }
-    
+
     private JPanel criarBarraDeTituloCustomizada() {
         JPanel barraDeTitulo = new JPanel(new BorderLayout());
         barraDeTitulo.setBackground(COR_PAINEL_CONTEUDO);
@@ -98,7 +98,7 @@ public class TelaGestao extends JFrame {
         FingerprintIconPanel iconPanel = new FingerprintIconPanel();
         iconPanel.setBorder(new EmptyBorder(2, 0, 0, 0));
         painelTituloIcone.add(iconPanel, BorderLayout.WEST);
-        
+
         JLabel tituloLabel = new JLabel("Painel de Gestão");
         tituloLabel.setForeground(COR_TEXTO);
         tituloLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
@@ -109,19 +109,19 @@ public class TelaGestao extends JFrame {
         JPanel painelBotoes = new JPanel();
         painelBotoes.setOpaque(false);
         painelBotoes.setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-        
+
         btnMaximizar = new JButton("\u25A1");
         configurarBotaoControle(btnMaximizar);
         // ALTERAÇÃO: Definindo a fonte manualmente aqui para aumentar o "alcance"
         btnMaximizar.setFont(new Font("Segoe UI", Font.BOLD, 17));
         btnMaximizar.addActionListener(e -> toggleMaximize());
-        
+
         JButton btnFechar = new JButton("\u00D7");
         configurarBotaoControle(btnFechar);
         // ALTERAÇÃO: Definindo a fonte manualmente aqui para aumentar o "alcance"
         btnFechar.setFont(new Font("Segoe UI", Font.BOLD, 16));
         btnFechar.addActionListener(e -> dispose());
-        
+
         applyButtonHoverEffect(btnMaximizar, COR_DESTAQUE_BOTAO, COR_TEXTO);
         applyButtonHoverEffect(btnFechar, COR_DESTAQUE_BOTAO, COR_TEXTO);
 
@@ -132,7 +132,7 @@ public class TelaGestao extends JFrame {
         MouseAdapter draggableAdapter = createDraggableMouseAdapter();
         barraDeTitulo.addMouseListener(draggableAdapter);
         barraDeTitulo.addMouseMotionListener(draggableAdapter);
-        
+
         this.addWindowStateListener(e -> {
             if ((e.getNewState() & JFrame.MAXIMIZED_BOTH) == JFrame.MAXIMIZED_BOTH) {
                 btnMaximizar.setText("\u29C9");
@@ -140,7 +140,7 @@ public class TelaGestao extends JFrame {
                 btnMaximizar.setText("\u25A1");
             }
         });
-        
+
         return barraDeTitulo;
     }
 
@@ -152,16 +152,24 @@ public class TelaGestao extends JFrame {
         button.setContentAreaFilled(false);
         button.setPreferredSize(new Dimension(45, 30));
     }
-    
+
     private JPanel criarAbaUsuarios() {
         JPanel painel = new JPanel(new BorderLayout(10, 10));
         painel.setBorder(new EmptyBorder(15, 15, 15, 15));
         painel.setBackground(COR_FUNDO);
 
-        modelUsuarios = new DefaultTableModel(new String[]{"ID", "Nome", "CPF", "Tipo", "Status"}, 0) {
+        modelUsuarios = new DefaultTableModel(new String[] { "ID", "Nome", "CPF", "Tipo", "Status" }, 0) {
             private static final long serialVersionUID = 1L;
-            @Override public boolean isCellEditable(int r, int c) { return false; }
-            @Override public Class<?> getColumnClass(int c) { return c == 0 ? Integer.class : String.class; }
+
+            @Override
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
+
+            @Override
+            public Class<?> getColumnClass(int c) {
+                return c == 0 ? Integer.class : String.class;
+            }
         };
         tabelaUsuarios = new JTable(modelUsuarios);
         configurarTabela(tabelaUsuarios, new StatusCellRenderer());
@@ -195,7 +203,7 @@ public class TelaGestao extends JFrame {
         JButton btnRemover = new JButton("REMOVER");
         configurarBotao(btnRemover, COR_BOTAO_SECUNDARIO, COR_TEXTO_BOTAO_SECUNDARIO);
         btnRemover.addActionListener(e -> removerSelecionado());
-        
+
         JButton btnAtualizar = new JButton("ATUALIZAR");
         configurarBotao(btnAtualizar, COR_BOTAO_SECUNDARIO, COR_TEXTO_BOTAO_SECUNDARIO);
         btnAtualizar.addActionListener(e -> carregarDadosUsuarios());
@@ -204,7 +212,7 @@ public class TelaGestao extends JFrame {
         painelBotoesDireita.add(btnEditar);
         painelBotoesDireita.add(btnRemover);
         painelBotoesDireita.add(btnAdicionar);
-        
+
         painelAcoes.add(painelBotoesDireita, BorderLayout.CENTER);
 
         painel.add(painelAcoes, BorderLayout.SOUTH);
@@ -218,7 +226,7 @@ public class TelaGestao extends JFrame {
 
         JPanel painelFiltro = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         painelFiltro.setBackground(COR_PAINEL_CONTEUDO);
-        painelFiltro.setBorder(new EmptyBorder(10,10,10,10));
+        painelFiltro.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         painelFiltro.add(new JLabel("Data Início:"));
@@ -235,25 +243,30 @@ public class TelaGestao extends JFrame {
         configurarBotao(btnGerar, COR_BOTAO_PRIMARIO, COR_TEXTO_BOTAO_PRIMARIO);
         btnGerar.addActionListener(e -> carregarRelatorio());
         painelFiltro.add(btnGerar);
-        
+
         JButton btnVoltar = new JButton("VOLTAR / SAIR");
         configurarBotao(btnVoltar, COR_BOTAO_SECUNDARIO, COR_TEXTO_BOTAO_SECUNDARIO);
         btnVoltar.addActionListener(e -> dispose());
         painelFiltro.add(btnVoltar);
-        
+
         painel.add(painelFiltro, BorderLayout.NORTH);
 
-        modelRelatorio = new DefaultTableModel(new String[]{"ID", "Data e Hora", "ID Usuário", "Nome Usuário", "Status", "Origem"}, 0) {
+        modelRelatorio = new DefaultTableModel(
+                new String[] { "ID", "Data e Hora", "ID Usuário", "Nome Usuário", "Status", "Origem" }, 0) {
             private static final long serialVersionUID = 1L;
-            @Override public boolean isCellEditable(int r, int c) { return false; }
+
+            @Override
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
         };
         JTable tabelaRelatorio = new JTable(modelRelatorio);
         configurarTabela(tabelaRelatorio, new ZebraTableCellRenderer());
-        
+
         JScrollPane scrollPane = new JScrollPane(tabelaRelatorio);
         scrollPane.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
         painel.add(scrollPane, BorderLayout.CENTER);
-        
+
         return painel;
     }
 
@@ -265,14 +278,14 @@ public class TelaGestao extends JFrame {
         tabela.setSelectionBackground(COR_BOTAO_PRIMARIO);
         tabela.setSelectionForeground(Color.WHITE);
         tabela.setDefaultRenderer(Object.class, renderer);
-        
+
         JTableHeader header = tabela.getTableHeader();
         header.setFont(new Font("Segoe UI", Font.BOLD, 14));
         header.setBackground(COR_CABECALHO_TABELA);
         header.setForeground(new Color(60, 60, 60));
         header.setReorderingAllowed(false);
     }
-    
+
     private void configurarBotao(JButton botao, Color corFundo, Color corTexto) {
         botao.setFont(FONTE_BOTAO);
         botao.setBackground(corFundo);
@@ -285,7 +298,8 @@ public class TelaGestao extends JFrame {
     private void editarSelecionado() {
         int viewIndex = tabelaUsuarios.getSelectedRow();
         if (viewIndex == -1) {
-            JOptionPane.showMessageDialog(this, "Selecione um usuário para editar.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Selecione um usuário para editar.", "Aviso",
+                    JOptionPane.WARNING_MESSAGE);
             return;
         }
         int modelIndex = tabelaUsuarios.convertRowIndexToModel(viewIndex);
@@ -304,7 +318,8 @@ public class TelaGestao extends JFrame {
     private void removerSelecionado() {
         int viewIndex = tabelaUsuarios.getSelectedRow();
         if (viewIndex == -1) {
-            JOptionPane.showMessageDialog(this, "Selecione um usuário para remover.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Selecione um usuário para remover.", "Aviso",
+                    JOptionPane.WARNING_MESSAGE);
             return;
         }
         int modelIndex = tabelaUsuarios.convertRowIndexToModel(viewIndex);
@@ -313,30 +328,39 @@ public class TelaGestao extends JFrame {
         int confirmar = JOptionPane.showConfirmDialog(this,
                 "Confirma remover o usuário selecionado?", "Remover Usuário",
                 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-        
-        if (confirmar != JOptionPane.YES_OPTION) return;
+
+        if (confirmar != JOptionPane.YES_OPTION)
+            return;
 
         if (controller.removerUsuario(id)) {
-            JOptionPane.showMessageDialog(this, "Usuário removido com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Usuário removido com sucesso!", "Sucesso",
+                    JOptionPane.INFORMATION_MESSAGE);
             carregarDadosUsuarios();
         } else {
-            JOptionPane.showMessageDialog(this, "Não foi possível remover o usuário.", "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Não foi possível remover o usuário.", "Erro",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
-    
+
     private void carregarDadosUsuarios() {
         new SwingWorker<List<Usuario>, Void>() {
-            @Override protected List<Usuario> doInBackground() { return controller.solicitarListaDeUsuarios(); }
-            @Override protected void done() {
+            @Override
+            protected List<Usuario> doInBackground() {
+                return controller.solicitarListaDeUsuarios();
+            }
+
+            @Override
+            protected void done() {
                 try {
                     modelUsuarios.setRowCount(0);
-                    get().forEach(u -> modelUsuarios.addRow(new Object[]{
+                    get().forEach(u -> modelUsuarios.addRow(new Object[] {
                             u.getId(), u.getNome(), u.getCpf(),
                             (u instanceof Funcionario) ? "Funcionário" : "Admin",
                             u.isAtivo() ? "Ativo" : "Inativo"
                     }));
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(TelaGestao.this, "Erro ao carregar usuários: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(TelaGestao.this, "Erro ao carregar usuários: " + ex.getMessage(),
+                            "Erro", JOptionPane.ERROR_MESSAGE);
                 }
             }
         }.execute();
@@ -349,12 +373,17 @@ public class TelaGestao extends JFrame {
             LocalDateTime fim = LocalDate.parse(txtDataFim.getText(), formatter).atTime(LocalTime.MAX);
 
             new SwingWorker<List<RegistroAcesso>, Void>() {
-                @Override protected List<RegistroAcesso> doInBackground() { return controller.solicitarRelatorioAcesso(inicio, fim); }
-                @Override protected void done() {
+                @Override
+                protected List<RegistroAcesso> doInBackground() {
+                    return controller.solicitarRelatorioAcesso(inicio, fim);
+                }
+
+                @Override
+                protected void done() {
                     try {
                         modelRelatorio.setRowCount(0);
                         DateTimeFormatter displayFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-                        get().forEach(r -> modelRelatorio.addRow(new Object[]{
+                        get().forEach(r -> modelRelatorio.addRow(new Object[] {
                                 r.getId(),
                                 r.getDataHora().format(displayFormatter),
                                 r.getUsuarioId() == 0 ? "N/A" : r.getUsuarioId(),
@@ -363,15 +392,17 @@ public class TelaGestao extends JFrame {
                                 r.getOrigem()
                         }));
                     } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(TelaGestao.this, "Erro ao carregar relatório: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(TelaGestao.this, "Erro ao carregar relatório: " + ex.getMessage(),
+                                "Erro", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }.execute();
         } catch (DateTimeParseException ex) {
-            JOptionPane.showMessageDialog(this, "Formato de data inválido. Use dd/mm/aaaa.", "Erro de Formato", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Formato de data inválido. Use dd/mm/aaaa.", "Erro de Formato",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
-    
+
     private void toggleMaximize() {
         if (getExtendedState() == JFrame.MAXIMIZED_BOTH) {
             setExtendedState(JFrame.NORMAL);
@@ -379,14 +410,19 @@ public class TelaGestao extends JFrame {
             setExtendedState(JFrame.MAXIMIZED_BOTH);
         }
     }
-    
+
     private MouseAdapter createDraggableMouseAdapter() {
         return new MouseAdapter() {
-            @Override public void mousePressed(MouseEvent e) {
-                if (getExtendedState() != JFrame.MAXIMIZED_BOTH) { initialClick = e.getPoint(); }
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (getExtendedState() != JFrame.MAXIMIZED_BOTH) {
+                    initialClick = e.getPoint();
+                }
             }
-            @Override public void mouseDragged(MouseEvent e) {
-                 if (getExtendedState() != JFrame.MAXIMIZED_BOTH) {
+
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                if (getExtendedState() != JFrame.MAXIMIZED_BOTH) {
                     int thisX = getLocation().x;
                     int thisY = getLocation().y;
                     int xMoved = thisX + (e.getX() - initialClick.x);
@@ -396,18 +432,27 @@ public class TelaGestao extends JFrame {
             }
         };
     }
-    
+
     private void applyButtonHoverEffect(JButton button, Color hoverColor, Color defaultColor) {
         button.addMouseListener(new MouseAdapter() {
-            @Override public void mouseEntered(MouseEvent e) { button.setForeground(hoverColor); }
-            @Override public void mouseExited(MouseEvent e) { button.setForeground(defaultColor); }
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                button.setForeground(hoverColor);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                button.setForeground(defaultColor);
+            }
         });
     }
 
     static class StatusCellRenderer extends ZebraTableCellRenderer {
         private static final long serialVersionUID = 1L;
+
         @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+                int row, int column) {
             Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             if (!isSelected) {
                 if (table.getColumnName(column).equals("Status")) {
@@ -418,20 +463,21 @@ public class TelaGestao extends JFrame {
                         c.setForeground(Color.RED);
                     }
                 } else {
-                     c.setForeground(table.getForeground());
+                    c.setForeground(table.getForeground());
                 }
             }
             return c;
         }
     }
-    
+
     static class ZebraTableCellRenderer extends DefaultTableCellRenderer {
         private static final long serialVersionUID = 1L;
         private static final Color COR_LINHA_PAR = new Color(248, 249, 250);
         private static final Color COR_LINHA_IMPAR = Color.WHITE;
-        
+
         @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+                int row, int column) {
             Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             if (!isSelected) {
                 c.setBackground(row % 2 == 0 ? COR_LINHA_PAR : COR_LINHA_IMPAR);
@@ -439,13 +485,15 @@ public class TelaGestao extends JFrame {
             return c;
         }
     }
-    
+
     private static class FingerprintIconPanel extends JPanel {
         private static final long serialVersionUID = 1L;
+
         public FingerprintIconPanel() {
             setOpaque(false);
             setPreferredSize(new Dimension(20, 20));
         }
+
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);

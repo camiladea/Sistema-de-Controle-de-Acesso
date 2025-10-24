@@ -29,15 +29,19 @@ public class UsuarioDAO {
             pstm.setBoolean(5, usuario.isAtivo());
             pstm.setString(6, tipo);
 
-            if (usuario instanceof Funcionario f) {
+            // --- CORREÇÃO PARA JAVA 11 ---
+            if (usuario instanceof Funcionario) {
+                Funcionario f = (Funcionario) usuario; // Cast manual
                 pstm.setString(7, f.getCargo());
                 pstm.setNull(8, Types.VARCHAR);
                 pstm.setNull(9, Types.VARCHAR);
-            } else if (usuario instanceof Administrador a) {
+            } else if (usuario instanceof Administrador) {
+                Administrador a = (Administrador) usuario; // Cast manual
                 pstm.setNull(7, Types.VARCHAR);
                 pstm.setString(8, a.getLogin());
                 pstm.setString(9, a.getSenhaHash());
             }
+            // --- FIM DA CORREÇÃO ---
 
             pstm.executeUpdate();
             System.out.println("Usuário salvo com sucesso!");
@@ -134,15 +138,20 @@ public class UsuarioDAO {
             stmt.setBytes(4, usuario.getDigitalTemplate());
             stmt.setBoolean(5, usuario.isAtivo());
 
-            if (usuario instanceof Funcionario f) {
+            // --- CORREÇÃO PARA JAVA 11 ---
+            if (usuario instanceof Funcionario) {
+                Funcionario f = (Funcionario) usuario; // Cast manual
                 stmt.setString(6, f.getCargo());
                 stmt.setNull(7, Types.VARCHAR);
                 stmt.setNull(8, Types.VARCHAR);
-            } else if (usuario instanceof Administrador a) {
+            } else if (usuario instanceof Administrador) {
+                Administrador a = (Administrador) usuario; // Cast manual
                 stmt.setNull(6, Types.VARCHAR);
                 stmt.setString(7, a.getLogin());
                 stmt.setString(8, a.getSenhaHash());
             }
+            // --- FIM DA CORREÇÃO ---
+            
             stmt.setInt(9, usuario.getId());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {

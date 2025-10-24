@@ -4,8 +4,8 @@ import controller.TerminalController;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowStateListener;
+//import java.awt.event.WindowEvent;
+//import java.awt.event.WindowStateListener;
 import java.util.Optional;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -47,7 +47,7 @@ public class TelaAutenticacao extends JFrame {
 
         JButton btnPainelAdmin = criarBotaoAdmin();
         JPanel painelCentral = criarPainelCentral();
-        
+
         JPanel painelConteudo = new JPanel(new BorderLayout(20, 20));
         painelConteudo.setBackground(COR_FUNDO);
         painelConteudo.setBorder(new EmptyBorder(30, 30, 30, 30));
@@ -64,7 +64,7 @@ public class TelaAutenticacao extends JFrame {
                 executarAutenticacao();
             }
         });
-        
+
         MouseAdapter draggableAdapter = new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -72,10 +72,10 @@ public class TelaAutenticacao extends JFrame {
                     initialClick = e.getPoint();
                 }
             }
-            
+
             @Override
             public void mouseDragged(MouseEvent e) {
-                 if (getExtendedState() != JFrame.MAXIMIZED_BOTH) {
+                if (getExtendedState() != JFrame.MAXIMIZED_BOTH) {
                     int thisX = getLocation().x;
                     int thisY = getLocation().y;
                     int xMoved = thisX + (e.getX() - initialClick.x);
@@ -84,7 +84,7 @@ public class TelaAutenticacao extends JFrame {
                 }
             }
         };
-        
+
         painelConteudo.addMouseListener(draggableAdapter);
         painelConteudo.addMouseMotionListener(draggableAdapter);
         painelCentral.addMouseListener(draggableAdapter);
@@ -100,8 +100,8 @@ public class TelaAutenticacao extends JFrame {
         setLocationRelativeTo(null);
         getContentPane().setBackground(COR_FUNDO);
     }
-    					// barra superior
-    
+    // barra superior
+
     private JPanel criarBarraDeTituloCustomizada() {
         JPanel barraDeTitulo = new JPanel(new BorderLayout());
         barraDeTitulo.setBackground(COR_FUNDO);
@@ -113,7 +113,7 @@ public class TelaAutenticacao extends JFrame {
         FingerprintIconPanel iconPanel = new FingerprintIconPanel();
         iconPanel.setBorder(new EmptyBorder(2, 0, 0, 0));
         painelTituloIcone.add(iconPanel, BorderLayout.WEST);
-        
+
         JLabel tituloLabel = new JLabel("Controle de Acesso Biométrico");
         tituloLabel.setForeground(Color.WHITE);
         tituloLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
@@ -131,7 +131,7 @@ public class TelaAutenticacao extends JFrame {
         btnMinimizar.setBorderPainted(false);
         btnMinimizar.setContentAreaFilled(false);
         btnMinimizar.addActionListener(e -> setState(JFrame.ICONIFIED));
-        
+
         btnMaximizar = new JButton("\u25A1");
         btnMaximizar.setForeground(Color.WHITE);
         btnMaximizar.setFont(new Font("Segoe UI Symbol", Font.BOLD, 14));
@@ -139,7 +139,7 @@ public class TelaAutenticacao extends JFrame {
         btnMaximizar.setBorderPainted(false);
         btnMaximizar.setContentAreaFilled(false);
         btnMaximizar.addActionListener(e -> toggleMaximize());
-        
+
         JButton btnFechar = new JButton("\u00D7");
         btnFechar.setForeground(Color.WHITE);
         btnFechar.setFont(new Font("Segoe UI", Font.BOLD, 21));
@@ -147,7 +147,7 @@ public class TelaAutenticacao extends JFrame {
         btnFechar.setBorderPainted(false);
         btnFechar.setContentAreaFilled(false);
         btnFechar.addActionListener(e -> dispose());
-        
+
         // aplicar o efeito de hover em todos os botoes
         applyButtonHoverEffect(btnMinimizar, COR_DESTAQUE_PROCESSANDO, Color.WHITE);
         applyButtonHoverEffect(btnMaximizar, COR_DESTAQUE_PROCESSANDO, Color.WHITE);
@@ -164,6 +164,7 @@ public class TelaAutenticacao extends JFrame {
                     initialClick = e.getPoint();
                 }
             }
+
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
@@ -192,10 +193,10 @@ public class TelaAutenticacao extends JFrame {
                 btnMaximizar.setText("\u25A1");
             }
         });
-        
+
         return barraDeTitulo;
     }
-    
+
     // efeito botoes
     private void applyButtonHoverEffect(JButton button, Color hoverColor, Color defaultColor) {
         button.addMouseListener(new MouseAdapter() {
@@ -210,7 +211,7 @@ public class TelaAutenticacao extends JFrame {
             }
         });
     }
-    
+
     private void toggleMaximize() {
         if (getExtendedState() == JFrame.MAXIMIZED_BOTH) {
             setExtendedState(JFrame.NORMAL);
@@ -223,10 +224,10 @@ public class TelaAutenticacao extends JFrame {
         JPanel painel = new JPanel(new BorderLayout(0, 20));
         painel.setBackground(COR_FUNDO);
         painel.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
+
         painel.add(fingerprintPanel, BorderLayout.CENTER);
         painel.add(labelStatus, BorderLayout.SOUTH);
-        
+
         return painel;
     }
 
@@ -256,6 +257,7 @@ public class TelaAutenticacao extends JFrame {
             protected Optional<Usuario> doInBackground() {
                 return controller.solicitarAutenticacaoBiometrica();
             }
+
             @Override
             protected void done() {
                 try {
@@ -304,7 +306,8 @@ public class TelaAutenticacao extends JFrame {
             this.statusCor = cor;
             repaint();
         }
-// icone de digital grande
+
+        // icone de digital grande
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -317,7 +320,7 @@ public class TelaAutenticacao extends JFrame {
 
             g2d.setColor(statusCor);
             g2d.setStroke(new BasicStroke(diametro / 20f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            
+
             for (int i = 0; i < 6; i++) {
                 int d = diametro - (i * (diametro / 6));
                 int arcX = x + (i * (diametro / 12));
@@ -327,11 +330,11 @@ public class TelaAutenticacao extends JFrame {
             g2d.dispose();
         }
     }
-    
+
     // icone da digital pequeno
     private static class FingerprintIconPanel extends JPanel {
         private static final long serialVersionUID = 1L;
-        
+
         public FingerprintIconPanel() {
             setOpaque(false);
             setPreferredSize(new Dimension(20, 20)); // tamanho
@@ -349,7 +352,7 @@ public class TelaAutenticacao extends JFrame {
 
             g2d.setColor(Color.WHITE); // cor
             g2d.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            
+
             for (int i = 0; i < 4; i++) { // tem menos arcos que o grande
                 int d = diametro - (i * (diametro / 4));
                 int arcX = x + (i * (diametro / 8));
