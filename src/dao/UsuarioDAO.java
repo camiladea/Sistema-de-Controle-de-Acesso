@@ -1,69 +1,148 @@
 package dao;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import model.Administrador;
-import model.Funcionario;
 import model.Usuario;
 import util.ConexaoBancoDados;
 
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
 public class UsuarioDAO {
 
-    public void salvarDigital(int usuarioId, byte[] digitalTemplate) throws SQLException {
-        String sql = "UPDATE Usuario SET digitalTemplate = ? WHERE id = ?";
+    public boolean inserir(Usuario usuario) {
+        String sql = "INSERT INTO usuario (nome, cpf, email, tipoUsuario, cargo, login, senhaHash, ativo, digitalTemplate) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConexaoBancoDados.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setBytes(1, digitalTemplate);
-            stmt.setInt(2, usuarioId);
+
+            stmt.setString(1, usuario.getNome());
+            stmt.setString(2, usuario.getCpf());
+            stmt.setString(3, usuario.getEmail());
+            stmt.setString(4, usuario.getTipoUsuario());
+            stmt.setString(5, usuario.getCargo());
+            stmt.setString(6, usuario.getLogin());
+            stmt.setString(7, usuario.getSenhaHash());
+            stmt.setBoolean(8, usuario.isAtivo());
+            stmt.setBytes(9, usuario.getDigitalTemplate());
             stmt.executeUpdate();
+            return true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
-    public byte[] obterDigitalPorId(int usuarioId) throws SQLException {
-        String sql = "SELECT digitalTemplate FROM Usuario WHERE id = ?";
+    public boolean atualizar(Usuario usuario) {
+        String sql = "UPDATE usuario SET nome=?, cpf=?, email=?, tipoUsuario=?, cargo=?, login=?, senhaHash=?, ativo=?, digitalTemplate=? WHERE id=?";
         try (Connection conn = ConexaoBancoDados.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, usuarioId);
+
+            stmt.setString(1, usuario.getNome());
+            stmt.setString(2, usuario.getCpf());
+            stmt.setString(3, usuario.getEmail());
+            stmt.setString(4, usuario.getTipoUsuario());
+            stmt.setString(5, usuario.getCargo());
+            stmt.setString(6, usuario.getLogin());
+            stmt.setString(7, usuario.getSenhaHash());
+            stmt.setBoolean(8, usuario.isAtivo());
+            stmt.setBytes(9, usuario.getDigitalTemplate());
+            stmt.setInt(10, usuario.getId());
+            stmt.executeUpdate();
+            return true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean remover(int id) {
+        String sql = "DELETE FROM usuario WHERE id = ?";
+        try (Connection conn = ConexaoBancoDados.getConexao();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public Usuario buscarPorId(int id) {
+        String sql = "SELECT * FROM usuario WHERE id = ?";
+        try (Connection conn = ConexaoBancoDados.getConexao();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
-            if (rs.next()) return rs.getBytes("digitalTemplate");
+            if (rs.next()) {
+                return mapearUsuario(rs);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return null;
     }
 
-    public Usuario buscarPorLogin(String login) throws SQLException {
-        String sql = "SELECT * FROM Usuario WHERE login = ?";
+    public Usuario buscarPorCPF(String cpf) {
+        String sql = "SELECT * FROM usuario WHERE cpf = ?";
+        try (Connection conn = ConexaoBancoDados.getConexao();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, cpf);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return mapearUsuario(rs);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Usuario buscarPorLoginESenha(String login, String senhaHash) {
+        String sql = "SELECT * FROM usuario WHERE login = ? AND senhaHash = ?";
         try (Connection conn = ConexaoBancoDados.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, login);
+            stmt.setString(2, senhaHash);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                Usuario u = new Usuario();
-                u.setId(rs.getInt("id"));
-                u.setNome(rs.getString("nome"));
-                u.setLogin(rs.getString("login"));
-                u.setSenhaHash(rs.getString("senhaHash"));
-                u.setDigitalTemplate(rs.getBytes("digitalTemplate"));
-                return u;
+                return mapearUsuario(rs);
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return null;
     }
 
-    public List<Usuario> listarUsuarios() throws SQLException {
+    public List<Usuario> listarTodos() {
         List<Usuario> lista = new ArrayList<>();
-        String sql = "SELECT * FROM Usuario";
+        String sql = "SELECT * FROM usuario";
         try (Connection conn = ConexaoBancoDados.getConexao();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
-                Usuario u = new Usuario();
-                u.setId(rs.getInt("id"));
-                u.setNome(rs.getString("nome"));
-                u.setLogin(rs.getString("login"));
-                lista.add(u);
+                lista.add(mapearUsuario(rs));
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return lista;
+    }
+
+    private Usuario mapearUsuario(ResultSet rs) throws SQLException {
+        Usuario u = new Usuario();
+        u.setId(rs.getInt("id"));
+        u.setNome(rs.getString("nome"));
+        u.setCpf(rs.getString("cpf"));
+        u.setEmail(rs.getString("email"));
+        u.setTipoUsuario(rs.getString("tipoUsuario"));
+        u.setCargo(rs.getString("cargo"));
+        u.setLogin(rs.getString("login"));
+        u.setSenhaHash(rs.getString("senhaHash"));
+        u.setAtivo(rs.getBoolean("ativo"));
+        u.setDigitalTemplate(rs.getBytes("digitalTemplate"));
+        return u;
     }
 }

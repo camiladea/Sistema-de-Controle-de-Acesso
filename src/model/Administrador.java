@@ -1,16 +1,13 @@
 package model;
 
 public class Administrador extends Usuario {
-    private String login;
-    private String senhaHash;
 
-    public Administrador(String nome, String cpf, String email, byte[] digitalTemplate, String login, String senhaHash) {
-        super(nome, cpf, email, digitalTemplate); // CORRETO: Passando byte[]
-        this.login = login;
-        this.senhaHash = senhaHash;
+    public Administrador(String nome, String cpf, String email, String cargo, String login, String senhaHash, byte[] digitalTemplate) {
+        super(nome, cpf, email, "Administrador", cargo, login, senhaHash, digitalTemplate);
     }
-    public String getLogin() { return login; }
-    public void setLogin(String login) { this.login = login; }
-    public String getSenhaHash() { return senhaHash; }
-    public void setSenhaHash(String senhaHash) { this.senhaHash = senhaHash; }
+
+    public Administrador() {
+        super();
+        this.setTipoUsuario("Administrador");
+    }
 }

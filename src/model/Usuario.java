@@ -1,8 +1,5 @@
 package model;
 
-/**
- * Representa um usuário do sistema, incluindo dados biométricos.
- */
 public class Usuario {
 
     private int id;
@@ -14,11 +11,29 @@ public class Usuario {
     private String login;
     private String senhaHash;
     private boolean ativo;
-    private byte[] digitalTemplate;
+    private byte[] digitalTemplate; // stored as BLOB
 
     public Usuario() {}
 
-    // Getters & Setters
+    // Existing constructor (without fingerprint)
+    public Usuario(String nome, String cpf, String email, String tipoUsuario, String cargo, String login, String senhaHash) {
+        this.nome = nome;
+        this.cpf = cpf;
+        this.email = email;
+        this.tipoUsuario = tipoUsuario;
+        this.cargo = cargo;
+        this.login = login;
+        this.senhaHash = senhaHash;
+        this.ativo = true;
+    }
+
+    // ✅ New constructor (for biometric registration)
+    public Usuario(String nome, String cpf, String email, String tipoUsuario, String cargo, String login, String senhaHash, byte[] digitalTemplate) {
+        this(nome, cpf, email, tipoUsuario, cargo, login, senhaHash);
+        this.digitalTemplate = digitalTemplate;
+    }
+
+    // Getters and setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -48,15 +63,4 @@ public class Usuario {
 
     public byte[] getDigitalTemplate() { return digitalTemplate; }
     public void setDigitalTemplate(byte[] digitalTemplate) { this.digitalTemplate = digitalTemplate; }
-
-    @Override
-    public String toString() {
-        return "Usuario{" +
-                "id=" + id +
-                ", nome='" + nome + '\'' +
-                ", login='" + login + '\'' +
-                ", ativo=" + ativo +
-                ", hasDigital=" + (digitalTemplate != null ? "sim" : "não") +
-                '}';
-    }
 }
