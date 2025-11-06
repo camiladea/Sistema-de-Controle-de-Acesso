@@ -248,42 +248,55 @@ public class TelaAutenticacao extends JFrame {
     }
 
     private void executarAutenticacao() {
-        labelStatus.setText("Aguarde, lendo biometria...");
-        fingerprintPanel.setStatusCor(COR_DESTAQUE_PROCESSANDO);
-        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+    labelStatus.setText("Lendo digital, por favor aguarde...");
+    fingerprintPanel.setStatusCor(COR_DESTAQUE_PROCESSANDO);
+    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-        new SwingWorker<Optional<Usuario>, Void>() {
-            @Override
-            protected Optional<Usuario> doInBackground() {
-                return controller.solicitarAutenticacaoBiometrica();
-            }
+    // Pequena animação enquanto o leitor captura
+    Timer pulseTimer = new Timer(250, evt -> {
+        if (fingerprintPanel.getBackground() == COR_DESTAQUE_PROCESSANDO) {
+            fingerprintPanel.setStatusCor(COR_DESTAQUE_IDLE);
+        } else {
+            fingerprintPanel.setStatusCor(COR_DESTAQUE_PROCESSANDO);
+        }
+    });
+    pulseTimer.start();
 
-            @Override
-            protected void done() {
-                try {
-                    Optional<Usuario> usuarioOpt = get();
-                    if (usuarioOpt.isPresent()) {
-                        labelStatus.setText("Acesso Permitido: " + usuarioOpt.get().getNome());
-                        fingerprintPanel.setStatusCor(COR_SUCESSO);
-                    } else {
-                        labelStatus.setText("Acesso Negado. Tente novamente.");
-                        fingerprintPanel.setStatusCor(COR_ERRO);
-                    }
-                } catch (Exception ex) {
-                    labelStatus.setText("Erro de Comunicação com o Leitor");
+    new SwingWorker<Optional<Usuario>, Void>() {
+        @Override
+        protected Optional<Usuario> doInBackground() {
+            // Faz a autenticação biométrica via controller → SistemaAutenticacao
+            return controller.solicitarAutenticacaoBiometrica();
+        }
+
+        @Override
+        protected void done() {
+            pulseTimer.stop(); // para animação de leitura
+            try {
+                Optional<Usuario> usuarioOpt = get();
+                if (usuarioOpt.isPresent()) {
+                    labelStatus.setText("Acesso Permitido: " + usuarioOpt.get().getNome());
+                    fingerprintPanel.setStatusCor(COR_SUCESSO);
+                } else {
+                    labelStatus.setText("Digital não reconhecida. Tente novamente.");
                     fingerprintPanel.setStatusCor(COR_ERRO);
-                } finally {
-                    setCursor(Cursor.getDefaultCursor());
-                    Timer timer = new Timer(3000, evt -> {
-                        labelStatus.setText("Aproxime o dedo para autenticar");
-                        fingerprintPanel.setStatusCor(COR_DESTAQUE_IDLE);
-                    });
-                    timer.setRepeats(false);
-                    timer.start();
                 }
+            } catch (Exception ex) {
+                labelStatus.setText("Erro de comunicação com o leitor");
+                fingerprintPanel.setStatusCor(COR_ERRO);
+            } finally {
+                setCursor(Cursor.getDefaultCursor());
+                // Volta ao estado original depois de 3s
+                Timer timer = new Timer(3000, evt -> {
+                    labelStatus.setText("Aproxime o dedo para autenticar");
+                    fingerprintPanel.setStatusCor(COR_DESTAQUE_IDLE);
+                });
+                timer.setRepeats(false);
+                timer.start();
             }
-        }.execute();
-    }
+        }
+    }.execute();
+}
 
     private void abrirPainelAdmin() {
         TelaLoginAdmin telaLogin = new TelaLoginAdmin(this, controller);
