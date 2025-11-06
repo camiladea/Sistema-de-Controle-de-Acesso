@@ -320,6 +320,11 @@ public class TelaAutenticacao extends JFrame {
             repaint();
         }
 
+        public Color getStatusCor() {
+            return statusCor;
+        }
+
+
         // icone de digital grande
         @Override
         protected void paintComponent(Graphics g) {
