@@ -1,3 +1,4 @@
+package main;
 import controller.TerminalController;
 import view.TelaAutenticacao;
 
