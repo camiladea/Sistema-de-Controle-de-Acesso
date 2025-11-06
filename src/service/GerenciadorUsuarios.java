@@ -6,7 +6,9 @@ import model.Usuario;
 import java.util.Optional;
 
 /**
- * Handles user registration, editing, and DAO bridging.
+ * GerenciadorUsuarios
+ * 
+ * Handles registration, fingerprint capture, and user data updates.
  */
 public class GerenciadorUsuarios {
 
@@ -19,11 +21,16 @@ public class GerenciadorUsuarios {
     }
 
     /**
-     * Register a new employee and capture their fingerprint template.
+     * Register a new employee and capture their fingerprint.
+     *
+     * @param nome  Nome completo
+     * @param cpf   CPF (unique identifier)
+     * @param email E-mail
+     * @param cargo Cargo ou função
+     * @return true se o cadastro foi bem-sucedido
      */
     public boolean cadastrarNovoFuncionario(String nome, String cpf, String email, String cargo) {
         try {
-            // Check if CPF already exists
             if (usuarioDAO.buscarPorCPF(cpf) != null) {
                 System.err.println("[GerenciadorUsuarios] ERRO: CPF já cadastrado: " + cpf);
                 return false;
@@ -38,13 +45,15 @@ public class GerenciadorUsuarios {
             }
 
             byte[] digitalTemplate = digitalOpt.get();
-
             Usuario novo = new Funcionario(nome, cpf, email, cargo, "", "", digitalTemplate);
             boolean sucesso = usuarioDAO.inserir(novo);
 
             if (sucesso) {
                 System.out.println("[GerenciadorUsuarios] Funcionário cadastrado com sucesso: " + nome);
+            } else {
+                System.err.println("[GerenciadorUsuarios] Falha ao inserir no banco de dados.");
             }
+
             return sucesso;
 
         } catch (Exception e) {
@@ -54,7 +63,7 @@ public class GerenciadorUsuarios {
     }
 
     /**
-     * Edit user data.
+     * Update an existing user’s data.
      */
     public boolean editarUsuario(Usuario usuario) {
         if (usuario == null) return false;

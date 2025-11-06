@@ -1,24 +1,21 @@
 package service;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Optional;
-import java.util.Base64;
+import java.io.*;
+import java.util.*;
 
 /**
- * Wrapper around the native C helper (`finger_helper`) that interacts with libfprint.
- * 
- * Handles capturing and comparing fingerprint templates via process calls.
+ * Wrapper around native C helper (`fp_test`) that interacts with libfprint 2.0.
+ * Handles capturing and verifying fingerprints via process calls.
  */
 public class NativeLibfprintReader {
 
-    private static final String HELPER_PATH = "/usr/local/bin/finger_helper"; // adjust if in another path
+    // Path to compiled binary
+    private static final String HELPER_PATH = "/usr/local/bin/fp_test";
 
     /**
-     * Captures a fingerprint template by invoking the helper binary.
-     * 
-     * @return Optional containing the captured fingerprint bytes (template), or empty if failed.
+     * Captures a fingerprint and returns its Base64-encoded template.
+     *
+     * @return Optional containing the captured fingerprint as bytes.
      */
     public Optional<byte[]> capturarDigital() {
         ProcessBuilder pb = new ProcessBuilder(HELPER_PATH, "enroll");
@@ -27,73 +24,72 @@ public class NativeLibfprintReader {
         try {
             Process process = pb.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
             String line;
             String base64Template = null;
 
             while ((line = reader.readLine()) != null) {
-                if (line.startsWith("OK ")) {
+                System.out.println("[fp_test] " + line); // debug log
+                if (line.startsWith("BASE64:")) { // new format
+                    base64Template = line.substring("BASE64:".length()).trim();
+                    break;
+                } else if (line.startsWith("OK ")) {
                     base64Template = line.substring(3).trim();
                     break;
                 }
             }
 
-            process.waitFor();
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                System.err.println("[NativeLibfprintReader] Processo terminou com código: " + exitCode);
+            }
 
             if (base64Template != null && !base64Template.isEmpty()) {
                 byte[] templateBytes = Base64.getDecoder().decode(base64Template);
-                System.out.println("[NativeLibfprintReader] Captura de digital concluída. Tamanho: " + templateBytes.length + " bytes");
+                System.out.println("[NativeLibfprintReader] Captura concluída: " + templateBytes.length + " bytes");
                 return Optional.of(templateBytes);
-            } else {
-                System.err.println("[NativeLibfprintReader] Falha ao capturar digital (sem saída OK).");
-                return Optional.empty();
             }
 
-        } catch (IOException | InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            return Optional.empty();
         }
+
+        System.err.println("[NativeLibfprintReader] Falha ao capturar digital.");
+        return Optional.empty();
     }
 
     /**
-     * Compares two fingerprint templates by calling the helper binary.
-     * 
-     * @param storedTemplate The template stored in the database.
-     * @param candidateTemplate The newly captured template.
-     * @return true if templates match, false otherwise.
+     * Verifies a fingerprint against a stored Base64 template.
+     *
+     * @param storedTemplate Template from DB
+     * @return true if matched, false otherwise
      */
-    public boolean compararDigitais(byte[] storedTemplate, byte[] candidateTemplate) {
-        if (storedTemplate == null || candidateTemplate == null) {
-            System.err.println("[NativeLibfprintReader] ERRO: Um dos templates está nulo.");
+    public boolean verificarDigital(byte[] storedTemplate) {
+        if (storedTemplate == null) {
+            System.err.println("[NativeLibfprintReader] ERRO: Template armazenado é nulo.");
             return false;
         }
 
-        String storedBase64 = Base64.getEncoder().encodeToString(storedTemplate);
-        String candidateBase64 = Base64.getEncoder().encodeToString(candidateTemplate);
-
-        ProcessBuilder pb = new ProcessBuilder(HELPER_PATH, "verify", storedBase64);
+        String base64 = Base64.getEncoder().encodeToString(storedTemplate);
+        ProcessBuilder pb = new ProcessBuilder(HELPER_PATH, "verify", base64);
         pb.redirectErrorStream(true);
 
         try {
             Process process = pb.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
             String line;
-            boolean match = false;
+            boolean matched = false;
 
             while ((line = reader.readLine()) != null) {
-                if (line.trim().equals("OK")) {
-                    match = true;
-                    break;
+                System.out.println("[fp_test] " + line);
+                if (line.contains("MATCH") || line.contains("OK MATCH")) {
+                    matched = true;
                 }
             }
 
             process.waitFor();
+            return matched;
 
-            System.out.println("[NativeLibfprintReader] Resultado da verificação: " + (match ? "CORRESPONDÊNCIA" : "NÃO CORRESPONDE"));
-            return match;
-
-        } catch (IOException | InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
