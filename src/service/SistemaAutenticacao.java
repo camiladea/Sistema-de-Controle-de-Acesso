@@ -5,11 +5,11 @@ import model.Usuario;
 import model.Administrador;
 import java.util.Optional;
 import java.util.List;
+import java.util.ArrayList;
+import java.security.MessageDigest;
 
 /**
- * SistemaAutenticacao
- * 
- * Handles biometric authentication (via fp_test) and admin login verification.
+ * Handles both biometric and admin credential authentication.
  */
 public class SistemaAutenticacao {
 
@@ -22,32 +22,33 @@ public class SistemaAutenticacao {
     }
 
     /**
-     * Perform biometric authentication — captures a fingerprint and compares it
-     * against all stored user templates in the database.
-     *
-     * @return Optional<Usuario> if a match is found, otherwise empty.
+     * Perform biometric authentication — ask the helper to IDENTIFY against all stored templates.
      */
     public Optional<Usuario> autenticarPorBiometria() {
         try {
-            System.out.println("[SistemaAutenticacao] Iniciando captura biométrica...");
-            Optional<byte[]> capturaOpt = leitorBiometrico.capturarDigital();
+            List<Usuario> usuarios = usuarioDAO.listarTodos();
+            List<byte[]> templates = new ArrayList<>();
+            List<Usuario> usersWithTemplates = new ArrayList<>();
 
-            if (capturaOpt.isEmpty()) {
-                System.err.println("[SistemaAutenticacao] ERRO: Não foi possível capturar a digital.");
+            for (Usuario u : usuarios) {
+                if (u.getDigitalTemplate() != null && u.getDigitalTemplate().length > 0) {
+                    templates.add(u.getDigitalTemplate());
+                    usersWithTemplates.add(u);
+                }
+            }
+
+            if (templates.isEmpty()) {
+                System.err.println("[SistemaAutenticacao] Nenhuma digital cadastrada no banco.");
                 return Optional.empty();
             }
 
-            byte[] novaCaptura = capturaOpt.get();
-            List<Usuario> usuarios = usuarioDAO.listarTodos();
-
-            for (Usuario u : usuarios) {
-                byte[] templateSalvo = u.getDigitalTemplate();
-                if (templateSalvo != null && templateSalvo.length > 0) {
-                    System.out.println("[SistemaAutenticacao] Verificando usuário: " + u.getNome());
-                    if (leitorBiometrico.verificarDigital(templateSalvo)) {
-                        System.out.println("[SistemaAutenticacao] Usuário autenticado com sucesso: " + u.getNome());
-                        return Optional.of(u);
-                    }
+            Optional<Integer> matchIndex = leitorBiometrico.identificar(templates);
+            if (matchIndex.isPresent()) {
+                int idx = matchIndex.get();
+                if (idx >= 0 && idx < usersWithTemplates.size()) {
+                    Usuario matchedUser = usersWithTemplates.get(idx);
+                    System.out.println("[SistemaAutenticacao] Usuário autenticado: " + matchedUser.getNome());
+                    return Optional.of(matchedUser);
                 }
             }
 
@@ -61,23 +62,56 @@ public class SistemaAutenticacao {
     }
 
     /**
-     * Authenticate an administrator via login and password hash.
-     *
-     * @param login - Admin username
-     * @param senhaHash - Password hash
-     * @return Optional<Administrador> if credentials match.
+     * Verify admin credentials via login and plain password. Accepts:
+     * - legacy plain stored password (exact match),
+     * - stored SHA-256(hex) produced from the plain password.
      */
-    public Optional<Administrador> autenticarAdminPorCredenciais(String login, String senhaHash) {
+    public Optional<Administrador> autenticarAdminPorCredenciais(String login, String senhaPlain) {
         try {
-            Usuario user = usuarioDAO.buscarPorLoginESenha(login, senhaHash);
-            if (user instanceof Administrador) {
-                System.out.println("[SistemaAutenticacao] Admin autenticado: " + user.getNome());
-                return Optional.of((Administrador) user);
+            Usuario user = usuarioDAO.buscarPorLogin(login);
+            if (user == null) {
+                System.err.println("[SistemaAutenticacao] Usuário não encontrado: " + login);
+                return Optional.empty();
             }
+
+            String stored = user.getSenhaHash();
+            if (stored == null) stored = "";
+
+            // 1) exact match (legacy plain text)
+            if (!stored.isEmpty() && stored.equals(senhaPlain)) {
+                if (user instanceof Administrador) return Optional.of((Administrador) user);
+                return Optional.empty();
+            }
+
+            // 2) SHA-256 hex match
+            String sha256hex = sha256Hex(senhaPlain);
+            if (!stored.isEmpty() && stored.equalsIgnoreCase(sha256hex)) {
+                if (user instanceof Administrador) return Optional.of((Administrador) user);
+                return Optional.empty();
+            }
+
+            // not matched
+            System.err.println("[SistemaAutenticacao] Credenciais inválidas para " + login);
+            return Optional.empty();
+
         } catch (Exception e) {
             e.printStackTrace();
+            return Optional.empty();
         }
-        System.err.println("[SistemaAutenticacao] Credenciais inválidas.");
-        return Optional.empty();
+    }
+
+    private String sha256Hex(String input) {
+        if (input == null) return "";
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] b = md.digest(input.getBytes("UTF-8"));
+            StringBuilder sb = new StringBuilder();
+            for (byte x : b) {
+                sb.append(String.format("%02x", x));
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

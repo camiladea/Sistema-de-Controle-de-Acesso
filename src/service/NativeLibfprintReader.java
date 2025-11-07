@@ -5,18 +5,11 @@ import java.util.*;
 
 /**
  * Wrapper around native C helper (`fp_test`) that interacts with libfprint 2.0.
- * Handles capturing and verifying fingerprints via process calls.
  */
 public class NativeLibfprintReader {
 
-    // Path to compiled binary
     private static final String HELPER_PATH = "/usr/local/bin/fp_test";
 
-    /**
-     * Captures a fingerprint and returns its Base64-encoded template.
-     *
-     * @return Optional containing the captured fingerprint as bytes.
-     */
     public Optional<byte[]> capturarDigital() {
         ProcessBuilder pb = new ProcessBuilder(HELPER_PATH, "enroll");
         pb.redirectErrorStream(true);
@@ -28,11 +21,8 @@ public class NativeLibfprintReader {
             String base64Template = null;
 
             while ((line = reader.readLine()) != null) {
-                System.out.println("[fp_test] " + line); // debug log
-                if (line.startsWith("BASE64:")) { // new format
-                    base64Template = line.substring("BASE64:".length()).trim();
-                    break;
-                } else if (line.startsWith("OK ")) {
+                System.out.println("[fp_test] " + line);
+                if (line.startsWith("OK ")) {
                     base64Template = line.substring(3).trim();
                     break;
                 }
@@ -40,7 +30,7 @@ public class NativeLibfprintReader {
 
             int exitCode = process.waitFor();
             if (exitCode != 0) {
-                System.err.println("[NativeLibfprintReader] Processo terminou com código: " + exitCode);
+                System.err.println("[NativeLibfprintReader] enroll exit code: " + exitCode);
             }
 
             if (base64Template != null && !base64Template.isEmpty()) {
@@ -58,10 +48,8 @@ public class NativeLibfprintReader {
     }
 
     /**
-     * Verifies a fingerprint against a stored Base64 template.
-     *
-     * @param storedTemplate Template from DB
-     * @return true if matched, false otherwise
+     * Verify stored template by invoking helper which will prompt for a finger and return OK/FAIL.
+     * This method is kept for single-template verification use-cases.
      */
     public boolean verificarDigital(byte[] storedTemplate) {
         if (storedTemplate == null) {
@@ -81,7 +69,7 @@ public class NativeLibfprintReader {
 
             while ((line = reader.readLine()) != null) {
                 System.out.println("[fp_test] " + line);
-                if (line.contains("MATCH") || line.contains("OK MATCH")) {
+                if (line.trim().equals("OK")) {
                     matched = true;
                 }
             }
@@ -92,6 +80,57 @@ public class NativeLibfprintReader {
         } catch (Exception e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    /**
+     * IDENTIFY: send all stored templates to the helper in a single call and let it prompt the user once.
+     *
+     * Returns Optional<Integer> containing the matched index (0-based) when matched,
+     * or Optional.empty() when no match or on error.
+     */
+    public Optional<Integer> identificar(List<byte[]> templates) {
+        if (templates == null || templates.isEmpty()) return Optional.empty();
+
+        // Build args: fp_test identify <base64-1> <base64-2> ...
+        List<String> cmd = new ArrayList<>();
+        cmd.add(HELPER_PATH);
+        cmd.add("identify");
+        for (byte[] t : templates) {
+            cmd.add(Base64.getEncoder().encodeToString(t));
+        }
+
+        ProcessBuilder pb = new ProcessBuilder(cmd);
+        pb.redirectErrorStream(true);
+
+        try {
+            Process process = pb.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            Optional<Integer> result = Optional.empty();
+
+            while ((line = reader.readLine()) != null) {
+                System.out.println("[fp_test] " + line);
+                line = line.trim();
+                // Expected outputs: "OK <index>" or "NO_MATCH"
+                if (line.startsWith("OK ")) {
+                    String num = line.substring(3).trim();
+                    try {
+                        int idx = Integer.parseInt(num);
+                        result = Optional.of(idx);
+                        break;
+                    } catch (NumberFormatException ex) { /* ignore */ }
+                } else if (line.equals("NO_MATCH") || line.equals("FAIL")) {
+                    result = Optional.empty();
+                }
+            }
+
+            process.waitFor();
+            return result;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Optional.empty();
         }
     }
 }

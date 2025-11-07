@@ -27,7 +27,7 @@ public class Usuario {
         this.ativo = true;
     }
 
-    // ✅ New constructor (for biometric registration)
+    // New constructor (for biometric registration)
     public Usuario(String nome, String cpf, String email, String tipoUsuario, String cargo, String login, String senhaHash, byte[] digitalTemplate) {
         this(nome, cpf, email, tipoUsuario, cargo, login, senhaHash);
         this.digitalTemplate = digitalTemplate;

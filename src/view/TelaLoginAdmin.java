@@ -116,7 +116,19 @@ public class TelaLoginAdmin extends JDialog {
 
         JButton btnLogin = new JButton("AUTORIZAR");
         estilizarBotao(btnLogin);
-        btnLogin.addActionListener(e -> autenticar());
+        btnLogin.addActionListener(e -> {
+        String login = txtLogin.getText().trim();
+        String senha = new String(txtSenha.getPassword()); // plain password
+        Optional<Administrador> admOpt = controller.solicitarAutenticacaoAdmin(login, senha);
+            if (admOpt.isPresent()) {
+        // success
+                this.setLoginSucedido(true);
+            this.dispose();
+            } else {
+        // failure
+        JOptionPane.showMessageDialog(this, "Credenciais inválidas", "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        });
         gbc.gridy = linhaAtual++;
         gbc.insets = new Insets(0, 0, 0, 0);
         painelPrincipal.add(btnLogin, gbc);
