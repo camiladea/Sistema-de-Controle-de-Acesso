@@ -51,6 +51,15 @@ public class TelaLoginAdmin extends JDialog {
         configurarEInicializar();
     }
 
+    public boolean isLoginSucedido() {
+        return loginSucedido;
+    }
+
+    public void setLoginSucedido(boolean loginSucedido) {
+        this.loginSucedido = loginSucedido;
+    }
+
+
     private void configurarEInicializar() {
         setUndecorated(true);
         setResizable(false);
@@ -288,10 +297,6 @@ public class TelaLoginAdmin extends JDialog {
         }
     }
 
-    public boolean isLoginSucedido() {
-        return loginSucedido;
-    }
-    
     private static class FingerprintIconPanel extends JPanel {
         private static final long serialVersionUID = 1L;
         

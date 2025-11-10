@@ -145,4 +145,20 @@ public class UsuarioDAO {
         u.setDigitalTemplate(rs.getBytes("digitalTemplate"));
         return u;
     }
+
+    public Usuario buscarPorLogin(String login) {
+        String sql = "SELECT * FROM usuario WHERE login = ?";
+        try (Connection conn = ConexaoBancoDados.getConexao();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, login);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapearUsuario(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
