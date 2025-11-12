@@ -1,17 +1,20 @@
 package dao;
 
-import model.Usuario;
-import util.ConexaoBancoDados;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import model.Administrador;
+import model.Usuario;
+import util.ConexaoBancoDados;
 
 public class UsuarioDAO {
 
+    // <- Set this to your exact table name (change to "usuario" if your DB uses lowercase)
+    private static final String TABLE = "Usuario";
+
     public boolean inserir(Usuario usuario) {
-        String sql = "INSERT INTO usuario (nome, cpf, email, tipoUsuario, cargo, login, senhaHash, ativo, digitalTemplate) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO " + TABLE + " (nome, cpf, email, tipoUsuario, cargo, login, senhaHash, ativo, digitalTemplate) "
+                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConexaoBancoDados.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -34,7 +37,7 @@ public class UsuarioDAO {
     }
 
     public boolean atualizar(Usuario usuario) {
-        String sql = "UPDATE usuario SET nome=?, cpf=?, email=?, tipoUsuario=?, cargo=?, login=?, senhaHash=?, ativo=?, digitalTemplate=? WHERE id=?";
+        String sql = "UPDATE " + TABLE + " SET nome=?, cpf=?, email=?, tipoUsuario=?, cargo=?, login=?, senhaHash=?, ativo=?, digitalTemplate=? WHERE id=?";
         try (Connection conn = ConexaoBancoDados.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -58,7 +61,7 @@ public class UsuarioDAO {
     }
 
     public boolean remover(int id) {
-        String sql = "DELETE FROM usuario WHERE id = ?";
+        String sql = "DELETE FROM " + TABLE + " WHERE id = ?";
         try (Connection conn = ConexaoBancoDados.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
@@ -71,13 +74,14 @@ public class UsuarioDAO {
     }
 
     public Usuario buscarPorId(int id) {
-        String sql = "SELECT * FROM usuario WHERE id = ?";
+        String sql = "SELECT * FROM " + TABLE + " WHERE id = ?";
         try (Connection conn = ConexaoBancoDados.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return mapearUsuario(rs);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapearUsuario(rs);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -86,13 +90,14 @@ public class UsuarioDAO {
     }
 
     public Usuario buscarPorCPF(String cpf) {
-        String sql = "SELECT * FROM usuario WHERE cpf = ?";
+        String sql = "SELECT * FROM " + TABLE + " WHERE cpf = ?";
         try (Connection conn = ConexaoBancoDados.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, cpf);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return mapearUsuario(rs);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapearUsuario(rs);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -101,14 +106,32 @@ public class UsuarioDAO {
     }
 
     public Usuario buscarPorLoginESenha(String login, String senhaHash) {
-        String sql = "SELECT * FROM usuario WHERE login = ? AND senhaHash = ?";
+        String sql = "SELECT * FROM " + TABLE + " WHERE login = ? AND senhaHash = ?";
         try (Connection conn = ConexaoBancoDados.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, login);
             stmt.setString(2, senhaHash);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return mapearUsuario(rs);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapearUsuario(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Added helper to search by login only
+    public Usuario buscarPorLogin(String login) {
+        String sql = "SELECT * FROM " + TABLE + " WHERE login = ?";
+        try (Connection conn = ConexaoBancoDados.getConexao();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, login);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapearUsuario(rs);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -118,7 +141,7 @@ public class UsuarioDAO {
 
     public List<Usuario> listarTodos() {
         List<Usuario> lista = new ArrayList<>();
-        String sql = "SELECT * FROM usuario";
+        String sql = "SELECT * FROM " + TABLE;
         try (Connection conn = ConexaoBancoDados.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -132,33 +155,24 @@ public class UsuarioDAO {
     }
 
     private Usuario mapearUsuario(ResultSet rs) throws SQLException {
-        Usuario u = new Usuario();
+        String tipo = rs.getString("tipoUsuario");
+        Usuario u;
+        if (tipo != null && tipo.equalsIgnoreCase("Administrador")) {
+            u = new Administrador();
+        } else {
+            u = new Usuario();
+        }
+
         u.setId(rs.getInt("id"));
         u.setNome(rs.getString("nome"));
         u.setCpf(rs.getString("cpf"));
         u.setEmail(rs.getString("email"));
-        u.setTipoUsuario(rs.getString("tipoUsuario"));
+        u.setTipoUsuario(tipo);
         u.setCargo(rs.getString("cargo"));
         u.setLogin(rs.getString("login"));
         u.setSenhaHash(rs.getString("senhaHash"));
         u.setAtivo(rs.getBoolean("ativo"));
         u.setDigitalTemplate(rs.getBytes("digitalTemplate"));
         return u;
-    }
-
-    public Usuario buscarPorLogin(String login) {
-        String sql = "SELECT * FROM usuario WHERE login = ?";
-        try (Connection conn = ConexaoBancoDados.getConexao();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, login);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return mapearUsuario(rs);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 }
