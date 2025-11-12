@@ -1,15 +1,9 @@
 package service;
 
 import dao.UsuarioDAO;
-import java.util.Optional;
-import model.Funcionario;
+import java.util.*;
 import model.Usuario;
 
-/**
- * GerenciadorUsuarios
- * 
- * Handles registration, fingerprint capture, and user data updates.
- */
 public class GerenciadorUsuarios {
 
     private final UsuarioDAO usuarioDAO;
@@ -20,53 +14,85 @@ public class GerenciadorUsuarios {
         this.leitorBiometrico = new NativeLibfprintReader();
     }
 
-    /**
-     * Register a new employee and capture their fingerprint.
-     *
-     * @param nome  Nome completo
-     * @param cpf   CPF (unique identifier)
-     * @param email E-mail
-     * @param cargo Cargo ou função
-     * @return true se o cadastro foi bem-sucedido
-     */
     public boolean cadastrarNovoFuncionario(String nome, String cpf, String email, String cargo) {
-        try {
-            if (usuarioDAO.buscarPorCPF(cpf) != null) {
-                System.err.println("[GerenciadorUsuarios] ERRO: CPF já cadastrado: " + cpf);
-                return false;
-            }
+        System.out.println("[GerenciadorUsuarios] Capturando digital para novo funcionário...");
+        
+        // ✅ leitorBiometrico returns Optional<String> (Base64)
+        Optional<String> digitalOpt = leitorBiometrico.capturarDigital();
 
-            System.out.println("[GerenciadorUsuarios] Capturando digital para novo funcionário...");
-            Optional<byte[]> digitalOpt = leitorBiometrico.capturarDigital();
-
-            if (digitalOpt.isEmpty()) {
-                System.err.println("[GerenciadorUsuarios] Falha: não foi possível capturar a digital.");
-                return false;
-            }
-
-            byte[] digitalTemplate = digitalOpt.get();
-            Usuario novo = new Funcionario(nome, cpf, email, cargo, "", "", digitalTemplate);
-            boolean sucesso = usuarioDAO.inserir(novo);
-
-            if (sucesso) {
-                System.out.println("[GerenciadorUsuarios] Funcionário cadastrado com sucesso: " + nome);
-            } else {
-                System.err.println("[GerenciadorUsuarios] Falha ao inserir no banco de dados.");
-            }
-
-            return sucesso;
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (digitalOpt.isEmpty()) {
+            System.err.println("[GerenciadorUsuarios] Falha na captura da digital.");
             return false;
         }
+
+        // ✅ Decode Base64 into raw bytes before saving in DB
+        byte[] digitalBytes = Base64.getDecoder().decode(digitalOpt.get());
+
+        Usuario novo = new Usuario();
+        novo.setNome(nome);
+        novo.setCpf(cpf);
+        novo.setEmail(email);
+        novo.setCargo(cargo);
+        novo.setAtivo(true);
+        novo.setTipoUsuario("FUNCIONARIO");
+        novo.setLogin(cpf);
+        novo.setSenhaHash("123"); // password placeholder for now
+        novo.setDigitalTemplate(digitalBytes);
+
+        boolean ok = usuarioDAO.inserir(novo);
+
+        if (ok)
+            System.out.println("[GerenciadorUsuarios] Funcionário cadastrado com sucesso: " + nome);
+        else
+            System.err.println("[GerenciadorUsuarios] Falha ao inserir funcionário no banco.");
+
+        return ok;
     }
 
-    /**
-     * Update an existing user’s data.
-     */
-    public boolean editarUsuario(Usuario usuario) {
-        if (usuario == null) return false;
-        return usuarioDAO.atualizar(usuario);
+    public Optional<Usuario> identificarUsuarioPorBiometria() {
+        System.out.println("[GerenciadorUsuarios] Iniciando identificação biométrica...");
+
+        List<Usuario> usuarios = usuarioDAO.listarTodos();
+        if (usuarios.isEmpty()) {
+            System.err.println("[GerenciadorUsuarios] Nenhum usuário encontrado no banco.");
+            return Optional.empty();
+        }
+
+        // ✅ Convert all fingerprint templates to Base64 strings
+        List<String> templatesBase64 = new ArrayList<>();
+        for (Usuario u : usuarios) {
+            byte[] tpl = u.getDigitalTemplate();
+            if (tpl != null && tpl.length > 0)
+                templatesBase64.add(Base64.getEncoder().encodeToString(tpl));
+        }
+
+        if (templatesBase64.isEmpty()) {
+            System.err.println("[GerenciadorUsuarios] Nenhum usuário possui digital cadastrada.");
+            return Optional.empty();
+        }
+
+        // ✅ identify expects List<String>
+        Optional<Integer> matchIndex = leitorBiometrico.identificar(templatesBase64);
+
+        if (matchIndex.isPresent()) {
+            int idx = matchIndex.get();
+            if (idx >= 0 && idx < usuarios.size()) {
+                Usuario u = usuarios.get(idx);
+                System.out.println("[GerenciadorUsuarios] Digital corresponde ao usuário: " + u.getNome());
+                return Optional.of(u);
+            }
+        }
+
+        System.out.println("[GerenciadorUsuarios] Digital não reconhecida.");
+        return Optional.empty();
+    }
+
+    public void editarUsuario(Usuario usuario) {
+        if (usuario == null) return;
+        boolean ok = usuarioDAO.atualizar(usuario);
+        if (ok)
+            System.out.println("[GerenciadorUsuarios] Usuário atualizado: " + usuario.getNome());
+        else
+            System.err.println("[GerenciadorUsuarios] Falha ao atualizar usuário.");
     }
 }
