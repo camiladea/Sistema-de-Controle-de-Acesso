@@ -90,47 +90,64 @@ public class NativeLibfprintReader {
      * or Optional.empty() when no match or on error.
      */
     public Optional<Integer> identificar(List<byte[]> templates) {
-        if (templates == null || templates.isEmpty()) return Optional.empty();
-
-        // Build args: fp_test identify <base64-1> <base64-2> ...
-        List<String> cmd = new ArrayList<>();
-        cmd.add(HELPER_PATH);
-        cmd.add("identify");
-        for (byte[] t : templates) {
-            cmd.add(Base64.getEncoder().encodeToString(t));
-        }
-
-        ProcessBuilder pb = new ProcessBuilder(cmd);
-        pb.redirectErrorStream(true);
-
-        try {
-            Process process = pb.start();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            Optional<Integer> result = Optional.empty();
-
-            while ((line = reader.readLine()) != null) {
-                System.out.println("[fp_test] " + line);
-                line = line.trim();
-                // Expected outputs: "OK <index>" or "NO_MATCH"
-                if (line.startsWith("OK ")) {
-                    String num = line.substring(3).trim();
-                    try {
-                        int idx = Integer.parseInt(num);
-                        result = Optional.of(idx);
-                        break;
-                    } catch (NumberFormatException ex) { /* ignore */ }
-                } else if (line.equals("NO_MATCH") || line.equals("FAIL")) {
-                    result = Optional.empty();
-                }
-            }
-
-            process.waitFor();
-            return result;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Optional.empty();
-        }
+    if (templates == null || templates.isEmpty()) {
+        System.err.println("[NativeLibfprintReader] Nenhum template válido encontrado para identificação.");
+        return Optional.empty();
     }
+
+    // Log each template’s length
+    for (int i = 0; i < templates.size(); i++) {
+        System.out.println("[NativeLibfprintReader] Template " + i + " length = " + templates.get(i).length + " bytes");
+    }
+
+    // Build args: fp_test identify <base64-1> <base64-2> ...
+    List<String> cmd = new ArrayList<>();
+    cmd.add(HELPER_PATH);
+    cmd.add("identify");
+    for (byte[] t : templates) {
+        String b64 = Base64.getEncoder().encodeToString(t);
+        cmd.add(b64);
+    }
+
+    System.out.println("[NativeLibfprintReader] Executando comando:");
+    for (String c : cmd) System.out.print(c + " ");
+    System.out.println();
+
+    ProcessBuilder pb = new ProcessBuilder(cmd);
+    pb.redirectErrorStream(true);
+
+    try {
+        Process process = pb.start();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line;
+        Optional<Integer> result = Optional.empty();
+
+        while ((line = reader.readLine()) != null) {
+            System.out.println("[fp_test output] " + line);
+            line = line.trim();
+            if (line.startsWith("OK ")) {
+                String num = line.substring(3).trim();
+                try {
+                    int idx = Integer.parseInt(num);
+                    result = Optional.of(idx);
+                    break;
+                } catch (NumberFormatException ex) {
+                    System.err.println("[NativeLibfprintReader] Falha ao interpretar índice: " + num);
+                }
+            } else if (line.equals("NO_MATCH") || line.equals("FAIL")) {
+                result = Optional.empty();
+            }
+        }
+
+        int exit = process.waitFor();
+        System.out.println("[NativeLibfprintReader] fp_test terminou com código " + exit);
+        return result;
+
+    } catch (Exception e) {
+        System.err.println("[NativeLibfprintReader] ERRO ao identificar:");
+        e.printStackTrace();
+        return Optional.empty();
+    }
+}
+
 }
