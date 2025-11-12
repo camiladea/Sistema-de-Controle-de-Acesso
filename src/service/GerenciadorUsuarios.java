@@ -1,9 +1,9 @@
 package service;
 
 import dao.UsuarioDAO;
+import java.util.Optional;
 import model.Funcionario;
 import model.Usuario;
-import java.util.Optional;
 
 /**
  * GerenciadorUsuarios

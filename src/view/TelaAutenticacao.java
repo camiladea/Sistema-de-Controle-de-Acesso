@@ -4,8 +4,6 @@ import controller.TerminalController;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-//import java.awt.event.WindowEvent;
-//import java.awt.event.WindowStateListener;
 import java.util.Optional;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
