@@ -9,12 +9,13 @@ import util.ConexaoBancoDados;
 
 public class UsuarioDAO {
 
-    // <- Set this to your exact table name (change to "usuario" if your DB uses lowercase)
+    // Matches your actual table name (capital U)
     private static final String TABLE = "Usuario";
 
     public boolean inserir(Usuario usuario) {
-        String sql = "INSERT INTO " + TABLE + " (nome, cpf, email, tipoUsuario, cargo, login, senhaHash, ativo, digitalTemplate) "
-                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO " + TABLE + 
+            " (nome, cpf, email, tipoUsuario, cargo, login, senhaHash, ativo, digitalTemplate) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConexaoBancoDados.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -37,7 +38,8 @@ public class UsuarioDAO {
     }
 
     public boolean atualizar(Usuario usuario) {
-        String sql = "UPDATE " + TABLE + " SET nome=?, cpf=?, email=?, tipoUsuario=?, cargo=?, login=?, senhaHash=?, ativo=?, digitalTemplate=? WHERE id=?";
+        String sql = "UPDATE " + TABLE +
+            " SET nome=?, cpf=?, email=?, tipoUsuario=?, cargo=?, login=?, senhaHash=?, ativo=?, digitalTemplate=? WHERE id=?";
         try (Connection conn = ConexaoBancoDados.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -106,10 +108,10 @@ public class UsuarioDAO {
     }
 
     public Usuario buscarPorLoginESenha(String login, String senhaHash) {
-        String sql = "SELECT * FROM " + TABLE + " WHERE login = ? AND senhaHash = ?";
+        String sql = "SELECT * FROM " + TABLE + " WHERE LOWER(login) = LOWER(?) AND senhaHash = ?";
         try (Connection conn = ConexaoBancoDados.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, login);
+            stmt.setString(1, login.toLowerCase());
             stmt.setString(2, senhaHash);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -122,12 +124,11 @@ public class UsuarioDAO {
         return null;
     }
 
-    // Added helper to search by login only
     public Usuario buscarPorLogin(String login) {
-        String sql = "SELECT * FROM " + TABLE + " WHERE login = ?";
+        String sql = "SELECT * FROM " + TABLE + " WHERE LOWER(login) = LOWER(?)";
         try (Connection conn = ConexaoBancoDados.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, login);
+            stmt.setString(1, login.toLowerCase());
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return mapearUsuario(rs);
@@ -154,10 +155,15 @@ public class UsuarioDAO {
         return lista;
     }
 
+    /** 
+     * Converts a ResultSet row into either a Usuario or Administrador instance.
+     */
     private Usuario mapearUsuario(ResultSet rs) throws SQLException {
         String tipo = rs.getString("tipoUsuario");
         Usuario u;
-        if (tipo != null && tipo.equalsIgnoreCase("Administrador")) {
+
+        // ✅ FIXED: your DB stores 'ADMIN', not 'Administrador'
+        if (tipo != null && tipo.equalsIgnoreCase("ADMIN")) {
             u = new Administrador();
         } else {
             u = new Usuario();
