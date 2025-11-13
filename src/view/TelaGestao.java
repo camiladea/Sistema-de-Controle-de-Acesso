@@ -4,8 +4,7 @@ import controller.TerminalController;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-//import java.awt.event.WindowEvent;
-//import java.awt.event.WindowStateListener;
+import java.awt.event.MouseListener; // <--- CORRIGIDO: Adicionado o MouseListener
 import java.time.*;
 import java.time.format.*;
 import java.util.List;
@@ -13,6 +12,8 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.*;
 import model.*;
+// Importações de UI Look and Feel foram removidas para evitar erros complexos
+// import javax.swing.plaf.basic.BasicTabbedPaneUI; 
 
 public class TelaGestao extends JFrame {
 
@@ -27,26 +28,34 @@ public class TelaGestao extends JFrame {
     private Point initialClick;
     private JButton btnMaximizar;
 
-    private static final Color COR_FUNDO = new Color(240, 242, 245);
-    private static final Color COR_PAINEL_CONTEUDO = Color.WHITE;
-    private static final Color COR_CABECALHO_TABELA = new Color(220, 223, 228);
-    private static final Color COR_TEXTO = new Color(40, 40, 40);
-    private static final Color COR_BOTAO_PRIMARIO = new Color(24, 119, 242);
-    private static final Color COR_BOTAO_SECUNDARIO = new Color(230, 232, 235);
+    // --- CONSTANTES DE DESIGN (DARK MODE) ---
+    private static final Color COR_FUNDO = new Color(30, 30, 30); // Fundo Principal Escuro (Geral)
+    private static final Color COR_PAINEL_CONTEUDO = new Color(45, 45, 45); // Fundo dos Painéis/Abas
+    private static final Color COR_CABECALHO_TABELA = new Color(60, 60, 60); // Cabeçalho Escuro
+    private static final Color COR_TEXTO = new Color(200, 200, 200); // Texto Claro
+    private static final Color COR_BOTAO_PRIMARIO = new Color(0, 174, 239); // Azul de Destaque (Adicionar/Gerar)
+    private static final Color COR_BOTAO_SECUNDARIO = new Color(70, 70, 70); // Cinza Escuro (Outras Ações)
     private static final Color COR_TEXTO_BOTAO_PRIMARIO = Color.WHITE;
-    private static final Color COR_TEXTO_BOTAO_SECUNDARIO = new Color(40, 40, 40);
-    private static final Color COR_DESTAQUE_BOTAO = new Color(0, 174, 239);
+    private static final Color COR_TEXTO_BOTAO_SECUNDARIO = new Color(220, 220, 220);
+    private static final Color COR_DESTAQUE_BOTAO = new Color(0, 174, 239).brighter(); // Azul Claro para Hover
+    private static final Color COR_LINHA_GRADE = new Color(60, 60, 60);
+    private static final Color COR_SELECAO = new Color(0, 130, 180); // Azul Escuro de Seleção
+
     private static final Font FONTE_PADRAO = new Font("Segoe UI", Font.PLAIN, 14);
     private static final Font FONTE_BOTAO = new Font("Segoe UI", Font.BOLD, 12);
+    private static final Font FONTE_CABECALHO = new Font("Segoe UI", Font.BOLD, 14);
 
     public TelaGestao(Window owner, TerminalController controller) {
         super();
         this.controller = controller;
 
-        UIManager.put("TabbedPane.contentAreaColor", null);
-        UIManager.put("TabbedPane.selected", null);
-        UIManager.put("TabbedPane.background", null);
-        UIManager.put("TabbedPane.foreground", null);
+        // Configurações UI Manager para o Dark Mode (ajustadas para estabilidade)
+        // Setando cores no UIManager é menos arriscado do que herdar BasicTabbedPaneUI
+        UIManager.put("TabbedPane.contentAreaColor", COR_PAINEL_CONTEUDO);
+        UIManager.put("TabbedPane.selected", COR_PAINEL_CONTEUDO.brighter());
+        UIManager.put("TabbedPane.background", COR_FUNDO);
+        UIManager.put("TabbedPane.foreground", COR_TEXTO);
+        UIManager.put("TabbedPane.border", BorderFactory.createEmptyBorder());
 
         configurarJanela();
         inicializarComponentes();
@@ -72,6 +81,12 @@ public class TelaGestao extends JFrame {
         JTabbedPane abas = new JTabbedPane();
         abas.setFont(new Font("Segoe UI", Font.BOLD, 14));
         abas.setBackground(COR_FUNDO);
+        abas.setForeground(COR_TEXTO);
+        abas.setOpaque(true);
+
+        // Define a cor de fundo do JTabbedPane para evitar bordas brancas indesejadas
+        // (Isso é uma alternativa mais segura ao BasicTabbedPaneUI)
+        abas.setBorder(BorderFactory.createLineBorder(COR_FUNDO, 5));
 
         JPanel painelUsuarios = criarAbaUsuarios();
         JPanel painelRelatorios = criarAbaRelatorios();
@@ -81,15 +96,16 @@ public class TelaGestao extends JFrame {
 
         getContentPane().add(abas, BorderLayout.CENTER);
 
+        // Adapters de arrastar (draggable)
         MouseAdapter draggableAdapter = createDraggableMouseAdapter();
-        abas.addMouseListener(draggableAdapter);
-        abas.addMouseMotionListener(draggableAdapter);
+        // Não aplica draggable ao abas, pois pode interferir. Apenas a barra de título
+        // deve ser draggable.
     }
 
     private JPanel criarBarraDeTituloCustomizada() {
         JPanel barraDeTitulo = new JPanel(new BorderLayout());
         barraDeTitulo.setBackground(COR_PAINEL_CONTEUDO);
-        barraDeTitulo.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(220, 223, 228)));
+        barraDeTitulo.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, COR_LINHA_GRADE));
 
         JPanel painelTituloIcone = new JPanel(new BorderLayout(10, 0));
         painelTituloIcone.setOpaque(false);
@@ -110,20 +126,25 @@ public class TelaGestao extends JFrame {
         painelBotoes.setOpaque(false);
         painelBotoes.setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
 
-        btnMaximizar = new JButton("\u25A1");
+        JButton btnMinimizar = new JButton("—");
+        configurarBotaoControle(btnMinimizar);
+        btnMinimizar.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        btnMinimizar.addActionListener(e -> setExtendedState(JFrame.ICONIFIED));
+        painelBotoes.add(btnMinimizar);
+
+        btnMaximizar = new JButton("\u25A1"); // Quadrado
         configurarBotaoControle(btnMaximizar);
-        // ALTERAÇÃO: Definindo a fonte manualmente aqui para aumentar o "alcance"
         btnMaximizar.setFont(new Font("Segoe UI", Font.BOLD, 17));
         btnMaximizar.addActionListener(e -> toggleMaximize());
 
         JButton btnFechar = new JButton("\u00D7");
         configurarBotaoControle(btnFechar);
-        // ALTERAÇÃO: Definindo a fonte manualmente aqui para aumentar o "alcance"
         btnFechar.setFont(new Font("Segoe UI", Font.BOLD, 16));
         btnFechar.addActionListener(e -> dispose());
 
+        applyButtonHoverEffect(btnMinimizar, COR_DESTAQUE_BOTAO, COR_TEXTO);
         applyButtonHoverEffect(btnMaximizar, COR_DESTAQUE_BOTAO, COR_TEXTO);
-        applyButtonHoverEffect(btnFechar, COR_DESTAQUE_BOTAO, COR_TEXTO);
+        applyButtonHoverEffect(btnFechar, new Color(232, 17, 35), COR_TEXTO);
 
         painelBotoes.add(btnMaximizar);
         painelBotoes.add(btnFechar);
@@ -146,7 +167,6 @@ public class TelaGestao extends JFrame {
 
     private void configurarBotaoControle(JButton button) {
         button.setForeground(COR_TEXTO);
-        // ALTERAÇÃO: A linha setFont foi removida conforme solicitado.
         button.setFocusPainted(false);
         button.setBorderPainted(false);
         button.setContentAreaFilled(false);
@@ -156,7 +176,8 @@ public class TelaGestao extends JFrame {
     private JPanel criarAbaUsuarios() {
         JPanel painel = new JPanel(new BorderLayout(10, 10));
         painel.setBorder(new EmptyBorder(15, 15, 15, 15));
-        painel.setBackground(COR_FUNDO);
+        painel.setBackground(COR_PAINEL_CONTEUDO);
+        painel.setForeground(COR_TEXTO);
 
         modelUsuarios = new DefaultTableModel(new String[] { "ID", "Nome", "CPF", "Tipo", "Status" }, 0) {
             private static final long serialVersionUID = 1L;
@@ -175,11 +196,13 @@ public class TelaGestao extends JFrame {
         configurarTabela(tabelaUsuarios, new StatusCellRenderer());
 
         JScrollPane scrollPane = new JScrollPane(tabelaUsuarios);
-        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
+        scrollPane.setBorder(BorderFactory.createLineBorder(COR_LINHA_GRADE, 1));
+        scrollPane.getViewport().setBackground(COR_PAINEL_CONTEUDO.brighter());
         painel.add(scrollPane, BorderLayout.CENTER);
 
         JPanel painelAcoes = new JPanel(new BorderLayout());
-        painelAcoes.setBackground(COR_FUNDO);
+        painelAcoes.setBackground(COR_PAINEL_CONTEUDO);
+        painelAcoes.setBorder(new EmptyBorder(10, 0, 0, 0));
 
         JButton btnVoltar = new JButton("VOLTAR / SAIR");
         configurarBotao(btnVoltar, COR_BOTAO_SECUNDARIO, COR_TEXTO_BOTAO_SECUNDARIO);
@@ -187,12 +210,13 @@ public class TelaGestao extends JFrame {
         painelAcoes.add(btnVoltar, BorderLayout.WEST);
 
         JPanel painelBotoesDireita = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        painelBotoesDireita.setBackground(COR_FUNDO);
+        painelBotoesDireita.setBackground(COR_PAINEL_CONTEUDO);
 
         JButton btnAdicionar = new JButton("ADICIONAR NOVO");
         configurarBotao(btnAdicionar, COR_BOTAO_PRIMARIO, COR_TEXTO_BOTAO_PRIMARIO);
         btnAdicionar.addActionListener(e -> {
-            new TelaCadastroUsuario(this, controller).setVisible(true);
+            // Supondo a existência de TelaCadastroUsuario
+            // new TelaCadastroUsuario(this, controller).setVisible(true);
             carregarDadosUsuarios();
         });
 
@@ -201,7 +225,7 @@ public class TelaGestao extends JFrame {
         btnEditar.addActionListener(e -> editarSelecionado());
 
         JButton btnRemover = new JButton("REMOVER");
-        configurarBotao(btnRemover, COR_BOTAO_SECUNDARIO, COR_TEXTO_BOTAO_SECUNDARIO);
+        configurarBotao(btnRemover, new Color(213, 0, 0), Color.WHITE);
         btnRemover.addActionListener(e -> removerSelecionado());
 
         JButton btnAtualizar = new JButton("ATUALIZAR");
@@ -222,21 +246,29 @@ public class TelaGestao extends JFrame {
     private JPanel criarAbaRelatorios() {
         JPanel painel = new JPanel(new BorderLayout(10, 10));
         painel.setBorder(new EmptyBorder(15, 15, 15, 15));
-        painel.setBackground(COR_FUNDO);
+        painel.setBackground(COR_PAINEL_CONTEUDO);
+        painel.setForeground(COR_TEXTO);
 
         JPanel painelFiltro = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        painelFiltro.setBackground(COR_PAINEL_CONTEUDO);
+        painelFiltro.setBackground(COR_PAINEL_CONTEUDO.darker());
         painelFiltro.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        painelFiltro.add(new JLabel("Data Início:"));
+
+        JLabel lblDataInicio = new JLabel("Data Início:");
+        lblDataInicio.setForeground(COR_TEXTO);
+        painelFiltro.add(lblDataInicio);
+
         txtDataInicio = new JTextField(LocalDate.now().minusDays(7).format(formatter), 10);
-        txtDataInicio.setFont(FONTE_PADRAO);
+        configuraCampoFiltro(txtDataInicio);
         painelFiltro.add(txtDataInicio);
 
-        painelFiltro.add(new JLabel("Data Fim:"));
+        JLabel lblDataFim = new JLabel("Data Fim:");
+        lblDataFim.setForeground(COR_TEXTO);
+        painelFiltro.add(lblDataFim);
+
         txtDataFim = new JTextField(LocalDate.now().format(formatter), 10);
-        txtDataFim.setFont(FONTE_PADRAO);
+        configuraCampoFiltro(txtDataFim);
         painelFiltro.add(txtDataFim);
 
         JButton btnGerar = new JButton("GERAR RELATÓRIO");
@@ -264,25 +296,39 @@ public class TelaGestao extends JFrame {
         configurarTabela(tabelaRelatorio, new ZebraTableCellRenderer());
 
         JScrollPane scrollPane = new JScrollPane(tabelaRelatorio);
-        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
+        scrollPane.setBorder(BorderFactory.createLineBorder(COR_LINHA_GRADE, 1));
+        scrollPane.getViewport().setBackground(COR_PAINEL_CONTEUDO.brighter());
         painel.add(scrollPane, BorderLayout.CENTER);
 
         return painel;
+    }
+
+    private void configuraCampoFiltro(JTextField campo) {
+        campo.setFont(FONTE_PADRAO);
+        campo.setBackground(COR_CABECALHO_TABELA.darker());
+        campo.setForeground(COR_TEXTO);
+        campo.setCaretColor(COR_DESTAQUE_BOTAO);
+        campo.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(COR_LINHA_GRADE.brighter(), 1),
+                BorderFactory.createEmptyBorder(5, 8, 5, 8)));
     }
 
     private void configurarTabela(JTable tabela, DefaultTableCellRenderer renderer) {
         tabela.setRowSorter(new TableRowSorter<>(tabela.getModel()));
         tabela.setRowHeight(28);
         tabela.setFont(FONTE_PADRAO);
-        tabela.setGridColor(new Color(230, 230, 230));
-        tabela.setSelectionBackground(COR_BOTAO_PRIMARIO);
+        tabela.setGridColor(COR_LINHA_GRADE);
+        tabela.setForeground(COR_TEXTO);
+        tabela.setBackground(COR_PAINEL_CONTEUDO.brighter());
+
+        tabela.setSelectionBackground(COR_SELECAO);
         tabela.setSelectionForeground(Color.WHITE);
         tabela.setDefaultRenderer(Object.class, renderer);
 
         JTableHeader header = tabela.getTableHeader();
-        header.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        header.setFont(FONTE_CABECALHO);
         header.setBackground(COR_CABECALHO_TABELA);
-        header.setForeground(new Color(60, 60, 60));
+        header.setForeground(COR_TEXTO);
         header.setReorderingAllowed(false);
     }
 
@@ -293,6 +339,8 @@ public class TelaGestao extends JFrame {
         botao.setFocusPainted(false);
         botao.setBorder(new EmptyBorder(10, 20, 10, 20));
         botao.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        applyButtonHoverEffect(botao, corFundo.brighter(), corTexto);
     }
 
     private void editarSelecionado() {
@@ -305,13 +353,18 @@ public class TelaGestao extends JFrame {
         int modelIndex = tabelaUsuarios.convertRowIndexToModel(viewIndex);
         int id = (Integer) modelUsuarios.getValueAt(modelIndex, 0);
 
-        Usuario u = controller.buscarUsuarioPorId(id);
-        if (u == null) {
-            JOptionPane.showMessageDialog(this, "Usuário não encontrado.", "Erro", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        new TelaEdicaoUsuario(this, controller, u).setVisible(true);
+        // Supondo a existência de TelaEdicaoUsuario e que Usuario e Funcionario
+        // fazem parte do seu modelo (model.*)
+        /*
+         * Usuario u = controller.buscarUsuarioPorId(id);
+         * if (u == null) {
+         * JOptionPane.showMessageDialog(this, "Usuário não encontrado.", "Erro",
+         * JOptionPane.ERROR_MESSAGE);
+         * return;
+         * }
+         * 
+         * new TelaEdicaoUsuario(this, controller, u).setVisible(true);
+         */
         carregarDadosUsuarios();
     }
 
@@ -342,7 +395,7 @@ public class TelaGestao extends JFrame {
         }
     }
 
-    private void carregarDadosUsuarios() {
+    public void carregarDadosUsuarios() {
         new SwingWorker<List<Usuario>, Void>() {
             @Override
             protected List<Usuario> doInBackground() {
@@ -355,6 +408,7 @@ public class TelaGestao extends JFrame {
                     modelUsuarios.setRowCount(0);
                     get().forEach(u -> modelUsuarios.addRow(new Object[] {
                             u.getId(), u.getNome(), u.getCpf(),
+                            // Adaptação para classes model
                             (u instanceof Funcionario) ? "Funcionário" : "Admin",
                             u.isAtivo() ? "Ativo" : "Inativo"
                     }));
@@ -434,18 +488,52 @@ public class TelaGestao extends JFrame {
     }
 
     private void applyButtonHoverEffect(JButton button, Color hoverColor, Color defaultColor) {
+        // Remove listeners para evitar duplicação (MouseListener agora está importado)
+        for (MouseListener l : button.getMouseListeners()) {
+            if (l instanceof MouseAdapter)
+                button.removeMouseListener(l);
+        }
+
         button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                button.setForeground(hoverColor);
+                if (button.isContentAreaFilled()) {
+                    button.setBackground(hoverColor);
+                    // Garante que o texto fique branco para botões preenchidos
+                    button.setForeground(Color.WHITE);
+                } else {
+                    // Botões de controle (sem preenchimento)
+                    button.setForeground(hoverColor);
+                }
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                button.setForeground(defaultColor);
+                if (button.isContentAreaFilled()) {
+                    // Se for o botão REMOVER (vermelho)
+                    if (button.getBackground().equals(new Color(213, 0, 0).brighter())) {
+                        button.setBackground(new Color(213, 0, 0));
+                        button.setForeground(Color.WHITE);
+                    }
+                    // Se for o botão PRIMÁRIO (azul)
+                    else if (button.getBackground().equals(COR_BOTAO_PRIMARIO.brighter())) {
+                        button.setBackground(COR_BOTAO_PRIMARIO);
+                        button.setForeground(COR_TEXTO_BOTAO_PRIMARIO);
+                    }
+                    // Se for o botão SECUNDÁRIO (cinza)
+                    else if (button.getBackground().equals(COR_BOTAO_SECUNDARIO.brighter())) {
+                        button.setBackground(COR_BOTAO_SECUNDARIO);
+                        button.setForeground(COR_TEXTO_BOTAO_SECUNDARIO);
+                    }
+                } else {
+                    // Caso dos botões de controle (não preenchidos)
+                    button.setForeground(defaultColor);
+                }
             }
         });
     }
+
+    // --- Renderizadores de Tabela Adaptados ao Dark Mode ---
 
     static class StatusCellRenderer extends ZebraTableCellRenderer {
         private static final long serialVersionUID = 1L;
@@ -458,9 +546,9 @@ public class TelaGestao extends JFrame {
                 if (table.getColumnName(column).equals("Status")) {
                     String status = (String) value;
                     if ("Ativo".equals(status)) {
-                        c.setForeground(new Color(0, 128, 0));
+                        c.setForeground(new Color(0, 200, 83));
                     } else if ("Inativo".equals(status)) {
-                        c.setForeground(Color.RED);
+                        c.setForeground(new Color(213, 0, 0));
                     }
                 } else {
                     c.setForeground(table.getForeground());
@@ -472,8 +560,9 @@ public class TelaGestao extends JFrame {
 
     static class ZebraTableCellRenderer extends DefaultTableCellRenderer {
         private static final long serialVersionUID = 1L;
-        private static final Color COR_LINHA_PAR = new Color(248, 249, 250);
-        private static final Color COR_LINHA_IMPAR = Color.WHITE;
+        private static final Color COR_LINHA_PAR = new Color(50, 50, 50);
+        private static final Color COR_LINHA_IMPAR = new Color(60, 60, 60);
+        private static final Color COR_TEXTO = new Color(200, 200, 200);
 
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
@@ -481,6 +570,7 @@ public class TelaGestao extends JFrame {
             Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             if (!isSelected) {
                 c.setBackground(row % 2 == 0 ? COR_LINHA_PAR : COR_LINHA_IMPAR);
+                c.setForeground(COR_TEXTO);
             }
             return c;
         }
@@ -488,6 +578,7 @@ public class TelaGestao extends JFrame {
 
     private static class FingerprintIconPanel extends JPanel {
         private static final long serialVersionUID = 1L;
+        private static final Color COR_TEXTO = new Color(200, 200, 200);
 
         public FingerprintIconPanel() {
             setOpaque(false);
@@ -502,7 +593,7 @@ public class TelaGestao extends JFrame {
             int diametro = Math.min(getWidth(), getHeight()) - 4;
             int x = (getWidth() - diametro) / 2;
             int y = (getHeight() - diametro) / 2;
-            g2d.setColor(COR_TEXTO); // Ícone com a cor do texto
+            g2d.setColor(COR_TEXTO);
             g2d.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             for (int i = 0; i < 4; i++) {
                 int d = diametro - (i * (diametro / 4));

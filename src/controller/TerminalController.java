@@ -37,8 +37,9 @@ public class TerminalController {
         return sistemaAutenticacao.autenticarAdminPorCredenciais(login, senha);
     }
 
-    public boolean solicitarCadastroNovoFuncionario(String nome, String cpf, String email, String cargo) {
-        return gerenciadorUsuarios.cadastrarNovoFuncionario(nome, cpf, email, cargo);
+    public boolean solicitarCadastroNovoFuncionario(String nome, String cpf, String email, String cargo,
+            boolean isAdmin, String login, String senha) { // <--- ASSINATURA ALTERADA
+        return gerenciadorUsuarios.cadastrarNovoFuncionario(nome, cpf, email, cargo, isAdmin, login, senha);
     }
 
     public List<Usuario> solicitarListaDeUsuarios() {
@@ -60,8 +61,8 @@ public class TerminalController {
         return registroAcessoDAO.listarPorPeriodo(inicio, fim);
     }
 
-    public void editarUsuario(Usuario usuario) {
-        GerenciadorUsuarios gerenciador = new GerenciadorUsuarios();
-        gerenciador.editarUsuario(usuario);
+    public void editarUsuario(Usuario usuario, boolean isAdmin, String login, String senha) {
+        // Simplesmente repassa a chamada para o Service
+        gerenciadorUsuarios.editarUsuario(usuario, isAdmin, login, senha);
     }
 }
