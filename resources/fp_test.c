@@ -1,4 +1,4 @@
-/* fp_test.c - this last version took next to 5 hours.*/
+/* fp_test.c - this last version took next to 5 hours and about 20 changes to fit parameters.*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,7 +6,7 @@
 #include <glib.h>
 #include <libfprint-2/fprint.h>
 
-/* ---------------- globals for callback serialization ---------------- */
+/* ---------------- Globals for callback serialization ---------------- */
 static GMutex g_serial_mutex;
 static guchar *g_serialized_buf = NULL;
 static gsize g_serialized_len = 0;
@@ -16,8 +16,8 @@ static gboolean g_serialized_ready = FALSE;
 static char* base64_encode(const guchar* data, gsize len) { return g_base64_encode(data, len); }
 static guchar* base64_decode(const char* base64, gsize* len) { return g_base64_decode(base64, len); }
 
-/* ---------------- enrollment progress callback ----------------
-   We serialize inside the callback when completed==5. That guarantees the FpPrint is valid.
+/* ---------------- Enrollment progress callback ----------------
+We serialize inside the callback when completed==5. That guarantees the FpPrint is valid.
 */
 static void enroll_progress(FpDevice *dev, gint completed, FpPrint *print, gpointer user_data, GError *error) {
     (void)dev;
@@ -53,7 +53,7 @@ static void enroll_progress(FpDevice *dev, gint completed, FpPrint *print, gpoin
     }
 }
 
-/* ---------------- match callback (no change) ---------------- */
+/* ---------------- match callback ---------------- */
 static void match_cb(FpDevice *dev, FpPrint *match, FpPrint *print, gpointer user_data, GError *error) {
     (void)dev; (void)match; (void)print;
     if (error) fprintf(stderr, "ERR [match_cb]: %s\n", error->message);
@@ -103,7 +103,7 @@ static int cmd_enroll(void) {
 
     /* enrolled may be invalid after return on some drivers; but we serialized in callback */
     /* wait briefly to ensure callback finished writing the global */
-    g_usleep(100 * 1000); /* 100ms */
+    g_usleep(300 * 1000); /* 100ms */
 
     /* Retrieve serialized buffer from callback */
     g_mutex_lock(&g_serial_mutex);

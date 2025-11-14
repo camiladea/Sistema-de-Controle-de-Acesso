@@ -10,7 +10,6 @@ import util.ConexaoBancoDados;
 
 public class UsuarioDAO {
 
-    // <- Set this to your exact table name (uppercase "Usuario" as in your DB)
     private static final String TABLE = "Usuario";
 
     public boolean inserir(Usuario usuario) {

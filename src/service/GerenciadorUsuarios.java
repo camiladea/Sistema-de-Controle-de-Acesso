@@ -17,7 +17,7 @@ public class GerenciadorUsuarios {
     public boolean cadastrarNovoFuncionario(String nome, String cpf, String email, String cargo) {
         System.out.println("[GerenciadorUsuarios] Capturando digital para novo funcionário...");
         
-        // ✅ leitorBiometrico returns Optional<String> (Base64)
+        // LeitorBiometrico returns Optional<String> (Base64)
         Optional<String> digitalOpt = leitorBiometrico.capturarDigital();
 
         if (digitalOpt.isEmpty()) {
@@ -25,7 +25,7 @@ public class GerenciadorUsuarios {
             return false;
         }
 
-        // ✅ Decode Base64 into raw bytes before saving in DB
+        // Decode Base64 into raw bytes before saving in DB
         byte[] digitalBytes = Base64.getDecoder().decode(digitalOpt.get());
 
         Usuario novo = new Usuario();
@@ -36,7 +36,7 @@ public class GerenciadorUsuarios {
         novo.setAtivo(true);
         novo.setTipoUsuario("FUNCIONARIO");
         novo.setLogin(cpf);
-        novo.setSenhaHash("123"); // password placeholder for now
+        novo.setSenhaHash("123"); // password placeholder for "now"
         novo.setDigitalTemplate(digitalBytes);
 
         boolean ok = usuarioDAO.inserir(novo);
@@ -58,7 +58,7 @@ public class GerenciadorUsuarios {
             return Optional.empty();
         }
 
-        // ✅ Convert all fingerprint templates to Base64 strings
+        // Convert all fingerprint templates to Base64 strings
         List<String> templatesBase64 = new ArrayList<>();
         for (Usuario u : usuarios) {
             byte[] tpl = u.getDigitalTemplate();
@@ -71,7 +71,7 @@ public class GerenciadorUsuarios {
             return Optional.empty();
         }
 
-        // ✅ identify expects List<String>
+        // Identify expects List<String>
         Optional<Integer> matchIndex = leitorBiometrico.identificar(templatesBase64);
 
         if (matchIndex.isPresent()) {
