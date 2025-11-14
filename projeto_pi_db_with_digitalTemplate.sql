@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS ConfiguracaoSistema (
     valor TEXT
 );
 
-INSERT OR IGNORE INTO Usuario (nome, cpf, email, ativo, tipoUsuario, cargo, login, senhaHash)
+INSERT OR IGNORE INTO Usuario (nome, cpf, email, ativo, tipoUsuario, cargo, login, senhaHash, digitalTemplate)
 VALUES
 ('Administrador Padrão', '00000000000', 'admin@sistema.local', 1, 'ADMIN', 'Administrador', 'admin', 'admin123');
 

@@ -24,17 +24,21 @@ public class SistemaAutenticacao {
         List<Usuario> usuarios = usuarioDAO.listarTodos();
         System.out.println("[SistemaAutenticacao] Total de usuários carregados: " + usuarios.size());
 
-        // Coletar templates válidos
+        // --------------------------
+        // FIX: manter lista paralela alinhada
+        // --------------------------
         List<String> templatesBase64 = new ArrayList<>();
+        List<Usuario> usuariosComTemplate = new ArrayList<>();
+
         for (Usuario u : usuarios) {
             byte[] template = u.getDigitalTemplate();
             System.out.println("[SistemaAutenticacao] Usuário: " + u.getNome() +
                                ", template bytes = " + (template != null ? template.length : 0));
 
             if (template != null && template.length > 3) {
-                // Converte para Base64 para enviar ao programa fp_test
                 String b64 = Base64.getEncoder().encodeToString(template);
                 templatesBase64.add(b64);
+                usuariosComTemplate.add(u);   // IMPORTANT: index linked here
             }
         }
 
@@ -43,7 +47,7 @@ public class SistemaAutenticacao {
             return Optional.empty();
         }
 
-        // Envia todas as digitais para o leitor
+        // Identify
         Optional<Integer> matchIndex = leitorBiometrico.identificar(templatesBase64);
 
         if (matchIndex.isEmpty()) {
@@ -52,13 +56,16 @@ public class SistemaAutenticacao {
         }
 
         int idx = matchIndex.get();
-        if (idx < 0 || idx >= usuarios.size()) {
+        if (idx < 0 || idx >= usuariosComTemplate.size()) {
             System.err.println("[SistemaAutenticacao] Índice de correspondência inválido: " + idx);
             return Optional.empty();
         }
 
-        Usuario usuarioCorrespondente = usuarios.get(idx);
-        System.out.println("[SistemaAutenticacao] Usuário autenticado com sucesso: " + usuarioCorrespondente.getNome());
+        Usuario usuarioCorrespondente = usuariosComTemplate.get(idx);
+
+        System.out.println("[SistemaAutenticacao] Usuário autenticado com sucesso: " 
+                           + usuarioCorrespondente.getNome());
+
         return Optional.of(usuarioCorrespondente);
     }
 
