@@ -1,0 +1,11 @@
+# HOW TO EXECUTE THE PROJECT #
+
+OBS: MAKE SURE YOU FOLLOWED ALL THE STEPS IN essential-packages.txt, sqlite3-setup.txt and udev-rules.txt
+OBS: MAKE SURE YOU FOLLOWED ALL THE STEPS IN essential-packages.txt, sqlite3-setup.txt and udev-rules.txt
+OBS: MAKE SURE YOU FOLLOWED ALL THE STEPS IN essential-packages.txt, sqlite3-setup.txt and udev-rules.txt
+
+In order to execute the system, just paste this command after doing cd as root in the project folder.
+
+java -jar SDCDA-2.0-stable.jar
+
+# END OF FILE #

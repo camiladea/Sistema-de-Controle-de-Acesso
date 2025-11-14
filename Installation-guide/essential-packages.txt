@@ -1,0 +1,125 @@
+# ESSENTIAL PACKAGES #
+
+In order to properly run the system you will have to install the following packages in your ARM64 machine.
+First, update your system in order to maintain compatibility.
+
+sudo apt update && sudo apt upgrade -y
+
+
+
+
+# 1. sqlite3 #
+
+This system uses sqlite3 in order to maintain light and stable performance.
+TO install it simply run:
+
+sudo apt install sqlite3 libsqlite3-dev
+
+
+
+
+# 2. Glib #
+
+For general use of file compiling and handling compatibility accross ARM64 based systems.
+Install with:
+
+sudo apt install libglib2.0-0
+
+
+
+
+# 3. Gobject #
+
+API for fprint that is used by many functions included in libfprint.
+Install with: 
+
+sudo apt install libgobject-2.0
+
+
+
+
+# 4. Libfprint 2 & Fprintd #
+
+Main library for reading and implementing fingerprint scanners. Should work globally with any scanner that supports it.
+Install with:
+
+sudo apt-get install libfprint-2-2 libfprint-2-dev fprintd libpam-fprintd
+
+
+
+
+# 5. Build Essentials & Others #
+
+Dependency necessary packages, basic for running the system.
+Install with:
+
+sudo apt install build-essential meson ninja-build pkg-config
+
+
+
+
+# 6. Lsusb #
+
+Reads and manages connected USB devices.
+Install with:
+
+sudo apt-get install libusb-1.0-0 libusb-1.0-0-dev
+
+
+
+
+# 7. Temurin JDK 11 #
+
+This is the only Java JDK that works with our system, and compiles correctly. Other JDKs (Oracle 11 legacy, openJDK 11) have failed to prove viable.
+In order to install it, follow these steps.
+
+cd /usr/lib/jvm
+sudo wget https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.22%2B7/OpenJDK11U-jdk_aarch64_linux_hotspot_11.0.22_7.tar.gz
+sudo tar -xvf OpenJDK11U-jdk_aarch64_linux_hotspot_11.0.22_7.tar.gz
+sudo mv jdk-11.0.22+7 temurin-11
+sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/temurin-11/bin/java 1
+sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/temurin-11/bin/javac 1
+
+After running all the commands the JDK should be setup for use.
+
+
+
+
+# 8. C Helper Tool #
+
+In order to communicate with the scanner we use a helper C file that sends the fprint fucntions directly.
+To setup the helper follow these steps:
+
+
+## 8.1. CD into the project folder. ##
+
+use "cd /(path-to-project)/resources"
+
+
+## 8.2. Compile, move and authorize. ##
+
+Then execute this command to compile, send to the correct compile location, and give it permission to run.
+
+sudo gcc fp_test.c -o fp_test $(pkg-config --cflags --libs libfprint-2 glib-2.0 gobject-2.0) -ldl
+
+sudo mv fp_test /usr/local/bin/
+sudo chmod +x /usr/local/bin/fp_test
+
+
+## 8.3. Test it. ##
+
+Run this command to temporarily enroll a fingerprint locally.
+
+/usr/local/bin/fp_test enroll
+
+Copy the base64 output and copy it into a generic txt file (here named test.txt as example).
+Then, verify it using:
+
+/usr/local/bin/fp_test verify "$(cat test.txt)"
+
+If it prints 'ok', the helper is properly installed.
+
+
+
+
+# END OF FILE #

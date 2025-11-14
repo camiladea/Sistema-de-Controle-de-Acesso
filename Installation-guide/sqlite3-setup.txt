@@ -1,0 +1,35 @@
+# HOW TO START SQLITE3 SERVER #
+
+To start the database to begin enrolling users you need the follow all of these steps,
+Make sure you download sqlite3 before doing any of these.
+
+
+
+
+
+1. CD into the project folder
+
+Use cd in your terminal to enter the project folder using its path.
+
+cd /path-to-system
+
+
+
+
+2. Create the Database.
+
+We have a premade database with a pre-set ADMIN user called "Administrador Padrão",
+you may remove and add your own Admin user later using the .sql file (projeto_pi_db_with_digitalTemplate.sql)
+
+To sucessfuly make the database you write the following command into your terminal:
+
+sqlite3 sistema_acesso.db < projeto_pi_db_with_digitalTemplate.sql
+
+And just like that the database is set up and ready to use.
+
+
+
+
+OBS: Any changes to the database (tables, .db name or .sql name) will affect the Java code and possibly break it.
+
+# END OF FILE #

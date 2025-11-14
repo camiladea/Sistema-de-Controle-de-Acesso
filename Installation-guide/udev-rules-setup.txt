@@ -1,0 +1,47 @@
+# HOW TO SETUP SPECIFIC UDEV-RULES #
+
+We have a file that tries to get any fingerprint scanners but some have unique IDs that require you to manually add a new
+line into the file to support your device.
+
+To fully implement a specific rule for your specific device follow these steps.
+
+
+
+1. Edit the .rules file
+
+To insert your own device to the file simply fetch it with:
+
+lsusb
+
+Then use
+
+nano 90-libfprint.rules
+
+And the paste following line with replaced values according to your specific ones,
+like this, alongside the others in the file.
+
+SUBSYSTEM=="usb", ATTR{idVendor}=="your vendor id here", ATTR{idProduct}=="your product id here", MODE="0666"
+
+Do CTRL+S and CTRL+x
+
+
+
+
+2. Copy the rules from the resource path to the actual udev path.
+
+Run this command still inside the resources folder:
+
+sudo cp 90-libfprint.rules /etc/udev/rules.d/
+
+
+
+
+
+3. Reload the rules
+
+Paste these into your terminal to fully reload the rules and apply the changes.
+
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+
+# END OF FILE #
