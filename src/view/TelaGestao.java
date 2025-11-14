@@ -4,8 +4,6 @@ import controller.TerminalController;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-//import java.awt.event.WindowEvent;
-//import java.awt.event.WindowStateListener;
 import java.time.*;
 import java.time.format.*;
 import java.util.List;
@@ -366,13 +364,29 @@ public class TelaGestao extends JFrame {
         }.execute();
     }
 
-    private void carregarRelatorio() {
+        private void carregarRelatorio() {
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-            LocalDateTime inicio = LocalDate.parse(txtDataInicio.getText(), formatter).atStartOfDay();
-            LocalDateTime fim = LocalDate.parse(txtDataFim.getText(), formatter).atTime(LocalTime.MAX);
+
+            String inicioTxt = txtDataInicio.getText().trim();
+            String fimTxt = txtDataFim.getText().trim();
+
+            if (inicioTxt.isEmpty() || fimTxt.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "Preencha as datas antes de gerar o relatório.",
+                        "Erro",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            LocalDate inicioData = LocalDate.parse(inicioTxt, formatter);
+            LocalDate fimData = LocalDate.parse(fimTxt, formatter);
+
+            LocalDateTime inicio = inicioData.atStartOfDay();
+            LocalDateTime fim = fimData.atTime(LocalTime.MAX);
 
             new SwingWorker<List<RegistroAcesso>, Void>() {
+
                 @Override
                 protected List<RegistroAcesso> doInBackground() {
                     return controller.solicitarRelatorioAcesso(inicio, fim);
@@ -383,25 +397,38 @@ public class TelaGestao extends JFrame {
                     try {
                         modelRelatorio.setRowCount(0);
                         DateTimeFormatter displayFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-                        get().forEach(r -> modelRelatorio.addRow(new Object[] {
-                                r.getId(),
-                                r.getDataHora().format(displayFormatter),
-                                r.getUsuarioId() == 0 ? "N/A" : r.getUsuarioId(),
-                                r.getNomeUsuario() == null ? "Usuário Removido" : r.getNomeUsuario(),
-                                r.getStatus(),
-                                r.getOrigem()
-                        }));
+
+                        for (RegistroAcesso r : get()) {
+                            modelRelatorio.addRow(new Object[] {
+                                    r.getId(),
+                                    r.getDataHora().format(displayFormatter),
+                                    r.getUsuarioId() == 0 ? "N/A" : r.getUsuarioId(),
+                                    r.getNomeUsuario() == null ? "Usuário Removido" : r.getNomeUsuario(),
+                                    r.getStatus(),
+                                    r.getOrigem()
+                            });
+                        }
+
                     } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(TelaGestao.this, "Erro ao carregar relatório: " + ex.getMessage(),
-                                "Erro", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(
+                                TelaGestao.this,
+                                "Erro ao carregar relatório: " + ex.getMessage(),
+                                "Erro",
+                                JOptionPane.ERROR_MESSAGE
+                        );
                     }
                 }
+
             }.execute();
+
         } catch (DateTimeParseException ex) {
-            JOptionPane.showMessageDialog(this, "Formato de data inválido. Use dd/mm/aaaa.", "Erro de Formato",
+            JOptionPane.showMessageDialog(this,
+                    "Formato de data inválido. Use dd/mm/aaaa.",
+                    "Erro de Formato",
                     JOptionPane.ERROR_MESSAGE);
         }
     }
+
 
     private void toggleMaximize() {
         if (getExtendedState() == JFrame.MAXIMIZED_BOTH) {

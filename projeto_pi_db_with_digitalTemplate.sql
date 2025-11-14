@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS ConfiguracaoSistema (
 
 INSERT OR IGNORE INTO Usuario (nome, cpf, email, ativo, tipoUsuario, cargo, login, senhaHash, digitalTemplate)
 VALUES
-('Administrador Padrão', '00000000000', 'admin@sistema.local', 1, 'ADMIN', 'Administrador', 'admin', 'admin123');
+('Administrador Padrão', '00000000000', 'admin@sistema.local', 1, 'ADMIN', 'Administrador', 'admin', 'admin123', NULL);
 
 INSERT OR IGNORE INTO ConfiguracaoSistema (chave, valor)
 VALUES ('versao_banco', '1.1'),
