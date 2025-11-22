@@ -1,6 +1,9 @@
+package main;
+
 import controller.TerminalController;
 import view.TelaAutenticacao;
 
+import javax.swing.SwingUtilities;
 
 public class Main {
 

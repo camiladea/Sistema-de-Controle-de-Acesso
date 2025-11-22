@@ -5,9 +5,9 @@ view/TelaLoginAdmin.class
 view/TelaAutenticacao$2.class
 view/TelaGestao$StatusCellRenderer.class
 view/TelaCadastroUsuario.class
+main/Main.class
 dao/UsuarioDAO.class
 view/TelaGestao.class
-Main.class
 model/Administrador.class
 view/TelaGestao$7.class
 service/LeitorBiometrico.class
