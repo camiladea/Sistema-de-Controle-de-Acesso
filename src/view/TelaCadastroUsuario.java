@@ -18,6 +18,9 @@ public class TelaCadastroUsuario extends JDialog {
     private final transient TerminalController controller;
     private JTextField txtNome, txtEmail, txtCargo;
     private JFormattedTextField txtCpf;
+    private JCheckBox chkAdmin;
+    private JTextField txtLogin;
+    private JPasswordField txtSenha;
     private JButton btnSalvar;
 
     private static final Color COR_FUNDO = new Color(240, 242, 245);
@@ -107,6 +110,31 @@ public class TelaCadastroUsuario extends JDialog {
         adicionarCampo(painel, gbc, "Email:", txtEmail, 2);
         adicionarCampo(painel, gbc, "Cargo:", txtCargo, 3);
 
+        chkAdmin = new JCheckBox("Administrador");
+        chkAdmin.setFont(FONTE_LABEL);
+        chkAdmin.setBackground(COR_PAINEL_FORMULARIO);
+        gbc.gridx = 1;
+        gbc.gridy = 4;
+        gbc.anchor = GridBagConstraints.LINE_START;
+        painel.add(chkAdmin, gbc);
+
+        txtLogin = new JTextField();
+        new TextPrompt("Login de acesso", txtLogin, COR_PLACEHOLDE
+        adicionarCampo(painel, gbc, "Login:", txtLogin, 5);
+
+        txtSenha = new JPasswordField();
+        adicionarCampo(painel, gbc, "Senha:", txtSenha, 6);
+
+        // Lógica para habilitar/desabilitar campos de admin
+        txtLogin.setEnabled(false);
+        txtSenha.setEnabled(false);
+
+        chkAdmin.addActionListener(e -> {
+            boolean isSelecionado = chkAdmin.isSelected();
+            txtLogin.setEnabled(isSelecionado);
+            txtSenha.setEnabled(isSelecionado);
+        });
+
         return painel;
     }
 
@@ -174,6 +202,15 @@ public class TelaCadastroUsuario extends JDialog {
             return;
         }
 
+        boolean isAdmin = chkAdmin.isSelected();
+        String login = txtLogin.getText().trim();
+        String senha = new String(txtSenha.getPassword());
+
+        if (isAdmin && (login.isEmpty() || senha.isEmpty())) {
+            JOptionPane.showMessageDialog(this, "Login e Senha são obrigatórios para administradores.", "Erro de Validação", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         JOptionPane.showMessageDialog(this, "A seguir, será solicitada a captura da digital.", "Próximo Passo", JOptionPane.INFORMATION_MESSAGE);
 
         btnSalvar.setEnabled(false);
@@ -182,17 +219,20 @@ public class TelaCadastroUsuario extends JDialog {
         new SwingWorker<Boolean, Void>() {
             @Override
             protected Boolean doInBackground() {
-                return controller.solicitarCadastroNovoFuncionario(txtNome.getText(), cpfSemMascara, email, txtCargo.getText());
+                return controller.solicitarCadastroNovoFuncionario(
+                    txtNome.getText(), cpfSemMascara, email, txtCargo.getText(),
+                    isAdmin, login, senha
+                );
             }
 
             @Override
             protected void done() {
                 try {
                     if (get()) {
-                        JOptionPane.showMessageDialog(TelaCadastroUsuario.this, "Funcionário cadastrado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                        JOptionPane.showMessageDialog(TelaCadastroUsuario.this, "Usuário cadastrado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                         dispose();
                     } else {
-                        JOptionPane.showMessageDialog(TelaCadastroUsuario.this, "Falha no cadastro. Verifique se o CPF já existe ou se há um problema com o leitor biométrico.", "Erro", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(TelaCadastroUsuario.this, "Falha no cadastro. Verifique se o CPF ou Login já existe, ou se há um problema com o leitor biométrico.", "Erro", JOptionPane.ERROR_MESSAGE);
                     }
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(TelaCadastroUsuario.this, "Erro: " + ex.getMessage(), "Erro Crítico", JOptionPane.ERROR_MESSAGE);

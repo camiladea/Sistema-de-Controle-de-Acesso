@@ -12,41 +12,58 @@ public class UsuarioDAO {
 
     /**
      * Salva um novo usuário no banco de dados, tratando o template da digital como BLOB.
+     * @return true se o usuário foi salvo com sucesso, false caso contrário.
      */
-    public void salvar(Usuario usuario) {
+    public boolean salvar(Usuario usuario) {
         // SQL ajustado para 'digitalTemplate'
         final String sql = "INSERT INTO Usuario (nome, cpf, email, digitalTemplate, ativo, tipoUsuario, cargo, login, senhaHash) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         final String tipo = (usuario instanceof Funcionario) ? "Funcionario" : "Administrador";
 
         try (Connection conexao = ConexaoBancoDados.getConexao();
-             PreparedStatement pstm = conexao.prepareStatement(sql)) {
+             PreparedStatement pstm = conexao.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             pstm.setString(1, usuario.getNome());
             pstm.setString(2, usuario.getCpf());
             pstm.setString(3, usuario.getEmail());
-            // CORREÇÃO: Salva a digital como um array de bytes (BLOB)
-            pstm.setBytes(4, usuario.getDigitalTemplate());
+            
+            // Lida com o template da digital que agora pode ser nulo
+            if (usuario.getDigitalTemplate() != null) {
+                pstm.setBytes(4, usuario.getDigitalTemplate());
+            } else {
+                pstm.setNull(4, Types.BLOB);
+            }
+            
             pstm.setBoolean(5, usuario.isAtivo());
             pstm.setString(6, tipo);
 
-            // --- CORREÇÃO PARA JAVA 11 ---
             if (usuario instanceof Funcionario) {
-                Funcionario f = (Funcionario) usuario; // Cast manual
+                Funcionario f = (Funcionario) usuario;
                 pstm.setString(7, f.getCargo());
                 pstm.setNull(8, Types.VARCHAR);
                 pstm.setNull(9, Types.VARCHAR);
             } else if (usuario instanceof Administrador) {
-                Administrador a = (Administrador) usuario; // Cast manual
+                Administrador a = (Administrador) usuario;
                 pstm.setNull(7, Types.VARCHAR);
                 pstm.setString(8, a.getLogin());
                 pstm.setString(9, a.getSenhaHash());
             }
-            // --- FIM DA CORREÇÃO ---
 
-            pstm.executeUpdate();
-            System.out.println("Usuário salvo com sucesso!");
+            int affectedRows = pstm.executeUpdate();
+
+            if (affectedRows > 0) {
+                try (ResultSet generatedKeys = pstm.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        usuario.setId(generatedKeys.getInt(1));
+                    }
+                }
+                System.out.println("Usuário salvo com sucesso! ID: " + usuario.getId());
+                return true;
+            }
+            return false;
+
         } catch (SQLException e) {
             System.err.println("Erro ao salvar usuário: " + e.getMessage());
+            return false;
         }
     }
 
@@ -135,7 +152,13 @@ public class UsuarioDAO {
             stmt.setString(1, usuario.getNome());
             stmt.setString(2, usuario.getCpf());
             stmt.setString(3, usuario.getEmail());
-            stmt.setBytes(4, usuario.getDigitalTemplate());
+            
+            if (usuario.getDigitalTemplate() != null) {
+                stmt.setBytes(4, usuario.getDigitalTemplate());
+            } else {
+                stmt.setNull(4, Types.BLOB);
+            }
+            
             stmt.setBoolean(5, usuario.isAtivo());
 
             // --- CORREÇÃO PARA JAVA 11 ---

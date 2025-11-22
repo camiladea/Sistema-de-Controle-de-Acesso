@@ -38,7 +38,12 @@ public class TerminalController {
     }
 
     public boolean solicitarCadastroNovoFuncionario(String nome, String cpf, String email, String cargo) {
-        return gerenciadorUsuarios.cadastrarNovoFuncionario(nome, cpf, email, cargo);
+        // Chama o método mais detalhado com valores padrão para não-admin.
+        return solicitarCadastroNovoFuncionario(nome, cpf, email, cargo, false, null, null);
+    }
+
+    public boolean solicitarCadastroNovoFuncionario(String nome, String cpf, String email, String cargo, boolean isAdmin, String login, String senha) {
+        return gerenciadorUsuarios.cadastrarNovoUsuario(nome, cpf, email, cargo, isAdmin, login, senha);
     }
 
     public List<Usuario> solicitarListaDeUsuarios() {

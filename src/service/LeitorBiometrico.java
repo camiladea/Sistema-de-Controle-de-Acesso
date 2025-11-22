@@ -21,37 +21,43 @@ public class LeitorBiometrico {
     }
 
     /**
-     * Captura uma nova digital e retorna o hash (string simbólica) do usuário.
-     * Este método invoca o daemon fprintd, portanto funciona igual ao terminal.
+     * Captura uma nova digital e a registra no serviço fprintd, associando-a ao CPF do usuário.
+     * @param cpf O CPF do usuário, que será usado como 'username' no fprintd.
+     * @return true se o cadastro foi bem-sucedido, false caso contrário.
      */
-    public Optional<String> lerDigital(String proposito) {
+    public boolean enroll(String cpf) {
+        if (cpf == null || cpf.trim().isEmpty()) {
+            System.err.println("ERRO: CPF não pode ser nulo ou vazio para o cadastro da digital.");
+            return false;
+        }
         try {
-            System.out.println("LOG [LeitorBiometrico]: Capturando digital (" + proposito + ")");
-            ProcessBuilder pb = new ProcessBuilder("fprintd-enroll", "usuario_padrao");
+            System.out.println("LOG [LeitorBiometrico]: Iniciando captura de digital para o CPF: " + cpf);
+            // Usamos o CPF como o nome de usuário para o fprintd
+            ProcessBuilder pb = new ProcessBuilder("fprintd-enroll", cpf);
             pb.redirectErrorStream(true);
             Process process = pb.start();
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            StringBuilder output = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                System.out.println("[fprintd] " + line);
-                output.append(line).append("\n");
-            }
-            process.waitFor();
+            // É crucial consumir a saída do processo para evitar que ele trave
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                StringBuilder output = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println("[fprintd-enroll] " + line);
+                    output.append(line);
+                }
+                process.waitFor();
 
-            if (output.toString().contains("enroll-completed")) {
-                String hash = "FP_" + System.currentTimeMillis();
-                System.out.println("LOG [LeitorBiometrico]: Digital cadastrada com sucesso.");
-                return Optional.of(hash);
-            } else {
-                System.err.println("ERRO: Falha ao capturar digital (mensagem: " + output + ")");
-                return Optional.empty();
+                if (output.toString().contains("Enroll result: enroll-completed")) {
+                    System.out.println("LOG [LeitorBiometrico]: Digital para o CPF " + cpf + " cadastrada com sucesso.");
+                    return true;
+                } else {
+                    System.err.println("ERRO: Falha ao capturar digital (saída do fprintd: " + output + ")");
+                    return false;
+                }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
-            return Optional.empty();
+            return false;
         }
     }
 
