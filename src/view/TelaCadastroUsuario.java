@@ -119,7 +119,7 @@ public class TelaCadastroUsuario extends JDialog {
         painel.add(chkAdmin, gbc);
 
         txtLogin = new JTextField();
-        new TextPrompt("Login de acesso", txtLogin, COR_PLACEHOLDE
+        new TextPrompt("Login de acesso", txtLogin, COR_PLACEHOLDER);
         adicionarCampo(painel, gbc, "Login:", txtLogin, 5);
 
         txtSenha = new JPasswordField();

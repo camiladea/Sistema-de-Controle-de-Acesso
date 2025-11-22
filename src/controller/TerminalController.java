@@ -7,6 +7,7 @@ import service.GerenciadorUsuarios;
 import service.SistemaAutenticacao;
 import dao.UsuarioDAO;
 import dao.RegistroAcessoDAO;
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -38,8 +39,8 @@ public class TerminalController {
     }
 
     public boolean solicitarCadastroNovoFuncionario(String nome, String cpf, String email, String cargo) {
-        // Chama o método mais detalhado com valores padrão para não-admin.
-        return solicitarCadastroNovoFuncionario(nome, cpf, email, cargo, false, null, null);
+        // Chama o método mais detalhado com valores padrão para não-admin e sem statusUpdater.
+        return solicitarCadastroNovoFuncionario(nome, cpf, email, cargo, false, null, null, null);
     }
 
     public boolean solicitarCadastroNovoFuncionario(String nome, String cpf, String email, String cargo, boolean isAdmin, String login, String senha, java.util.function.Consumer<String> statusUpdater) {

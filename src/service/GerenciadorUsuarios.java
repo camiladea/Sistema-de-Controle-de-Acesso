@@ -1,3 +1,5 @@
+package service;
+
 import dao.UsuarioDAO;
 import model.Administrador;
 import model.Funcionario;
@@ -9,6 +11,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import service.LeitorBiometrico;
 
 public class GerenciadorUsuarios {
 

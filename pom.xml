@@ -17,7 +17,7 @@
     <dependencies>
         <!-- SQLite JDBC Driver -->
         <dependency>
-            <groupId>org.xerial</sqlite-jdbc</groupId>
+            <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.43.0.0</version>
         </dependency>
