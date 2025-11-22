@@ -255,6 +255,11 @@ public class TelaGestao extends JFrame {
         btnGerar.addActionListener(e -> carregarRelatorio());
         painelFiltro.add(btnGerar);
 
+        JButton btnExportarCsv = new JButton("EXPORTAR CSV");
+        configurarBotao(btnExportarCsv, COR_BOTAO_SECUNDARIO, COR_TEXTO_BOTAO_SECUNDARIO);
+        btnExportarCsv.addActionListener(e -> exportarRelatorioCsv());
+        painelFiltro.add(btnExportarCsv);
+
         JButton btnVoltar = new JButton("VOLTAR / SAIR");
         configurarBotao(btnVoltar, COR_BOTAO_SECUNDARIO, COR_TEXTO_BOTAO_SECUNDARIO);
         btnVoltar.addActionListener(e -> dispose());
@@ -427,6 +432,63 @@ public class TelaGestao extends JFrame {
         } catch (DateTimeParseException ex) {
             JOptionPane.showMessageDialog(this, "Formato de data inválido. Use dd/mm/aaaa.", "Erro de Formato",
                     JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void exportarRelatorioCsv() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Salvar Relatório CSV");
+        fileChooser.setSelectedFile(new File("relatorio_acessos.csv"));
+
+        int userSelection = fileChooser.showSaveDialog(this);
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File fileToSave = fileChooser.getSelectedFile();
+            if (!fileToSave.getName().toLowerCase().endsWith(".csv")) {
+                fileToSave = new File(fileToSave.getAbsolutePath() + ".csv");
+            }
+
+            // Coleta os dados da tabela
+            List<String[]> dadosParaExportar = new java.util.ArrayList<>();
+            // Adiciona cabeçalhos
+            String[] headers = new String[modelRelatorio.getColumnCount()];
+            for (int i = 0; i < modelRelatorio.getColumnCount(); i++) {
+                headers[i] = modelRelatorio.getColumnName(i);
+            }
+            dadosParaExportar.add(headers);
+
+            // Adiciona linhas de dados
+            for (int i = 0; i < modelRelatorio.getRowCount(); i++) {
+                String[] row = new String[modelRelatorio.getColumnCount()];
+                for (int j = 0; j < modelRelatorio.getColumnCount(); j++) {
+                    Object value = modelRelatorio.getValueAt(i, j);
+                    row[j] = (value == null) ? "" : value.toString();
+                }
+                dadosParaExportar.add(row);
+            }
+
+            // Executa a exportação em uma thread separada
+            File finalFileToSave = fileToSave;
+            new SwingWorker<Boolean, Void>() {
+                @Override
+                protected Boolean doInBackground() {
+                    return controller.exportarRelatorioCSV(dadosParaExportar, finalFileToSave);
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        if (get()) {
+                            JOptionPane.showMessageDialog(TelaGestao.this, "Relatório exportado com sucesso para: " + finalFileToSave.getAbsolutePath(), "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(TelaGestao.this, "Falha ao exportar relatório.", "Erro", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(TelaGestao.this, "Erro ao exportar relatório: " + ex.getMessage(), "Erro Crítico", JOptionPane.ERROR_MESSAGE);
+                        ex.printStackTrace();
+                    }
+                }
+            }.execute();
         }
     }
 

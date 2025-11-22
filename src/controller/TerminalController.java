@@ -73,4 +73,8 @@ public class TerminalController {
         GerenciadorUsuarios gerenciador = new GerenciadorUsuarios();
         gerenciador.editarUsuario(usuario);
     }
+
+    public boolean exportarRelatorioCSV(List<String[]> dados, File arquivoSaida) {
+        return registroAcessoDAO.exportarParaCSV(dados, arquivoSaida);
+    }
 }

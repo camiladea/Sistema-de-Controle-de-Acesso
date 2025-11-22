@@ -1,14 +1,22 @@
 package dao;
 
+import com.opencsv.CSVWriter;
 import model.RegistroAcesso;
 import util.ConexaoBancoDados;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class RegistroAcessoDAO {
+
+    private static final Logger LOGGER = Logger.getLogger(RegistroAcessoDAO.class.getName());
 
     public void salvar(RegistroAcesso registro) {
         String sql = "INSERT INTO RegistroAcesso (dataHora, usuarioId, status, origem) VALUES (?, ?, ?, ?)";
@@ -23,7 +31,7 @@ public class RegistroAcessoDAO {
             pstm.setString(4, registro.getOrigem());
             pstm.execute();
         } catch (SQLException e) {
-            System.err.println("Erro ao salvar registro de acesso: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Erro ao salvar registro de acesso: " + e.getMessage(), e);
         }
     }
 
@@ -70,8 +78,20 @@ public class RegistroAcessoDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Erro ao listar registros por período com filtros: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Erro ao listar registros por período com filtros: " + e.getMessage(), e);
         }
         return registros;
     }
+
+    public boolean exportarParaCSV(List<String[]> dados, File arquivoSaida) {
+        try (CSVWriter writer = new CSVWriter(new FileWriter(arquivoSaida))) {
+            writer.writeAll(dados);
+            LOGGER.log(Level.INFO, "Relatório exportado com sucesso para: {0}", arquivoSaida.getAbsolutePath());
+            return true;
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Erro ao exportar relatório para CSV: " + e.getMessage(), e);
+            return false;
+        }
+    }
+}
 }
