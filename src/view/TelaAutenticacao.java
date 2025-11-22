@@ -248,14 +248,25 @@ public class TelaAutenticacao extends JFrame {
     }
 
     private void executarAutenticacao() {
-        labelStatus.setText("Aguarde, lendo biometria...");
+        // Define a cor de processamento imediatamente
         fingerprintPanel.setStatusCor(COR_DESTAQUE_PROCESSANDO);
         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-        new SwingWorker<Optional<Usuario>, Void>() {
+        new SwingWorker<Optional<Usuario>, String>() {
             @Override
             protected Optional<Usuario> doInBackground() {
-                return controller.solicitarAutenticacaoBiometrica();
+                // O Consumer atualiza o JLabel na Event Dispatch Thread para segurança de thread.
+                java.util.function.Consumer<String> statusUpdater =
+                        mensagem -> publish(mensagem); // Usa publish para enviar para process()
+
+                return controller.solicitarAutenticacaoBiometrica(statusUpdater);
+            }
+
+            @Override
+            protected void process(java.util.List<String> chunks) {
+                // Atualiza o labelStatus com a última mensagem recebida
+                String lastMessage = chunks.get(chunks.size() - 1);
+                labelStatus.setText("<html><div style='text-align: center;'>" + lastMessage + "</div></html>");
             }
 
             @Override
@@ -263,19 +274,21 @@ public class TelaAutenticacao extends JFrame {
                 try {
                     Optional<Usuario> usuarioOpt = get();
                     if (usuarioOpt.isPresent()) {
-                        labelStatus.setText("Acesso Permitido: " + usuarioOpt.get().getNome());
+                        // A mensagem final já é definida pelo SistemaAutenticacao
                         fingerprintPanel.setStatusCor(COR_SUCESSO);
                     } else {
-                        labelStatus.setText("Acesso Negado. Tente novamente.");
+                        // A mensagem final já é definida pelo SistemaAutenticacao
                         fingerprintPanel.setStatusCor(COR_ERRO);
                     }
                 } catch (Exception ex) {
-                    labelStatus.setText("Erro de Comunicação com o Leitor");
+                    labelStatus.setText("<html><div style='text-align: center;'>Erro de Comunicação com o Leitor</div></html>");
                     fingerprintPanel.setStatusCor(COR_ERRO);
+                    ex.printStackTrace();
                 } finally {
                     setCursor(Cursor.getDefaultCursor());
+                    // Reseta o status após um pequeno atraso para o usuário ver o resultado final
                     Timer timer = new Timer(3000, evt -> {
-                        labelStatus.setText("Aproxime o dedo para autenticar");
+                        labelStatus.setText("<html><div style='text-align: center;'>Aproxime o dedo para autenticar</div></html>");
                         fingerprintPanel.setStatusCor(COR_DESTAQUE_IDLE);
                     });
                     timer.setRepeats(false);

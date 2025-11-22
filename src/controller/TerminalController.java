@@ -26,8 +26,8 @@ public class TerminalController {
         this.registroAcessoDAO = new RegistroAcessoDAO();
     }
 
-    public Optional<Usuario> solicitarAutenticacaoBiometrica() {
-        return sistemaAutenticacao.autenticarPorBiometria();
+    public Optional<Usuario> solicitarAutenticacaoBiometrica(java.util.function.Consumer<String> statusUpdater) {
+        return sistemaAutenticacao.autenticarPorBiometria(statusUpdater);
     }
 
     public Optional<Administrador> solicitarAutenticacaoAdmin(String login, String senha) {

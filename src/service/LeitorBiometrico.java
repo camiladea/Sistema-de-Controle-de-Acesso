@@ -99,11 +99,12 @@ public class LeitorBiometrico {
     /**
      * Realiza a verificação de digital via fprintd-verify.
      * Retorna o CPF do usuário autenticado, se houver.
+     * @param statusUpdater Callback para enviar atualizações de status para a UI.
      */
-    public Optional<String> verificarDigital() {
+    public Optional<String> verificarDigital(java.util.function.Consumer<String> statusUpdater) {
         try {
+            statusUpdater.accept("Posicione o dedo no leitor...");
             System.out.println("LOG [LeitorBiometrico]: Iniciando verificação biométrica...");
-            // fprintd-verify sem argumento tenta verificar qualquer digital cadastrada
             ProcessBuilder pb = new ProcessBuilder("fprintd-verify");
             pb.redirectErrorStream(true);
             Process process = pb.start();
@@ -116,8 +117,9 @@ public class LeitorBiometrico {
                 while ((line = reader.readLine()) != null) {
                     System.out.println("[fprintd-verify] " + line);
                     output.append(line);
+
                     if (line.contains("verify-match")) {
-                        // Ex: "verify-match (username: 12345678900)"
+                        statusUpdater.accept("Digital verificada! Processando...");
                         int startIndex = line.indexOf("username: ");
                         if (startIndex != -1) {
                             startIndex += "username: ".length();
@@ -126,6 +128,18 @@ public class LeitorBiometrico {
                                 authenticatedUser = line.substring(startIndex, endIndex).trim();
                             }
                         }
+                    } else if (line.contains("verify-no-match")) {
+                        statusUpdater.accept("Digital não reconhecida.");
+                    } else if (line.contains("verify-disconnected")) {
+                        statusUpdater.accept("Leitor desconectado.");
+                    } else if (line.contains("verify-finger-removed")) {
+                        statusUpdater.accept("Dedo removido muito cedo.");
+                    } else if (line.contains("verify-retry")) {
+                        statusUpdater.accept("Tente novamente. Posicione o dedo.");
+                    } else if (line.contains("verify-enroll-not-matched")) {
+                        statusUpdater.accept("Digital não cadastrada.");
+                    } else {
+                        statusUpdater.accept("Verificando digital...");
                     }
                 }
                 process.waitFor();
@@ -140,6 +154,7 @@ public class LeitorBiometrico {
             }
 
         } catch (Exception e) {
+            statusUpdater.accept("Erro crítico no leitor.");
             e.printStackTrace();
             return Optional.empty();
         }

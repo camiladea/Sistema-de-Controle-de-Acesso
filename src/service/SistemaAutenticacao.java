@@ -24,13 +24,14 @@ public class SistemaAutenticacao {
         this.registroAcessoDAO = new RegistroAcessoDAO();
     }
 
-    public Optional<Usuario> autenticarPorBiometria() {
+    public Optional<Usuario> autenticarPorBiometria(java.util.function.Consumer<String> statusUpdater) {
         leitorBiometrico.conectar();
-        Optional<String> cpfAutenticadoOpt = leitorBiometrico.verificarDigital();
+        Optional<String> cpfAutenticadoOpt = leitorBiometrico.verificarDigital(statusUpdater);
         leitorBiometrico.desconectar();
 
         if (cpfAutenticadoOpt.isEmpty()) {
             registrarAcesso(null, "Falha na Verificação Biometrica");
+            statusUpdater.accept("Acesso Negado. Tente novamente.");
             return Optional.empty();
         }
 
@@ -40,13 +41,16 @@ public class SistemaAutenticacao {
         if (usuario != null) {
             if (usuario.isAtivo()) {
                 registrarAcesso(usuario, "Acesso Permitido");
+                statusUpdater.accept("Acesso Permitido: " + usuario.getNome());
                 return Optional.of(usuario);
             } else {
                 registrarAcesso(usuario, "Acesso Negado (Usuário Inativo)");
+                statusUpdater.accept("Acesso Negado: Usuário Inativo.");
                 return Optional.empty();
             }
         } else {
             registrarAcesso(null, "Acesso Negado (Usuário Não Encontrado)");
+            statusUpdater.accept("Acesso Negado: Usuário não encontrado.");
             return Optional.empty();
         }
     }
