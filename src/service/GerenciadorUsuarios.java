@@ -21,7 +21,7 @@ public class GerenciadorUsuarios {
         this.leitorBiometrico = new LeitorBiometrico();
     }
 
-    public boolean cadastrarNovoUsuario(String nome, String cpf, String email, String cargo, boolean isAdmin, String login, String senha) {
+    public boolean cadastrarNovoUsuario(String nome, String cpf, String email, String cargo, boolean isAdmin, String login, String senha, java.util.function.Consumer<String> statusUpdater) {
         if (usuarioDAO.buscarPorCpf(cpf) != null) {
             LOGGER.warning("Tentativa de cadastrar um CPF que já existe: " + cpf);
             return false;
@@ -36,7 +36,7 @@ public class GerenciadorUsuarios {
 
         LOGGER.info("Iniciando captura de digital para o usuário: " + nome);
         // A lógica agora é registrar a digital no fprintd usando o CPF como chave.
-        boolean digitalCadastrada = leitorBiometrico.enroll(cpf);
+        boolean digitalCadastrada = leitorBiometrico.enroll(cpf, statusUpdater);
 
         if (!digitalCadastrada) {
             LOGGER.severe("Não foi possível capturar a impressão digital para o usuário: " + nome);

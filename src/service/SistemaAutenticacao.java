@@ -26,30 +26,29 @@ public class SistemaAutenticacao {
 
     public Optional<Usuario> autenticarPorBiometria() {
         leitorBiometrico.conectar();
-        Optional<String> hashOpt = leitorBiometrico.lerDigital("Autenticação");
+        Optional<String> cpfAutenticadoOpt = leitorBiometrico.verificarDigital();
         leitorBiometrico.desconectar();
 
-        if (hashOpt.isEmpty()) {
-            registrarAcesso(null, "Falha na Captura");
+        if (cpfAutenticadoOpt.isEmpty()) {
+            registrarAcesso(null, "Falha na Verificação Biometrica");
             return Optional.empty();
         }
 
-        // Para simular um login bem-sucedido, vamos pegar o primeiro usuário com digital
-        // que encontrarmos no banco e assumir que a digital dele "correspondeu".
-        List<Usuario> todosOsUsuarios = usuarioDAO.listarTodos();
-        
-        Optional<Usuario> usuarioCorrespondente = todosOsUsuarios.stream()
-        .filter(u -> u.getDigitalTemplate() != null && u.getDigitalTemplate().length > 0)
-            .findFirst();
+        String cpfAutenticado = cpfAutenticadoOpt.get();
+        Usuario usuario = usuarioDAO.buscarPorCpf(cpfAutenticado);
 
-        if (usuarioCorrespondente.isPresent() && usuarioCorrespondente.get().isAtivo()) {
-            registrarAcesso(usuarioCorrespondente.get(), "Acesso Permitido (Simulado)");
-            return usuarioCorrespondente;
+        if (usuario != null) {
+            if (usuario.isAtivo()) {
+                registrarAcesso(usuario, "Acesso Permitido");
+                return Optional.of(usuario);
+            } else {
+                registrarAcesso(usuario, "Acesso Negado (Usuário Inativo)");
+                return Optional.empty();
+            }
+        } else {
+            registrarAcesso(null, "Acesso Negado (Usuário Não Encontrado)");
+            return Optional.empty();
         }
-        // Se não houver usuários com digital ou o encontrado estiver inativo...
-        
-        registrarAcesso(null, "Acesso Negado");
-        return Optional.empty();
     }
 
     public Optional<Administrador> autenticarAdminPorCredenciais(String login, String senha) {

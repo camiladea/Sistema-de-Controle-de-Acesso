@@ -188,6 +188,31 @@ public class TelaCadastroUsuario extends JDialog {
         botao.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 
+    private JDialog criarDialogoStatusBiometria() {
+        JDialog dialogo = new JDialog(this, "Captura de Digital", true);
+        dialogo.setSize(400, 200);
+        dialogo.setLocationRelativeTo(this);
+        dialogo.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+
+        JPanel painel = new JPanel(new BorderLayout(10, 10));
+        painel.setBorder(new EmptyBorder(20, 20, 20, 20));
+
+        JLabel lblStatus = new JLabel("Iniciando leitor biométrico...", SwingConstants.CENTER);
+        lblStatus.setFont(FONTE_LABEL);
+
+        // Adiciona um ícone simples de digital
+        // (O ideal seria carregar uma imagem, mas para simplificar vamos usar um caractere unicode)
+        JLabel lblIcon = new JLabel("🖐️", SwingConstants.CENTER);
+        lblIcon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 48));
+
+        painel.add(lblIcon, BorderLayout.NORTH);
+        painel.add(lblStatus, BorderLayout.CENTER);
+        dialogo.add(painel);
+
+        // Este diálogo será controlado pelo SwingWorker, não pelo usuário.
+        return dialogo;
+    }
+
     private void executarCadastro() {
         String cpfSemMascara = txtCpf.getText().replaceAll("[^0-9]", "");
 
@@ -211,7 +236,8 @@ public class TelaCadastroUsuario extends JDialog {
             return;
         }
 
-        JOptionPane.showMessageDialog(this, "A seguir, será solicitada a captura da digital.", "Próximo Passo", JOptionPane.INFORMATION_MESSAGE);
+        JDialog dialogoStatus = criarDialogoStatusBiometria();
+        JLabel lblStatus = (JLabel) ((JPanel) dialogoStatus.getContentPane().getComponent(0)).getComponent(1);
 
         btnSalvar.setEnabled(false);
         btnSalvar.setText("PROCESSANDO...");
@@ -219,29 +245,38 @@ public class TelaCadastroUsuario extends JDialog {
         new SwingWorker<Boolean, Void>() {
             @Override
             protected Boolean doInBackground() {
+                // O Consumer atualiza o JLabel na Event Dispatch Thread para segurança de thread.
+                java.util.function.Consumer<String> statusUpdater =
+                        mensagem -> SwingUtilities.invokeLater(() -> lblStatus.setText("<html><div style='text-align: center;'>" + mensagem + "</div></html>"));
+
                 return controller.solicitarCadastroNovoFuncionario(
-                    txtNome.getText(), cpfSemMascara, email, txtCargo.getText(),
-                    isAdmin, login, senha
+                        txtNome.getText(), cpfSemMascara, email, txtCargo.getText(),
+                        isAdmin, login, senha, statusUpdater
                 );
             }
 
             @Override
             protected void done() {
+                dialogoStatus.dispose(); // Fecha o diálogo de status
                 try {
                     if (get()) {
                         JOptionPane.showMessageDialog(TelaCadastroUsuario.this, "Usuário cadastrado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                        dispose();
+                        dispose(); // Fecha a tela de cadastro
                     } else {
                         JOptionPane.showMessageDialog(TelaCadastroUsuario.this, "Falha no cadastro. Verifique se o CPF ou Login já existe, ou se há um problema com o leitor biométrico.", "Erro", JOptionPane.ERROR_MESSAGE);
                     }
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(TelaCadastroUsuario.this, "Erro: " + ex.getMessage(), "Erro Crítico", JOptionPane.ERROR_MESSAGE);
+                    ex.printStackTrace();
                 } finally {
                     btnSalvar.setEnabled(true);
                     btnSalvar.setText("CAPTURAR DIGITAL E SALVAR");
                 }
             }
         }.execute();
+
+        // Exibe o diálogo de status DEPOIS de iniciar o SwingWorker
+        dialogoStatus.setVisible(true);
     }
 }
 

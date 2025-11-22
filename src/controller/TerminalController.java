@@ -42,8 +42,8 @@ public class TerminalController {
         return solicitarCadastroNovoFuncionario(nome, cpf, email, cargo, false, null, null);
     }
 
-    public boolean solicitarCadastroNovoFuncionario(String nome, String cpf, String email, String cargo, boolean isAdmin, String login, String senha) {
-        return gerenciadorUsuarios.cadastrarNovoUsuario(nome, cpf, email, cargo, isAdmin, login, senha);
+    public boolean solicitarCadastroNovoFuncionario(String nome, String cpf, String email, String cargo, boolean isAdmin, String login, String senha, java.util.function.Consumer<String> statusUpdater) {
+        return gerenciadorUsuarios.cadastrarNovoUsuario(nome, cpf, email, cargo, isAdmin, login, senha, statusUpdater);
     }
 
     public List<Usuario> solicitarListaDeUsuarios() {
