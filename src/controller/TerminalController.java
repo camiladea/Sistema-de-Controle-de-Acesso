@@ -59,10 +59,14 @@ public class TerminalController {
     }
 
     public List<RegistroAcesso> solicitarRelatorioAcesso(LocalDateTime inicio, LocalDateTime fim) {
+        return solicitarRelatorioAcesso(inicio, fim, null, null);
+    }
+
+    public List<RegistroAcesso> solicitarRelatorioAcesso(LocalDateTime inicio, LocalDateTime fim, String nomeUsuario, Integer idUsuario) {
         if (inicio == null || fim == null || inicio.isAfter(fim)) {
             return Collections.emptyList();
         }
-        return registroAcessoDAO.listarPorPeriodo(inicio, fim);
+        return registroAcessoDAO.listarPorPeriodo(inicio, fim, nomeUsuario, idUsuario);
     }
 
     public void editarUsuario(Usuario usuario) {

@@ -27,17 +27,35 @@ public class RegistroAcessoDAO {
         }
     }
 
-    public List<RegistroAcesso> listarPorPeriodo(LocalDateTime inicio, LocalDateTime fim) {
+    public List<RegistroAcesso> listarPorPeriodo(LocalDateTime inicio, LocalDateTime fim, String nomeUsuario, Integer idUsuario) {
         List<RegistroAcesso> registros = new ArrayList<>();
-        String sql = "SELECT ra.id, ra.dataHora, ra.usuarioId, u.nome AS nomeUsuario, ra.status, ra.origem " +
-                     "FROM RegistroAcesso ra " +
-                     "LEFT JOIN Usuario u ON ra.usuarioId = u.id " +
-                     "WHERE ra.dataHora BETWEEN ? AND ? " +
-                     "ORDER BY ra.dataHora DESC";
+        StringBuilder sql = new StringBuilder(
+                "SELECT ra.id, ra.dataHora, ra.usuarioId, u.nome AS nomeUsuario, ra.status, ra.origem " +
+                "FROM RegistroAcesso ra " +
+                "LEFT JOIN Usuario u ON ra.usuarioId = u.id " +
+                "WHERE ra.dataHora BETWEEN ? AND ?");
+        List<Object> params = new ArrayList<>();
+        params.add(Timestamp.valueOf(inicio));
+        params.add(Timestamp.valueOf(fim));
 
-        try (Connection conexao = ConexaoBancoDados.getConexao(); PreparedStatement pstm = conexao.prepareStatement(sql)) {
-            pstm.setTimestamp(1, Timestamp.valueOf(inicio));
-            pstm.setTimestamp(2, Timestamp.valueOf(fim));
+        if (nomeUsuario != null && !nomeUsuario.isEmpty()) {
+            sql.append(" AND u.nome LIKE ?");
+            params.add("%" + nomeUsuario + "%");
+        }
+        if (idUsuario != null && idUsuario > 0) {
+            sql.append(" AND u.id = ?");
+            params.add(idUsuario);
+        }
+
+        sql.append(" ORDER BY ra.dataHora DESC");
+
+        try (Connection conexao = ConexaoBancoDados.getConexao();
+             PreparedStatement pstm = conexao.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                pstm.setObject(i + 1, params.get(i));
+            }
+
             try (ResultSet rset = pstm.executeQuery()) {
                 while (rset.next()) {
                     RegistroAcesso registro = new RegistroAcesso(
@@ -52,7 +70,7 @@ public class RegistroAcessoDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Erro ao listar registros por período: " + e.getMessage());
+            System.err.println("Erro ao listar registros por período com filtros: " + e.getMessage());
         }
         return registros;
     }

@@ -21,7 +21,7 @@ public class TelaGestao extends JFrame {
     private final transient TerminalController controller;
     private DefaultTableModel modelUsuarios;
     private DefaultTableModel modelRelatorio;
-    private JTextField txtDataInicio, txtDataFim;
+    private JTextField txtDataInicio, txtDataFim, txtNomeUsuario, txtIdUsuario;
     private JTable tabelaUsuarios;
 
     private Point initialClick;
@@ -239,6 +239,17 @@ public class TelaGestao extends JFrame {
         txtDataFim.setFont(FONTE_PADRAO);
         painelFiltro.add(txtDataFim);
 
+        // Novos campos de filtro
+        painelFiltro.add(new JLabel("Nome Usuário:"));
+        txtNomeUsuario = new JTextField(15);
+        txtNomeUsuario.setFont(FONTE_PADRAO);
+        painelFiltro.add(txtNomeUsuario);
+
+        painelFiltro.add(new JLabel("ID Usuário:"));
+        txtIdUsuario = new JTextField(5);
+        txtIdUsuario.setFont(FONTE_PADRAO);
+        painelFiltro.add(txtIdUsuario);
+
         JButton btnGerar = new JButton("GERAR RELATÓRIO");
         configurarBotao(btnGerar, COR_BOTAO_PRIMARIO, COR_TEXTO_BOTAO_PRIMARIO);
         btnGerar.addActionListener(e -> carregarRelatorio());
@@ -372,10 +383,25 @@ public class TelaGestao extends JFrame {
             LocalDateTime inicio = LocalDate.parse(txtDataInicio.getText(), formatter).atStartOfDay();
             LocalDateTime fim = LocalDate.parse(txtDataFim.getText(), formatter).atTime(LocalTime.MAX);
 
+            String nomeUsuarioFiltro = txtNomeUsuario.getText().trim();
+            Integer idUsuarioFiltro = null;
+            if (!txtIdUsuario.getText().trim().isEmpty()) {
+                try {
+                    idUsuarioFiltro = Integer.parseInt(txtIdUsuario.getText().trim());
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(this, "ID do Usuário inválido. Digite um número.", "Erro de Formato",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+
+            final String finalNomeUsuarioFiltro = nomeUsuarioFiltro.isEmpty() ? null : nomeUsuarioFiltro;
+            final Integer finalIdUsuarioFiltro = idUsuarioFiltro;
+
             new SwingWorker<List<RegistroAcesso>, Void>() {
                 @Override
                 protected List<RegistroAcesso> doInBackground() {
-                    return controller.solicitarRelatorioAcesso(inicio, fim);
+                    return controller.solicitarRelatorioAcesso(inicio, fim, finalNomeUsuarioFiltro, finalIdUsuarioFiltro);
                 }
 
                 @Override
@@ -394,6 +420,7 @@ public class TelaGestao extends JFrame {
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(TelaGestao.this, "Erro ao carregar relatório: " + ex.getMessage(),
                                 "Erro", JOptionPane.ERROR_MESSAGE);
+                        ex.printStackTrace();
                     }
                 }
             }.execute();
