@@ -1,5 +1,8 @@
 -- Script de criação das tabelas para o banco de dados SQLite
 
+DROP TABLE IF EXISTS RegistroAcesso;
+DROP TABLE IF EXISTS Usuario;
+
 -- Tabela Usuario adaptada para SQLite
 CREATE TABLE IF NOT EXISTS Usuario (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

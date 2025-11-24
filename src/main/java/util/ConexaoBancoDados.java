@@ -31,6 +31,12 @@ public class ConexaoBancoDados {
             LOGGER.log(Level.SEVERE, "Erro ao carregar o arquivo de propriedades do banco de dados", ex);
             DB_PATH = "sistema_acesso.db"; // Fallback em caso de erro de leitura
         }
+
+        java.io.File dbFile = new java.io.File(DB_PATH);
+        if (!dbFile.exists() || dbFile.length() == 0) {
+            LOGGER.log(Level.INFO, "Banco de dados não encontrado ou vazio. Inicializando...");
+            DatabaseInitializer.initializeDatabase();
+        }
     }
 
     public static Connection getConexao() throws SQLException {

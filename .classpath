@@ -10,5 +10,9 @@
 	<classpathentry kind="lib" path="lib/jna-5.14.0.jar"/>
 	<classpathentry kind="lib" path="lib/jna-platform-5.14.0.jar"/>
 	<classpathentry kind="lib" path="lib/sqlite-jdbc-3.43.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/opencsv-5.9.jar"/>
+	<classpathentry kind="lib" path="lib/commons-lang3-3.13.0.jar"/>
+	<classpathentry kind="lib" path="lib/commons-text-1.11.0.jar"/>
+	<classpathentry kind="lib" path="lib/commons-collections4-4.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

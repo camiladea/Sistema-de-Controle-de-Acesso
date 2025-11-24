@@ -21,7 +21,7 @@ public class RegistroAcessoDAO {
     public void salvar(RegistroAcesso registro) {
         String sql = "INSERT INTO RegistroAcesso (dataHora, usuarioId, status, origem) VALUES (?, ?, ?, ?)";
         try (Connection conexao = ConexaoBancoDados.getConexao(); PreparedStatement pstm = conexao.prepareStatement(sql)) {
-            pstm.setTimestamp(1, Timestamp.valueOf(registro.getDataHora()));
+            pstm.setString(1, registro.getDataHora().toString());
             if (registro.getUsuarioId() <= 0) {
                 pstm.setNull(2, Types.INTEGER);
             } else {
@@ -43,8 +43,8 @@ public class RegistroAcessoDAO {
                 "LEFT JOIN Usuario u ON ra.usuarioId = u.id " +
                 "WHERE ra.dataHora BETWEEN ? AND ?");
         List<Object> params = new ArrayList<>();
-        params.add(Timestamp.valueOf(inicio));
-        params.add(Timestamp.valueOf(fim));
+        params.add(inicio.toString());
+        params.add(fim.toString());
 
         if (nomeUsuario != null && !nomeUsuario.isEmpty()) {
             sql.append(" AND u.nome LIKE ?");
@@ -67,7 +67,7 @@ public class RegistroAcessoDAO {
             try (ResultSet rset = pstm.executeQuery()) {
                 while (rset.next()) {
                     RegistroAcesso registro = new RegistroAcesso(
-                        rset.getTimestamp("dataHora").toLocalDateTime(),
+                        LocalDateTime.parse(rset.getString("dataHora")),
                         rset.getInt("usuarioId"),
                         rset.getString("status"),
                         rset.getString("origem")
