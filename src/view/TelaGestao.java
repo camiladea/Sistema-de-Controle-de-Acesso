@@ -224,11 +224,7 @@ public class TelaGestao extends JFrame {
 
         JButton btnEditar = new JButton("EDITAR");
 configurarBotao(btnEditar, COR_BOTAO_SECUNDARIO, COR_TEXTO_BOTAO_SECUNDARIO);
-btnEditar.addActionListener(e -> {
-    // Abre a tela de gestão de usuários
-    new TelaGestao(this, controller).setVisible(true);
-    carregarDadosUsuarios();
-});
+btnEditar.addActionListener(e -> editarSelecionado());
 
         JButton btnRemover = new JButton("REMOVER");
         configurarBotao(btnRemover, new Color(213, 0, 0), Color.WHITE);
@@ -349,27 +345,34 @@ btnEditar.addActionListener(e -> {
         applyButtonHoverEffect(botao, corFundo.brighter(), corTexto);
     }
 
-    private void editarSelecionado() {
-        int viewIndex = tabelaUsuarios.getSelectedRow();
-        if (viewIndex == -1) {
-            JOptionPane.showMessageDialog(this, "Selecione um usuário para editar.", "Aviso",
-                    JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        int modelIndex = tabelaUsuarios.convertRowIndexToModel(viewIndex);
-        int id = (Integer) modelUsuarios.getValueAt(modelIndex, 0);
+   
 
-        
-          Usuario u = controller.buscarUsuarioPorId(id);
-          if (u == null) {
-          JOptionPane.showMessageDialog(this, "Usuário não encontrado.", "Erro",
-          JOptionPane.ERROR_MESSAGE);
-          return;
-         }
-         
-        
-        carregarDadosUsuarios();
+   private void editarSelecionado() {
+    int viewIndex = tabelaUsuarios.getSelectedRow();
+    if (viewIndex == -1) {
+        JOptionPane.showMessageDialog(this, "Selecione um usuário para editar.", "Aviso",
+                JOptionPane.WARNING_MESSAGE);
+        return;
     }
+    int modelIndex = tabelaUsuarios.convertRowIndexToModel(viewIndex);
+    // Garante que a linha existe no modelo original
+    if (modelIndex < 0 || modelIndex >= modelUsuarios.getRowCount()) return; 
+
+    int id = (Integer) modelUsuarios.getValueAt(modelIndex, 0);
+
+    
+    Usuario u = controller.buscarUsuarioPorId(id);
+    if (u == null) {
+        JOptionPane.showMessageDialog(this, "Usuário não encontrado.", "Erro",
+                JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+     
+    // Ação Corrigida: Abre a TelaEdicaoUsuario com os dados do usuário
+    new TelaEdicaoUsuario(this, controller, u).setVisible(true); 
+    
+    carregarDadosUsuarios(); 
+}
 
     private void removerSelecionado() {
         int viewIndex = tabelaUsuarios.getSelectedRow();

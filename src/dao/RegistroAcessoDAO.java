@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import model.RegistroAcesso;
+import util.ConexaoBancoDados;
 
 public class RegistroAcessoDAO {
 
@@ -43,12 +44,11 @@ public class RegistroAcessoDAO {
                      "WHERE ra.dataHora >= ? AND ra.dataHora < ? " +
                      "ORDER BY ra.dataHora DESC";
 
-        try (Connection conexao = DriverManager.getConnection("jdbc:sqlite:seu_banco_de_dados.db");
-             PreparedStatement pstm = conexao.prepareStatement(sql)) {
-
-            
-            pstm.setString(1, inicio.toString());
-            pstm.setString(2, fim.toString());
+             try (Connection conexao = ConexaoBancoDados.getConexao(); // CORRIGIDO
+                 PreparedStatement pstm = conexao.prepareStatement(sql)) {
+        
+                    
+                    pstm.setString(1, inicio.toString());
 
             try (ResultSet rset = pstm.executeQuery()) {
                 while (rset.next()) {
