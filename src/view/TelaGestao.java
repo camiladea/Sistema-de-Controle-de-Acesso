@@ -223,8 +223,12 @@ public class TelaGestao extends JFrame {
         });
 
         JButton btnEditar = new JButton("EDITAR");
-        configurarBotao(btnEditar, COR_BOTAO_SECUNDARIO, COR_TEXTO_BOTAO_SECUNDARIO);
-        btnEditar.addActionListener(e -> editarSelecionado());
+configurarBotao(btnEditar, COR_BOTAO_SECUNDARIO, COR_TEXTO_BOTAO_SECUNDARIO);
+btnEditar.addActionListener(e -> {
+    // Abre a tela de gestão de usuários
+    new TelaGestao(this, controller).setVisible(true);
+    carregarDadosUsuarios();
+});
 
         JButton btnRemover = new JButton("REMOVER");
         configurarBotao(btnRemover, new Color(213, 0, 0), Color.WHITE);
