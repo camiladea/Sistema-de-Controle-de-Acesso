@@ -1,0 +1,9 @@
+SUBSYSTEM=="usb", ATTR{idVendor}=="138a", MODE="0666"
+SUBSYSTEM=="usb", ATTR{idVendor}=="0483", MODE="0666"
+SUBSYSTEM=="usb", ATTR{idVendor}=="1c7a", MODE="0666"
+SUBSYSTEM=="usb", ATTR{idVendor}=="0a5c", MODE="0666"
+SUBSYSTEM=="usb", ATTR{idVendor}=="04f3", MODE="0666"
+SUBSYSTEM=="usb", ATTR{idVendor}=="27c6", MODE="0666"
+
+SUBSYSTEM=="usb", ENV{ID_SECURITY_TOKEN}=="1", MODE="0666"
+KERNEL=="uinput", MODE="0666", GROUP="plugdev"

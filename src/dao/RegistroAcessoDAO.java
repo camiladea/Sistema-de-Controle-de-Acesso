@@ -5,16 +5,18 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import model.RegistroAcesso;
-import util.ConexaoBancoDados;
 
 public class RegistroAcessoDAO {
 
+    
     public void salvar(RegistroAcesso registro) {
         String sql = "INSERT INTO RegistroAcesso (dataHora, usuarioId, status, origem) VALUES (?, ?, ?, ?)";
-        try (Connection conexao = ConexaoBancoDados.getConexao();
+        
+        try (Connection conexao = DriverManager.getConnection("jdbc:sqlite:seu_banco_de_dados.db");
              PreparedStatement pstm = conexao.prepareStatement(sql)) {
 
-            pstm.setTimestamp(1, Timestamp.valueOf(registro.getDataHora()));
+            
+            pstm.setString(1, registro.getDataHora().toString());
 
             if (registro.getUsuarioId() <= 0) {
                 pstm.setNull(2, Types.INTEGER);
@@ -25,33 +27,33 @@ public class RegistroAcessoDAO {
             pstm.setString(3, registro.getStatus());
             pstm.setString(4, registro.getOrigem());
 
-            pstm.execute();
+            pstm.executeUpdate();  // Usar executeUpdate para inserções
         } catch (SQLException e) {
             System.err.println("Erro ao salvar registro de acesso: " + e.getMessage());
         }
     }
 
+    
     public List<RegistroAcesso> listarPorPeriodo(LocalDateTime inicio, LocalDateTime fim) {
         List<RegistroAcesso> registros = new ArrayList<>();
-
         String sql = "SELECT ra.id, ra.dataHora, ra.usuarioId, u.nome AS nomeUsuario, " +
                      "ra.status, ra.origem " +
                      "FROM RegistroAcesso ra " +
                      "LEFT JOIN Usuario u ON ra.usuarioId = u.id " +
-                     "WHERE ra.dataHora BETWEEN ? AND ? " +
+                     "WHERE ra.dataHora >= ? AND ra.dataHora < ? " +
                      "ORDER BY ra.dataHora DESC";
 
-        try (Connection conexao = ConexaoBancoDados.getConexao();
+        try (Connection conexao = DriverManager.getConnection("jdbc:sqlite:seu_banco_de_dados.db");
              PreparedStatement pstm = conexao.prepareStatement(sql)) {
 
-            pstm.setTimestamp(1, Timestamp.valueOf(inicio));
-            pstm.setTimestamp(2, Timestamp.valueOf(fim));
+            
+            pstm.setString(1, inicio.toString());
+            pstm.setString(2, fim.toString());
 
             try (ResultSet rset = pstm.executeQuery()) {
                 while (rset.next()) {
-
                     RegistroAcesso registro = new RegistroAcesso(
-                            rset.getTimestamp("dataHora").toLocalDateTime(),
+                            LocalDateTime.parse(rset.getString("dataHora")),
                             rset.getInt("usuarioId"),
                             rset.getString("status"),
                             rset.getString("origem")
