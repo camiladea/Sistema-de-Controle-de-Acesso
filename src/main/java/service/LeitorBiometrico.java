@@ -38,14 +38,14 @@ public class LeitorBiometrico {
             pb.redirectErrorStream(true);
             Process process = pb.start();
 
+            StringBuilder fullOutput = new StringBuilder();
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                StringBuilder fullOutput = new StringBuilder();
                 String line;
                 int stage = 1;
 
                 while ((line = reader.readLine()) != null) {
+                    fullOutput.append(line).append("\n");
                     System.out.println("[fprintd-enroll] " + line);
-                    fullOutput.append(line);
 
                     String userMessage = parseFprintdMessage(line, stage);
                     statusUpdater.accept(userMessage);
@@ -54,18 +54,23 @@ public class LeitorBiometrico {
                         stage++;
                     }
                 }
-                process.waitFor();
-
-                if (fullOutput.toString().contains("Enroll result: enroll-completed")) {
-                    statusUpdater.accept("Cadastro concluído!");
-                    System.out.println("LOG [LeitorBiometrico]: Digital para o CPF " + cpf + " cadastrada com sucesso.");
-                    return true;
-                } else {
-                    statusUpdater.accept("Falha no cadastro.");
-                    System.err.println("ERRO: Falha ao capturar digital (saída do fprintd: " + fullOutput + ")");
-                    return false;
-                }
             }
+
+            int exitCode = process.waitFor();
+            System.out.println("LOG [LeitorBiometrico]: fprintd-enroll finalizado com código de saída: " + exitCode);
+            System.out.println("LOG [LeitorBiometrico]: Saída completa do fprintd-enroll:\n" + fullOutput);
+
+
+            if (exitCode == 0 && fullOutput.toString().contains("Enroll result: enroll-completed")) {
+                statusUpdater.accept("Cadastro concluído!");
+                System.out.println("LOG [LeitorBiometrico]: Digital para o CPF " + cpf + " cadastrada com sucesso.");
+                return true;
+            } else {
+                 statusUpdater.accept("Falha no cadastro.");
+                 System.err.println("ERRO: Falha ao capturar digital (saída do fprintd: " + fullOutput + ")");
+                 return false;
+            }
+
         } catch (Exception e) {
             statusUpdater.accept("Erro crítico no leitor.");
             e.printStackTrace();
@@ -77,9 +82,8 @@ public class LeitorBiometrico {
      * Traduz a saída do fprintd para mensagens mais amigáveis.
      */
     private String parseFprintdMessage(String rawLine, int currentStage) {
-        final int totalStages = 10; // Requisito do usuário: 10 capturas.
         if (rawLine.contains("Place your finger on the reader")) {
-            return String.format("Posicione o dedo no leitor... (%d/%d)", currentStage, totalStages);
+            return String.format("Posicione o dedo no leitor... (Etapa %d)", currentStage);
         }
         if (rawLine.contains("Remove your finger from the reader")) {
             return "Remova o dedo do leitor.";
@@ -88,7 +92,7 @@ public class LeitorBiometrico {
             return "Iniciando cadastro...";
         }
         if (rawLine.contains("enroll-stage-passed")) {
-            return String.format("Captura %d de %d bem-sucedida!", currentStage, totalStages);
+            return String.format("Captura %d bem-sucedida!", currentStage);
         }
         if (rawLine.contains("enroll-completed")) {
             return "Cadastro da digital concluído com sucesso!";
