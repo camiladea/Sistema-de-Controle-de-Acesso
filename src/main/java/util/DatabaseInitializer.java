@@ -9,6 +9,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
 public class DatabaseInitializer {
 
     private static final Logger LOGGER = Logger.getLogger(DatabaseInitializer.class.getName());
@@ -31,11 +34,41 @@ public class DatabaseInitializer {
                     }
                 }
                 LOGGER.log(Level.INFO, "Banco de dados inicializado com sucesso a partir de " + SCRIPT_FILE);
-            } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Falha ao inicializar o banco de dados", e);
+                createDefaultAdmin(conn);
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Falha ao inicializar o banco de dados", e);
+        }
+    }
+
+    private static void createDefaultAdmin(Connection conn) {
+        String adminLogin = "admin";
+        try (PreparedStatement checkUser = conn.prepareStatement("SELECT 1 FROM Usuario WHERE login = ?")) {
+            checkUser.setString(1, adminLogin);
+            try (ResultSet rs = checkUser.executeQuery()) {
+                if (rs.next()) {
+                    LOGGER.log(Level.INFO, "Usuário admin padrão já existe.");
+                    return;
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Falha ao verificar a existência do usuário admin.", e);
+            return;
+        }
+
+        try (PreparedStatement insertAdmin = conn.prepareStatement(
+                "INSERT INTO Usuario (nome, cpf, email, tipoUsuario, ativo, login, senhaHash) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
+            insertAdmin.setString(1, "Administrador Principal");
+            insertAdmin.setString(2, "000.000.000-00");
+            insertAdmin.setString(3, "admin@sistema.com");
+            insertAdmin.setString(4, "Administrador");
+            insertAdmin.setInt(5, 1);
+            insertAdmin.setString(6, adminLogin);
+            insertAdmin.setString(7, HashUtils.hashSenha("admin123"));
+            insertAdmin.executeUpdate();
+            LOGGER.log(Level.INFO, "Usuário admin padrão criado com sucesso.");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Falha ao criar o usuário admin padrão.", e);
         }
     }
 }

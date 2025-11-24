@@ -26,8 +26,3 @@ CREATE TABLE IF NOT EXISTS RegistroAcesso (
     origem TEXT NOT NULL,
     FOREIGN KEY (usuarioId) REFERENCES Usuario(id) ON DELETE SET NULL
 );
-
--- Inserção do usuário administrador. O comando é compatível.
-INSERT OR IGNORE INTO Usuario (nome, cpf, email, tipoUsuario, ativo, login, senhaHash) 
-VALUES 
-('Administrador Principal', '000.000.000-00', 'admin@sistema.com', 'Administrador', 1, 'admin', 'admin123');

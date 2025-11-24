@@ -12,6 +12,8 @@ import java.util.Optional;
 /**
  * SistemaAutenticacao 
  */
+import util.HashUtils;
+
 public class SistemaAutenticacao {
     private final LeitorBiometrico leitorBiometrico;
     private final UsuarioDAO usuarioDAO;
@@ -59,7 +61,8 @@ public class SistemaAutenticacao {
         Usuario usuario = usuarioDAO.buscarPorLogin(login);
         if (usuario instanceof Administrador) {
             Administrador admin = (Administrador) usuario;
-            if (senha.equals(admin.getSenhaHash())) { // Simulação, usar BCrypt em produção
+            String senhaHasheada = HashUtils.hashSenha(senha);
+            if (senhaHasheada.equals(admin.getSenhaHash())) {
                 return Optional.of(admin);
             }
         }
