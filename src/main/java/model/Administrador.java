@@ -4,8 +4,8 @@ public class Administrador extends Usuario {
     private String login;
     private String senhaHash;
 
-    public Administrador(String nome, String cpf, String email, byte[] digitalTemplate, String login, String senhaHash) {
-        super(nome, cpf, email, digitalTemplate); // CORRETO: Passando byte[]
+    public Administrador(String nome, String cpf, String email, byte[] digitalTemplate, byte[] digitalTemplate1, byte[] digitalTemplate2, String login, String senhaHash) {
+        super(nome, cpf, email, digitalTemplate, digitalTemplate1, digitalTemplate2);
         this.login = login;
         this.senhaHash = senhaHash;
     }

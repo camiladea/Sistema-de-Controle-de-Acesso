@@ -44,11 +44,11 @@ public class GerenciadorUsuarios {
         Usuario novoUsuario;
         if (isAdmin) {
             String senhaHasheada = HashUtils.hashSenha(senha);
-            // Passamos 'null' para o template da digital, pois ele não é mais armazenado aqui.
-            novoUsuario = new Administrador(nome, cpf, email, null, login, senhaHasheada);
+            // Passamos 'null' para os templates de digital, pois eles não são mais armazenados aqui.
+            novoUsuario = new Administrador(nome, cpf, email, null, null, null, login, senhaHasheada);
         } else {
-            // Passamos 'null' para o template da digital.
-            novoUsuario = new Funcionario(nome, cpf, email, null, cargo);
+            // Passamos 'null' para os templates de digital.
+            novoUsuario = new Funcionario(nome, cpf, email, null, null, null, cargo);
         }
 
         boolean sucesso = usuarioDAO.salvar(novoUsuario);

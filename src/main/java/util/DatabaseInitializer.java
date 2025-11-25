@@ -15,7 +15,7 @@ import java.sql.ResultSet;
 public class DatabaseInitializer {
 
     private static final Logger LOGGER = Logger.getLogger(DatabaseInitializer.class.getName());
-    private static final String SCRIPT_FILE = "projeto_pi_db.sql";
+    private static final String SCRIPT_FILE = "projeto_pi_db_with_digitalTemplate.sql";
 
     public static void initializeDatabase() {
         try (InputStream inputStream = ConexaoBancoDados.class.getClassLoader().getResourceAsStream(SCRIPT_FILE)) {

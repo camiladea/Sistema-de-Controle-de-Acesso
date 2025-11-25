@@ -1,6 +1,11 @@
 package dao;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import model.Administrador;
@@ -11,12 +16,11 @@ import util.ConexaoBancoDados;
 public class UsuarioDAO {
 
     /**
-     * Salva um novo usuário no banco de dados, tratando o template da digital como BLOB.
+     * Salva um novo usuário no banco de dados, tratando os múltiplos templates de digital como BLOB.
      * @return true se o usuário foi salvo com sucesso, false caso contrário.
      */
     public boolean salvar(Usuario usuario) {
-        // SQL ajustado para 'digitalTemplate'
-        final String sql = "INSERT INTO Usuario (nome, cpf, email, digitalTemplate, ativo, tipoUsuario, cargo, login, senhaHash) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        final String sql = "INSERT INTO Usuario (nome, cpf, email, digitalTemplate, digitalTemplate1, digitalTemplate2, ativo, tipoUsuario, cargo, login, senhaHash) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         final String tipo = (usuario instanceof Funcionario) ? "Funcionario" : "Administrador";
 
         try (Connection conexao = ConexaoBancoDados.getConexao();
@@ -25,27 +29,25 @@ public class UsuarioDAO {
             pstm.setString(1, usuario.getNome());
             pstm.setString(2, usuario.getCpf());
             pstm.setString(3, usuario.getEmail());
+
+            // Lida com os múltiplos templates de digital
+            pstm.setBytes(4, usuario.getDigitalTemplate());
+            pstm.setBytes(5, usuario.getDigitalTemplate1());
+            pstm.setBytes(6, usuario.getDigitalTemplate2());
             
-            // Lida com o template da digital que agora pode ser nulo
-            if (usuario.getDigitalTemplate() != null) {
-                pstm.setBytes(4, usuario.getDigitalTemplate());
-            } else {
-                pstm.setNull(4, Types.BLOB);
-            }
-            
-            pstm.setBoolean(5, usuario.isAtivo());
-            pstm.setString(6, tipo);
+            pstm.setBoolean(7, usuario.isAtivo());
+            pstm.setString(8, tipo);
 
             if (usuario instanceof Funcionario) {
                 Funcionario f = (Funcionario) usuario;
-                pstm.setString(7, f.getCargo());
-                pstm.setNull(8, Types.VARCHAR);
-                pstm.setNull(9, Types.VARCHAR);
+                pstm.setString(9, f.getCargo());
+                pstm.setNull(10, Types.VARCHAR);
+                pstm.setNull(11, Types.VARCHAR);
             } else if (usuario instanceof Administrador) {
                 Administrador a = (Administrador) usuario;
-                pstm.setNull(7, Types.VARCHAR);
-                pstm.setString(8, a.getLogin());
-                pstm.setString(9, a.getSenhaHash());
+                pstm.setNull(9, Types.VARCHAR);
+                pstm.setString(10, a.getLogin());
+                pstm.setString(11, a.getSenhaHash());
             }
 
             int affectedRows = pstm.executeUpdate();
@@ -63,32 +65,39 @@ public class UsuarioDAO {
 
         } catch (SQLException e) {
             System.err.println("Erro ao salvar usuário: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
 
     /**
-     * Extrai um objeto Usuario do ResultSet, tratando a digital como byte[].
+     * Extrai um objeto Usuario do ResultSet, tratando as digitais como byte[].
      */
     private Usuario extrairUsuarioDoResultSet(ResultSet rset) throws SQLException {
         String tipoUsuario = rset.getString("tipoUsuario");
         Usuario usuario;
 
+        byte[] digitalTemplate = rset.getBytes("digitalTemplate");
+        byte[] digitalTemplate1 = rset.getBytes("digitalTemplate1");
+        byte[] digitalTemplate2 = rset.getBytes("digitalTemplate2");
+
         if ("Funcionario".equals(tipoUsuario)) {
-            // CORREÇÃO: Chama o construtor correto com byte[]
             usuario = new Funcionario(
                     rset.getString("nome"),
                     rset.getString("cpf"),
                     rset.getString("email"),
-                    rset.getBytes("digitalTemplate"), // Lê a digital como array de bytes
+                    digitalTemplate,
+                    digitalTemplate1,
+                    digitalTemplate2,
                     rset.getString("cargo"));
         } else { // Assume Administrador
-            // CORREÇÃO: Chama o construtor correto com byte[]
             usuario = new Administrador(
                     rset.getString("nome"),
                     rset.getString("cpf"),
                     rset.getString("email"),
-                    rset.getBytes("digitalTemplate"), // Lê a digital como array de bytes
+                    digitalTemplate,
+                    digitalTemplate1,
+                    digitalTemplate2,
                     rset.getString("login"),
                     rset.getString("senhaHash"));
         }
@@ -112,8 +121,6 @@ public class UsuarioDAO {
         return usuarios;
     }
     
-    // --- MÉTODOS QUE ESTAVAM FALTANDO ---
-
     public Usuario buscarPorCpf(String cpf) {
         String sql = "SELECT * FROM Usuario WHERE cpf = ?";
         try (Connection conn = ConexaoBancoDados.getConexao();
@@ -147,38 +154,35 @@ public class UsuarioDAO {
     }
     
     public boolean atualizar(Usuario usuario) {
-        final String sql = "UPDATE Usuario SET nome = ?, cpf = ?, email = ?, digitalTemplate = ?, ativo = ?, cargo = ?, login = ?, senhaHash = ? WHERE id = ?";
+        final String sql = "UPDATE Usuario SET nome = ?, cpf = ?, email = ?, digitalTemplate = ?, digitalTemplate1 = ?, digitalTemplate2 = ?, ativo = ?, cargo = ?, login = ?, senhaHash = ? WHERE id = ?";
         try (Connection conn = ConexaoBancoDados.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, usuario.getNome());
             stmt.setString(2, usuario.getCpf());
             stmt.setString(3, usuario.getEmail());
             
-            if (usuario.getDigitalTemplate() != null) {
-                stmt.setBytes(4, usuario.getDigitalTemplate());
-            } else {
-                stmt.setNull(4, Types.BLOB);
-            }
+            stmt.setBytes(4, usuario.getDigitalTemplate());
+            stmt.setBytes(5, usuario.getDigitalTemplate1());
+            stmt.setBytes(6, usuario.getDigitalTemplate2());
             
-            stmt.setBoolean(5, usuario.isAtivo());
+            stmt.setBoolean(7, usuario.isAtivo());
 
-            // --- CORREÇÃO PARA JAVA 11 ---
             if (usuario instanceof Funcionario) {
-                Funcionario f = (Funcionario) usuario; // Cast manual
-                stmt.setString(6, f.getCargo());
-                stmt.setNull(7, Types.VARCHAR);
-                stmt.setNull(8, Types.VARCHAR);
+                Funcionario f = (Funcionario) usuario;
+                stmt.setString(8, f.getCargo());
+                stmt.setNull(9, Types.VARCHAR);
+                stmt.setNull(10, Types.VARCHAR);
             } else if (usuario instanceof Administrador) {
-                Administrador a = (Administrador) usuario; // Cast manual
-                stmt.setNull(6, Types.VARCHAR);
-                stmt.setString(7, a.getLogin());
-                stmt.setString(8, a.getSenhaHash());
+                Administrador a = (Administrador) usuario;
+                stmt.setNull(8, Types.VARCHAR);
+                stmt.setString(9, a.getLogin());
+                stmt.setString(10, a.getSenhaHash());
             }
-            // --- FIM DA CORREÇÃO ---
             
-            stmt.setInt(9, usuario.getId());
+            stmt.setInt(11, usuario.getId());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Erro ao atualizar usuário: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
