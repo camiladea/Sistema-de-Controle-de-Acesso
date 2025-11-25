@@ -6,18 +6,17 @@ import java.sql.SQLException;
 
 public class ConexaoBancoDados {
 
-    // O caminho para o arquivo do banco de dados.
-    // O banco será um único arquivo chamado 'sistema_acesso.db' na raiz do projeto.
+    // path to database file, we use sistema_acesso.db in project root
     private static final String URL = "jdbc:sqlite:sistema_acesso.db";
 
     private static Connection conexao = null;
 
     public static Connection getConexao() {
         try {
-            // Carrega o driver do SQLite
+            // load driver for SQLite
             Class.forName("org.sqlite.JDBC");
             
-            // Cria a conexão com o arquivo do banco de dados
+            // sets up connection
             conexao = DriverManager.getConnection(URL);
             System.out.println("Conexão com o SQLite estabelecida com sucesso.");
             

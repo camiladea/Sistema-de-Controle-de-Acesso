@@ -58,7 +58,7 @@ public class GerenciadorUsuarios {
             return Optional.empty();
         }
 
-        // Convert all fingerprint templates to Base64 strings
+        // Convert all fingerprint templates to Base64 strings, those should be at least < 400 bytes.
         List<String> templatesBase64 = new ArrayList<>();
         for (Usuario u : usuarios) {
             byte[] tpl = u.getDigitalTemplate();

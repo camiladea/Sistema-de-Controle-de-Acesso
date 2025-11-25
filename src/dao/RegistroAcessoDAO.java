@@ -9,6 +9,8 @@ import util.ConexaoBancoDados;
 
 public class RegistroAcessoDAO {
 
+    // Supposed to save a new access record to the database, but this seems to be no working? Registers in the DB are there but no actual effect on view.
+
     public void salvar(RegistroAcesso registro) {
         String sql = "INSERT INTO RegistroAcesso (dataHora, usuarioId, status, origem) VALUES (?, ?, ?, ?)";
         try (Connection conexao = ConexaoBancoDados.getConexao();

@@ -101,6 +101,8 @@ public class TelaCadastroUsuario extends JDialog {
         
         txtCargo = new JTextField();
         new TextPrompt("ex: Desenvolvedor", txtCargo, COR_PLACEHOLDER);
+
+        //most of these new textprompt instances are being ignored, need to see if its actually necessary.
         
         adicionarCampo(painel, gbc, "Nome Completo:", txtNome, 0);
         adicionarCampo(painel, gbc, "CPF:", txtCpf, 1);
