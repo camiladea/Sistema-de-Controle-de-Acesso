@@ -13,10 +13,11 @@ public class UsuarioDAO {
     private static final String TABLE = "Usuario";
 
     public boolean inserir(Usuario usuario) {
-        String sql = "INSERT INTO " + TABLE + " (nome, cpf, email, tipoUsuario, cargo, login, senhaHash, ativo, digitalTemplate) "
-                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO " + TABLE
+                + " (nome, cpf, email, tipoUsuario, cargo, login, senhaHash, ativo, digitalTemplate) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConexaoBancoDados.getConexao();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, usuario.getNome());
             stmt.setString(2, usuario.getCpf());
@@ -27,6 +28,7 @@ public class UsuarioDAO {
             stmt.setString(7, usuario.getSenhaHash());
             stmt.setBoolean(8, usuario.isAtivo());
             stmt.setBytes(9, usuario.getDigitalTemplate());
+
             stmt.executeUpdate();
             return true;
 
@@ -37,9 +39,11 @@ public class UsuarioDAO {
     }
 
     public boolean atualizar(Usuario usuario) {
-        String sql = "UPDATE " + TABLE + " SET nome=?, cpf=?, email=?, tipoUsuario=?, cargo=?, login=?, senhaHash=?, ativo=?, digitalTemplate=? WHERE id=?";
+        // Atualiza todos os campos, incluindo login, senha e status
+        String sql = "UPDATE " + TABLE
+                + " SET nome=?, cpf=?, email=?, tipoUsuario=?, cargo=?, login=?, senhaHash=?, ativo=?, digitalTemplate=? WHERE id=?";
         try (Connection conn = ConexaoBancoDados.getConexao();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, usuario.getNome());
             stmt.setString(2, usuario.getCpf());
@@ -51,6 +55,7 @@ public class UsuarioDAO {
             stmt.setBoolean(8, usuario.isAtivo());
             stmt.setBytes(9, usuario.getDigitalTemplate());
             stmt.setInt(10, usuario.getId());
+
             stmt.executeUpdate();
             return true;
 
@@ -63,7 +68,7 @@ public class UsuarioDAO {
     public boolean remover(int id) {
         String sql = "DELETE FROM " + TABLE + " WHERE id = ?";
         try (Connection conn = ConexaoBancoDados.getConexao();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
             stmt.executeUpdate();
             return true;
@@ -76,7 +81,7 @@ public class UsuarioDAO {
     public Usuario buscarPorId(int id) {
         String sql = "SELECT * FROM " + TABLE + " WHERE id = ?";
         try (Connection conn = ConexaoBancoDados.getConexao();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -92,7 +97,7 @@ public class UsuarioDAO {
     public Usuario buscarPorCPF(String cpf) {
         String sql = "SELECT * FROM " + TABLE + " WHERE cpf = ?";
         try (Connection conn = ConexaoBancoDados.getConexao();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, cpf);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -108,7 +113,7 @@ public class UsuarioDAO {
     public Usuario buscarPorLoginESenha(String login, String senhaHash) {
         String sql = "SELECT * FROM " + TABLE + " WHERE login = ? AND senhaHash = ?";
         try (Connection conn = ConexaoBancoDados.getConexao();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, login);
             stmt.setString(2, senhaHash);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -125,7 +130,7 @@ public class UsuarioDAO {
     public Usuario buscarPorLogin(String login) {
         String sql = "SELECT * FROM " + TABLE + " WHERE login = ?";
         try (Connection conn = ConexaoBancoDados.getConexao();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, login);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -142,8 +147,8 @@ public class UsuarioDAO {
         List<Usuario> lista = new ArrayList<>();
         String sql = "SELECT * FROM " + TABLE;
         try (Connection conn = ConexaoBancoDados.getConexao();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
                 lista.add(mapearUsuario(rs));
             }
@@ -154,8 +159,8 @@ public class UsuarioDAO {
     }
 
     /**
-     * Securely maps a ResultSet row into a Usuario or Administrador instance.
-     * Uses a safe BLOB reader to prevent fingerprint data truncation.
+     * Mapeia o ResultSet para um objeto Usuario ou Administrador.
+     * Inclui proteção para leitura de BLOB (digitalTemplate).
      */
     private Usuario mapearUsuario(ResultSet rs) throws SQLException {
         String tipo = rs.getString("tipoUsuario");
@@ -176,7 +181,7 @@ public class UsuarioDAO {
         u.setSenhaHash(rs.getString("senhaHash"));
         u.setAtivo(rs.getBoolean("ativo"));
 
-        // --- Safe BLOB read fix ---
+        // --- Correção para leitura segura de BLOB no SQLite ---
         try (InputStream is = rs.getBinaryStream("digitalTemplate")) {
             if (is != null) {
                 byte[] bytes = is.readAllBytes();
@@ -185,8 +190,8 @@ public class UsuarioDAO {
                 u.setDigitalTemplate(null);
             }
         } catch (Exception ex) {
-            System.err.println("[UsuarioDAO] Falha ao ler digitalTemplate:");
-            ex.printStackTrace();
+            System.err.println(
+                    "[UsuarioDAO] Falha ao ler digitalTemplate (pode ser nulo ou incompatível): " + ex.getMessage());
             u.setDigitalTemplate(null);
         }
 

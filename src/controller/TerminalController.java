@@ -37,8 +37,8 @@ public class TerminalController {
         return sistemaAutenticacao.autenticarAdminPorCredenciais(login, senha);
     }
 
-   public boolean solicitarCadastroNovoFuncionario(String nome, String cpf, String email, String cargo,
-            boolean isAdmin, String login, String senha) { // <--- ASSINATURA ALTERADA
+    public boolean solicitarCadastroNovoFuncionario(String nome, String cpf, String email, String cargo,
+            boolean isAdmin, String login, String senha) {
         return gerenciadorUsuarios.cadastrarNovoFuncionario(nome, cpf, email, cargo, isAdmin, login, senha);
     }
 
@@ -61,8 +61,8 @@ public class TerminalController {
         return registroAcessoDAO.listarPorPeriodo(inicio, fim);
     }
 
-   public void editarUsuario(Usuario usuario, boolean isAdmin, String login, String senha) {
-        // Repassa os 4 argumentos para o Service
+    public void editarUsuario(Usuario usuario, boolean isAdmin, String login, String senha) {
+        // A lógica de hash da senha e definição de tipoUsuario deve estar no service
         this.gerenciadorUsuarios.editarUsuario(usuario, isAdmin, login, senha);
     }
 }

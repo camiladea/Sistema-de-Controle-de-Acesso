@@ -1,22 +1,29 @@
 package service;
 
 import dao.UsuarioDAO;
-import java.util.*;
+import dao.RegistroAcessoDAO; // Import Adicionado
+import model.RegistroAcesso; // Import Adicionado
 import model.Administrador;
 import model.Usuario;
+
+import java.time.LocalDateTime; // Import Adicionado
+import java.util.*;
 
 public class SistemaAutenticacao {
 
     private final UsuarioDAO usuarioDAO;
+    private final RegistroAcessoDAO registroAcessoDAO; // Campo Novo
     private final NativeLibfprintReader leitorBiometrico;
 
     public SistemaAutenticacao() {
         this.usuarioDAO = new UsuarioDAO();
+        this.registroAcessoDAO = new RegistroAcessoDAO(); // Inicialização Nova
         this.leitorBiometrico = new NativeLibfprintReader();
     }
 
     /**
-     * Autenticação biométrica geral (identifica qualquer usuário cadastrado com digital).
+     * Autenticação biométrica geral (identifica qualquer usuário cadastrado com
+     * digital).
      */
     public Optional<Usuario> autenticarPorBiometria() {
         System.out.println("[SistemaAutenticacao] Iniciando autenticação biométrica...");
@@ -32,13 +39,11 @@ public class SistemaAutenticacao {
 
         for (Usuario u : usuarios) {
             byte[] template = u.getDigitalTemplate();
-            System.out.println("[SistemaAutenticacao] Usuário: " + u.getNome() +
-                               ", template bytes = " + (template != null ? template.length : 0));
-
+            // Logging opcional removido para limpar a visualização, ou mantenha se preferir
             if (template != null && template.length > 3) {
                 String b64 = Base64.getEncoder().encodeToString(template);
                 templatesBase64.add(b64);
-                usuariosComTemplate.add(u);   // IMPORTANT: index linked here
+                usuariosComTemplate.add(u); // IMPORTANT: index linked here
             }
         }
 
@@ -47,7 +52,7 @@ public class SistemaAutenticacao {
             return Optional.empty();
         }
 
-        // Identify
+        // Identify (NÃO ALTERADO)
         Optional<Integer> matchIndex = leitorBiometrico.identificar(templatesBase64);
 
         if (matchIndex.isEmpty()) {
@@ -63,8 +68,37 @@ public class SistemaAutenticacao {
 
         Usuario usuarioCorrespondente = usuariosComTemplate.get(idx);
 
-        System.out.println("[SistemaAutenticacao] Usuário autenticado com sucesso: " 
-                           + usuarioCorrespondente.getNome());
+        // =========================================================================
+        // [CORREÇÃO APLICADA] VERIFICAÇÃO DE INATIVIDADE
+        // =========================================================================
+        if (!usuarioCorrespondente.isAtivo()) {
+            System.out.println("[SistemaAutenticacao] Acesso NEGADO: Usuário identificado mas INATIVO - "
+                    + usuarioCorrespondente.getNome());
+
+            // Registra a tentativa negada no banco
+            RegistroAcesso log = new RegistroAcesso(
+                    LocalDateTime.now(),
+                    usuarioCorrespondente.getId(),
+                    "NEGADO_INATIVO",
+                    "BIOMETRIA");
+            log.setNomeUsuario(usuarioCorrespondente.getNome());
+            registroAcessoDAO.salvar(log);
+
+            return Optional.empty(); // Retorna vazio para bloquear a porta
+        }
+        // =========================================================================
+
+        System.out.println("[SistemaAutenticacao] Usuário autenticado com sucesso: "
+                + usuarioCorrespondente.getNome());
+
+        // Registra o sucesso no banco (Para manter consistência com o log de erro)
+        RegistroAcesso logSucesso = new RegistroAcesso(
+                LocalDateTime.now(),
+                usuarioCorrespondente.getId(),
+                "AUTORIZADO",
+                "BIOMETRIA");
+        logSucesso.setNomeUsuario(usuarioCorrespondente.getNome());
+        registroAcessoDAO.salvar(logSucesso);
 
         return Optional.of(usuarioCorrespondente);
     }
@@ -100,13 +134,12 @@ public class SistemaAutenticacao {
         System.out.println("[SistemaAutenticacao] Login de administrador bem-sucedido: " + login);
 
         return Optional.of(new Administrador(
-            usuario.getNome(),
-            usuario.getCpf(),
-            usuario.getEmail(),
-            usuario.getCargo(),
-            usuario.getLogin(),
-            usuario.getSenhaHash(),
-            usuario.getDigitalTemplate()
-        ));
+                usuario.getNome(),
+                usuario.getCpf(),
+                usuario.getEmail(),
+                usuario.getCargo(),
+                usuario.getLogin(),
+                usuario.getSenhaHash(),
+                usuario.getDigitalTemplate()));
     }
 }
