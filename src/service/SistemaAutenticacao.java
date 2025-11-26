@@ -21,19 +21,14 @@ public class SistemaAutenticacao {
         this.leitorBiometrico = new NativeLibfprintReader();
     }
 
-    /**
-     * Autenticação biométrica geral (identifica qualquer usuário cadastrado com
-     * digital).
-     */
+    
     public Optional<Usuario> autenticarPorBiometria() {
         System.out.println("[SistemaAutenticacao] Iniciando autenticação biométrica...");
 
         List<Usuario> usuarios = usuarioDAO.listarTodos();
         System.out.println("[SistemaAutenticacao] Total de usuários carregados: " + usuarios.size());
 
-        // --------------------------
-        // FIX: manter lista paralela alinhada
-        // --------------------------
+         
         List<String> templatesBase64 = new ArrayList<>();
         List<Usuario> usuariosComTemplate = new ArrayList<>();
 
@@ -68,9 +63,7 @@ public class SistemaAutenticacao {
 
         Usuario usuarioCorrespondente = usuariosComTemplate.get(idx);
 
-        // =========================================================================
-        // [CORREÇÃO APLICADA] VERIFICAÇÃO DE INATIVIDADE
-        // =========================================================================
+        
         if (!usuarioCorrespondente.isAtivo()) {
             System.out.println("[SistemaAutenticacao] Acesso NEGADO: Usuário identificado mas INATIVO - "
                     + usuarioCorrespondente.getNome());
@@ -79,14 +72,14 @@ public class SistemaAutenticacao {
             RegistroAcesso log = new RegistroAcesso(
                     LocalDateTime.now(),
                     usuarioCorrespondente.getId(),
-                    "NEGADO_INATIVO",
+                    "NEGADO INATIVO",
                     "BIOMETRIA");
             log.setNomeUsuario(usuarioCorrespondente.getNome());
             registroAcessoDAO.salvar(log);
 
             return Optional.empty(); // Retorna vazio para bloquear a porta
         }
-        // =========================================================================
+       
 
         System.out.println("[SistemaAutenticacao] Usuário autenticado com sucesso: "
                 + usuarioCorrespondente.getNome());
@@ -107,22 +100,38 @@ public class SistemaAutenticacao {
      * Autenticação de administrador por login/senha
      */
     public Optional<Administrador> autenticarAdminPorCredenciais(String login, String senha) {
-        if (login == null || senha == null || login.isEmpty() || senha.isEmpty()) {
+        // 1. Validação básica (Adicionado trim() para limpar espaços em branco acidentais)
+        if (login == null || senha == null || login.trim().isEmpty() || senha.trim().isEmpty()) {
             System.out.println("[SistemaAutenticacao] Login ou senha vazios.");
             return Optional.empty();
         }
 
-        Usuario usuario = usuarioDAO.buscarPorLogin(login);
+        Usuario usuario = usuarioDAO.buscarPorLogin(login.trim());
         if (usuario == null) {
             System.out.println("[SistemaAutenticacao] Nenhum usuário encontrado para login: " + login);
             return Optional.empty();
         }
 
-        if (!"ADMIN".equalsIgnoreCase(usuario.getTipoUsuario())) {
-            System.out.println("[SistemaAutenticacao] Usuário não é administrador.");
+        // 2. CORREÇÃO: Verifica se o usuário está ATIVO
+        if (!usuario.isAtivo()) {
+            System.out.println("[SistemaAutenticacao] Login bloqueado: Usuário inativo -> " + login);
             return Optional.empty();
         }
 
+        // 3. CORREÇÃO: Verifica se é Admin aceitando variações (ADMIN, Administrador, etc.)
+        String tipo = usuario.getTipoUsuario();
+        boolean isAdmin = tipo != null && (
+            tipo.equalsIgnoreCase("ADMIN") || 
+            tipo.equalsIgnoreCase("ADMINISTRADOR") ||
+            tipo.toUpperCase().startsWith("ADMIN")
+        );
+
+        if (!isAdmin) {
+            System.out.println("[SistemaAutenticacao] Acesso negado. Tipo de usuário não é admin: " + tipo);
+            return Optional.empty();
+        }
+
+        // 4. Verificação de Senha (Texto Plano conforme solicitado)
         String senhaSalva = usuario.getSenhaHash();
         boolean senhaCorreta = senhaSalva != null && senhaSalva.equals(senha);
 
