@@ -118,7 +118,7 @@ public class SistemaAutenticacao {
             return Optional.empty();
         }
 
-        // 3. CORREÇÃO: Verifica se é Admin aceitando variações (ADMIN, Administrador, etc.)
+        
         String tipo = usuario.getTipoUsuario();
         boolean isAdmin = tipo != null && (
             tipo.equalsIgnoreCase("ADMIN") || 
@@ -131,7 +131,7 @@ public class SistemaAutenticacao {
             return Optional.empty();
         }
 
-        // 4. Verificação de Senha (Texto Plano conforme solicitado)
+       
         String senhaSalva = usuario.getSenhaHash();
         boolean senhaCorreta = senhaSalva != null && senhaSalva.equals(senha);
 

@@ -192,6 +192,7 @@ public class TelaCadastroUsuario extends JDialog {
             repaint();
         });
 
+        chkAdmin.setSelected(false);
         // Inicia os campos de admin como ocultos
         lblLogin.setVisible(false);
         txtLogin.setVisible(false);
