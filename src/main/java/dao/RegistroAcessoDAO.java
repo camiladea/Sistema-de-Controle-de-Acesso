@@ -1,16 +1,19 @@
 package dao;
 
-import com.opencsv.CSVWriter;
+import com.google.gson.Gson;
 import model.RegistroAcesso;
 import util.ConexaoBancoDados;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -84,12 +87,61 @@ public class RegistroAcessoDAO {
     }
 
     public boolean exportarParaCSV(List<String[]> dados, File arquivoSaida) {
-        try (CSVWriter writer = new CSVWriter(new FileWriter(arquivoSaida))) {
-            writer.writeAll(dados);
-            LOGGER.log(Level.INFO, "Relatório exportado com sucesso para: {0}", arquivoSaida.getAbsolutePath());
-            return true;
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Erro ao exportar relatório para CSV: " + e.getMessage(), e);
+        // O primeiro item da lista de dados é o cabeçalho
+        if (dados == null || dados.isEmpty()) {
+            LOGGER.log(Level.WARNING, "Não há dados para exportar.");
+            return false;
+        }
+
+        String[] cabecalho = dados.get(0);
+        List<String[]> registros = dados.subList(1, dados.size());
+
+        List<Map<String, String>> dadosJson = new ArrayList<>();
+        for (String[] registro : registros) {
+            Map<String, String> mapa = new LinkedHashMap<>();
+            for (int i = 0; i < cabecalho.length; i++) {
+                mapa.put(cabecalho[i], registro[i]);
+            }
+            dadosJson.add(mapa);
+        }
+
+        Gson gson = new Gson();
+        String jsonParaCsv = gson.toJson(dadosJson);
+
+        // Garante que o caminho do arquivo seja absoluto e trate espaços
+        String caminhoArquivo = arquivoSaida.getAbsolutePath();
+
+        // Comando para ser executado: echo '[json]' | in2csv > 'caminho/do/arquivo.csv'
+        String[] comando = {
+            "/bin/bash",
+            "-c",
+            "echo '" + jsonParaCsv.replace("'", "'\\''") + "' | in2csv > '" + caminhoArquivo + "'"
+        };
+
+        try {
+            ProcessBuilder pb = new ProcessBuilder(comando);
+            Process processo = pb.start();
+
+            int exitCode = processo.waitFor();
+
+            if (exitCode == 0) {
+                LOGGER.log(Level.INFO, "Relatório exportado com sucesso para: {0}", caminhoArquivo);
+                return true;
+            } else {
+                // Captura a saída de erro para depuração
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(processo.getErrorStream()))) {
+                    StringBuilder erro = new StringBuilder();
+                    String linha;
+                    while ((linha = reader.readLine()) != null) {
+                        erro.append(linha).append("\n");
+                    }
+                    LOGGER.log(Level.SEVERE, "Erro ao executar o comando do csvkit (exit code: " + exitCode + "): " + erro.toString());
+                }
+                return false;
+            }
+        } catch (IOException | InterruptedException e) {
+            LOGGER.log(Level.SEVERE, "Erro ao exportar relatório para CSV via csvkit: " + e.getMessage(), e);
+            Thread.currentThread().interrupt();
             return false;
         }
     }
