@@ -415,7 +415,8 @@ btnEditar.addActionListener(e -> editarSelecionado());
                     get().forEach(u -> modelUsuarios.addRow(new Object[] {
                             u.getId(), u.getNome(), u.getCpf(),
                             // Adaptação para classes model
-                            (u instanceof Funcionario) ? "Funcionário" : "Admin",
+                           // CÓDIGO CORRIGIDO:
+                            (u instanceof Administrador) ? "Administrador" : "Funcionário",
                             u.isAtivo() ? "Ativo" : "Inativo"
                     }));
                 } catch (Exception ex) {
