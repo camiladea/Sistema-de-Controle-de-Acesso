@@ -166,13 +166,14 @@ public class TelaEdicaoUsuario extends JDialog {
         gbc.gridy = 6;
         gbc.gridwidth = 1;
         gbc.weightx = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
         lblLogin = new JLabel("Login Admin:");
         lblLogin.setFont(FONTE_LABEL);
         painelCampos.add(lblLogin, gbc);
 
         gbc.gridx = 1;
         gbc.weightx = 1.0;
-        txtLogin = new JTextField(usuario.getLogin() != null ? usuario.getLogin() : "");
+        txtLogin = new JTextField(usuario.getLogin() != null ? usuario.getLogin() : "", 20);
         txtLogin.setFont(FONTE_CAMPO);
         painelCampos.add(txtLogin, gbc);
 
