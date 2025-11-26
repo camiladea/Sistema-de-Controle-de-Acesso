@@ -1,10 +1,4 @@
 #!/bin/bash
-# Script to compile the project
-# Find all java files
-find src/main/java -name "*.java" > sources.txt
-
-# Create bin directory if it doesn't exist
-mkdir -p bin
-
-# Compile the project
-javac -d bin -cp "lib/*:resources" @sources.txt
+# Script to compile and package the project using Maven
+echo "Limpando e empacotando o projeto com Maven..."
+mvn clean package
