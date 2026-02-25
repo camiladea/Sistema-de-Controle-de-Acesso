@@ -85,44 +85,58 @@ Siga os passos abaixo para configurar e executar o projeto localmente.
 - Execute o script SQL abaixo para criar as tabelas necessárias:
 
 ```sql
-CREATE DATABASE IF NOT EXISTS projeto_pi_db 
-CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-USE projeto_pi_db;
+PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS Usuario (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    nome VARCHAR(255) NOT NULL,
-    cpf VARCHAR(14) UNIQUE NOT NULL,
-    email VARCHAR(255),
-    digitalHash TEXT,
-    ativo BOOLEAN DEFAULT TRUE,
-    tipoUsuario VARCHAR(15) NOT NULL COMMENT 'Define se é Funcionario ou Administrador',
-
-    cargo VARCHAR(100),
-    matricula VARCHAR(50),
-
-    login VARCHAR(50) UNIQUE,
-    senhaHash VARCHAR(255)
-) ENGINE=InnoDB;
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    cpf TEXT UNIQUE NOT NULL,
+    email TEXT,
+    digitalTemplate BLOB,              -- Template da primeira digital
+    digitalTemplate1 BLOB,             -- Template da segunda digital
+    digitalTemplate2 BLOB,             -- Template da terceira digital
+    ativo INTEGER DEFAULT 1,
+    tipoUsuario TEXT NOT NULL,         -- Ex: "ADMIN", "FUNCIONARIO"
+    cargo TEXT,
+    login TEXT UNIQUE,
+    senhaHash TEXT                     -- Hash da senha (usar BCrypt em produção)
+);
 
 CREATE TABLE IF NOT EXISTS RegistroAcesso (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    dataHora DATETIME NOT NULL,
-    usuarioId INT, -- Pode ser nulo se o acesso for de um usuário não identificado.
-    status VARCHAR(50) NOT NULL,
-    origem VARCHAR(100) NOT NULL,
-    
-    CONSTRAINT fk_usuario_acesso
-    FOREIGN KEY (usuarioId) REFERENCES Usuario(id) 
-    ON DELETE SET NULL
-) ENGINE=InnoDB;
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    dataHora TEXT NOT NULL,            -- Armazena LocalDateTime como string ISO
+    usuarioId INTEGER,                 -- FK para Usuario
+    status TEXT NOT NULL,              -- Ex: "Acesso Permitido", "Acesso Negado"
+    origem TEXT,                       -- Ex: "Terminal Principal", "Admin Panel"
+    FOREIGN KEY (usuarioId) REFERENCES Usuario (id) ON DELETE SET NULL
+);
 
-INSERT INTO Usuario (nome, cpf, email, tipoUsuario, ativo, login, senhaHash) 
-VALUES 
-('Administrador Principal', '000.000.000-00', 'admin@sistema.com', 'Administrador', TRUE, 'admin', 'admin123')
-ON DUPLICATE KEY UPDATE 
-    nome = VALUES(nome);
+CREATE TABLE IF NOT EXISTS ConfiguracaoSistema (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    chave TEXT UNIQUE NOT NULL,
+    valor TEXT
+);
+
+INSERT OR IGNORE INTO Usuario (nome, cpf, email, ativo, tipoUsuario, cargo, login, senhaHash, digitalTemplate)
+VALUES
+('Administrador Padrão', '00000000000', 'admin@sistema.local', 1, 'ADMIN', 'Administrador', 'admin', 'admin123', NULL);
+
+INSERT OR IGNORE INTO ConfiguracaoSistema (chave, valor)
+VALUES ('versao_banco', '1.1'),
+       ('modo_debug', 'false');
+
+CREATE VIEW IF NOT EXISTS vw_relatorio_acessos AS
+SELECT 
+    RA.id AS idRegistro,
+    RA.dataHora,
+    U.nome AS nomeUsuario,
+    U.cpf,
+    U.cargo,
+    RA.status,
+    RA.origem
+FROM RegistroAcesso RA
+LEFT JOIN Usuario U ON RA.usuarioId = U.id
+ORDER BY RA.dataHora DESC;
 ```
 
 ### 4. Configuração do Projeto
